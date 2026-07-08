@@ -1412,6 +1412,21 @@ body::after{
   100% { opacity: 0;   transform: scale(1.4);  }
 }
 
+.luna-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1005;
+  background: rgba(20, 10, 40, 0.18);
+  backdrop-filter: blur(6px) saturate(1.2);
+  -webkit-backdrop-filter: blur(6px) saturate(1.2);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.35s ease;
+}
+.luna-backdrop.open {
+  opacity: 1;
+  pointer-events: auto;
+}
 /* ── Messages panel ─────────────────────────── */
 .luna-panel {
   position: fixed;
@@ -1976,6 +1991,7 @@ body::after{
 </button>
 
 <!-- Messages panel — fades in above the saber bar -->
+<div id="luna-backdrop" class="luna-backdrop"></div>
 <div id="luna-panel" class="luna-panel" role="dialog" aria-label="Chat with Luna" aria-modal="true">
   <div class="luna-panel-header">
     <svg class="luna-header-avatar" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
@@ -2097,5 +2113,5 @@ body::after{
     </div>
   </div>
 </div>
-<script src="/app.js?v=20260708171500"></script>
+<script src="/app.js?v=20260708172500"></script>
 </body></html>

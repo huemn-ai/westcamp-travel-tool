@@ -1776,12 +1776,14 @@ function openLunaChat() {
   const chip     = document.getElementById('luna-chip');
   const panel    = document.getElementById('luna-panel');
   const saberBar = document.getElementById('luna-saber-bar');
+  const backdrop = document.getElementById('luna-backdrop');
   if (!chip || !panel || !saberBar) return;
 
   // Toggle: if already open, close
   if (saberBar.classList.contains('open')) { closeLunaChat(); return; }
 
   chip.classList.add('active');
+  if (backdrop) backdrop.classList.add('open');
 
   // Step 1: ignite the saber bar (blade extends left)
   requestAnimationFrame(() => {
@@ -1800,9 +1802,11 @@ function closeLunaChat() {
   const chip     = document.getElementById('luna-chip');
   const panel    = document.getElementById('luna-panel');
   const saberBar = document.getElementById('luna-saber-bar');
+  const backdrop = document.getElementById('luna-backdrop');
 
-  // Panel fades out immediately
+  // Panel and backdrop fade out immediately
   if (panel)    panel.classList.remove('open');
+  if (backdrop) backdrop.classList.remove('open');
   // Saber retracts after a brief delay (so panel fades while blade retracts)
   setTimeout(() => {
     if (saberBar) saberBar.classList.remove('open');
@@ -1914,6 +1918,9 @@ function setupLunaListeners() {
       }
     });
   }
+  // Tap backdrop to close
+  const backdrop = document.getElementById('luna-backdrop');
+  if (backdrop) backdrop.addEventListener('click', closeLunaChat);
   // Swipe down on the panel header to close
   let touchStartY = 0;
   const panel = document.getElementById('luna-panel');
