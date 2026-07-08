@@ -7,19 +7,15 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_KEY
 );
 
-// ─── Bedrock (Fast / MiniMax) ─────────────────────────────────────────────────
-const BEDROCK_REGION  = process.env.AWS_REGION || "us-east-1";
-const BEDROCK_API_KEY = process.env.BEDROCK_API_KEY;
-const BEDROCK_MODEL   = process.env.BEDROCK_MODEL_ID || "minimax.minimax-m2.5";
+// ─── Vertex AI — model IDs ────────────────────────────────────────────────────
+const VERTEX_PROJECT       = process.env.GOOGLE_CLOUD_PROJECT    || "r41-prod";
+const VERTEX_LOCATION      = process.env.VERTEX_LOCATION         || "us-central1";
+const VERTEX_FAST_MODEL    = process.env.VERTEX_FAST_MODEL_ID    || "gemini-3.5-flash";
+const VERTEX_THINK_MODEL   = process.env.VERTEX_THINKING_MODEL_ID || "gemini-2.5-pro-002";
 
-// ─── Vertex AI (Thinking / Gemini) ───────────────────────────────────────────
-const VERTEX_PROJECT  = process.env.GOOGLE_CLOUD_PROJECT || "r41-prod";
-const VERTEX_LOCATION = process.env.VERTEX_LOCATION      || "us-central1";
-const VERTEX_MODEL    = process.env.VERTEX_MODEL_ID      || "gemini-2.5-pro-002";
-
-// ─── Google Custom Search (web_search tool, both models) ─────────────────────
+// ─── Google Custom Search (web_search tool fallback) ─────────────────────────
 const SEARCH_API_KEY = process.env.GOOGLE_SEARCH_API_KEY;
-const SEARCH_CX      = process.env.GOOGLE_SEARCH_CX; // Programmable Search Engine ID
+const SEARCH_CX      = process.env.GOOGLE_SEARCH_CX;
 
 // ─── Generic HTTPS POST ───────────────────────────────────────────────────────
 function httpsPost(hostname, path, body, headers = {}) {
@@ -61,14 +57,26 @@ function httpsPost(hostname, path, body, headers = {}) {
   });
 }
 
-// MiniMax on Bedrock uses bedrock-mantle endpoint.
-function bedrockRequest(body) {
-  const hostname = `bedrock-mantle.${BEDROCK_REGION}.api.aws`;
-  const path     = `/v1/model/${encodeURIComponent(BEDROCK_MODEL)}/converse`;
-  return httpsPost(hostname, path, body, { Authorization: `Bearer ${BEDROCK_API_KEY}` });
-}
+// ─── Vertex AI request ───────────────────────────────────────────────────────
+async function vertexRequest(contents, systemInstruction, tools, modelId) {
+  const token    = await getVertexAccessToken();
+  const hostname = `${VERTEX_LOCATION}-aiplatform.googleapis.com`;
+  const path     = `/v1/projects/${VERTEX_PROJECT}/locations/${VERTEX_LOCATION}/publishers/google/models/${modelId}:generateContent`;
 
-// ─── Vertex AI JWT OAuth2 (no external packages; uses Node crypto) ────────────
+  const body = {
+    contents,
+    systemInstruction: { parts: [{ text: systemInstruction }] },
+    // Both function declarations AND native Google Search grounding.
+    // Gemini decides whether to call a function, search natively, or answer directly.
+    tools: [
+      { functionDeclarations: tools },
+      { googleSearch: {} },
+    ],
+    generationConfig: { maxOutputTokens: 4096, temperature: 0.7 },
+  };
+
+  return httpsPost(hostname, path, body, { Authorization: `Bearer ${token}` });
+}
 let _vertexTokenCache = null; // { token, expiresAt }
 
 async function getVertexAccessToken() {
@@ -340,154 +348,6 @@ const GEMINI_TOOLS = [
   },
 ];
 
-// ─── Tool definitions (Bedrock Converse API format) ───────────────────────────
-const TOOL_CONFIG = {
-  tools: [
-    {
-      toolSpec: {
-        name: "web_search",
-        description:
-          "Search the web for current information: restaurants, reviews, activities, recipes, local tips, weather, events, or anything not in the trip database. Returns a list of relevant results with titles, links, and summaries.",
-        inputSchema: {
-          json: {
-            type: "object",
-            properties: {
-              query: {
-                type: "string",
-                description: "The search query, e.g. 'best restaurants near Saugerties NY' or 'Kaaterskill Falls hike difficulty'.",
-              },
-            },
-            required: ["query"],
-          },
-        },
-      },
-    },
-    {
-      toolSpec: {
-        name: "get_full_schedule",
-        description:
-          "Get the current trip schedule for one or all days. Returns each block with its ID, label, current start time (as clock time and as minutes-from-10am), duration, and type. Always call this before moving a block so you have the block IDs.",
-        inputSchema: {
-          json: {
-            type: "object",
-            properties: {
-              day: {
-                type: "string",
-                enum: ["thu", "fri", "sat", "all"],
-                description: "Day to retrieve. Use 'all' for the full three-day schedule.",
-              },
-            },
-            required: ["day"],
-          },
-        },
-      },
-    },
-    {
-      toolSpec: {
-        name: "move_block",
-        description:
-          "Move a calendar block to a new start time on its day. Use get_full_schedule first to find the block_id. The new_time should be a clock time like '3:30 PM' or '15:30'. The block's duration stays the same. Returns the updated schedule row.",
-        inputSchema: {
-          json: {
-            type: "object",
-            properties: {
-              day: {
-                type: "string",
-                enum: ["thu", "fri", "sat"],
-                description: "Day the block lives on.",
-              },
-              block_id: {
-                type: "string",
-                description: "Block ID from get_full_schedule (e.g. 'fri-dinner', 'sat-physical').",
-              },
-              new_time: {
-                type: "string",
-                description:
-                  "New start time in 12-hour or 24-hour format, e.g. '6:30 PM', '18:30', '7 PM'. Must be between 10:00 AM and 11:59 PM.",
-              },
-            },
-            required: ["day", "block_id", "new_time"],
-          },
-        },
-      },
-    },
-    {
-      toolSpec: {
-        name: "reset_block",
-        description: "Reset a calendar block to its default auto-placed time by removing any manual override.",
-        inputSchema: {
-          json: {
-            type: "object",
-            properties: {
-              day: { type: "string", enum: ["thu", "fri", "sat"] },
-              block_id: { type: "string", description: "Block ID to reset." },
-            },
-            required: ["day", "block_id"],
-          },
-        },
-      },
-    },
-    {
-      toolSpec: {
-        name: "get_preferences",
-        description:
-          "Get current voting preferences from the database. Returns each guest's first and second choice for each poll.",
-        inputSchema: {
-          json: {
-            type: "object",
-            properties: {
-              poll_id: {
-                type: "string",
-                description:
-                  "Optional: filter to one poll ID (e.g. 'poll-fri-dinner'). Omit to get all preferences.",
-              },
-            },
-          },
-        },
-      },
-    },
-    {
-      toolSpec: {
-        name: "update_preferences",
-        description: "Update or cast a vote for a guest on a specific poll.",
-        inputSchema: {
-          json: {
-            type: "object",
-            properties: {
-              guest_name: {
-                type: "string",
-                enum: ["Amanda", "Belal", "Luke", "Mina", "Nada", "Stefano", "Yehia"],
-              },
-              poll_id: { type: "string", description: "Poll ID, e.g. 'poll-fri-dinner'." },
-              first_choice: { type: "string", description: "Option ID for first choice." },
-              second_choice: { type: "string", description: "Option ID for second choice (optional)." },
-            },
-            required: ["guest_name", "poll_id", "first_choice"],
-          },
-        },
-      },
-    },
-    {
-      toolSpec: {
-        name: "get_trip_info",
-        description: "Get general trip information: dates, location, attendees, or weather forecast.",
-        inputSchema: {
-          json: {
-            type: "object",
-            properties: {
-              info_type: {
-                type: "string",
-                enum: ["dates", "location", "attendees", "weather", "all"],
-              },
-            },
-            required: ["info_type"],
-          },
-        },
-      },
-    },
-  ],
-};
-
 // ─── Tool implementations ─────────────────────────────────────────────────────
 
 async function getFullSchedule({ day }) {
@@ -707,65 +567,17 @@ Days:
 - Always verify block IDs with get_full_schedule before calling move_block
 - Warn if a proposed time would cause obvious conflicts (e.g. dinner at 4 PM when lunch is at 3 PM)`;
 
-// ─── Bedrock agentic loop (Converse API / MiniMax) ───────────────────────────
-async function runBedrockLoop(messages) {
-  const MAX_ROUNDS = 10;
-  let scheduleChanged = false;
-
-  for (let round = 0; round < MAX_ROUNDS; round++) {
-    const response = await bedrockRequest({
-      system: [{ text: SYSTEM_PROMPT }],
-      messages,
-      toolConfig: TOOL_CONFIG,
-      inferenceConfig: { maxTokens: 2048, temperature: 0.3 },
-    });
-
-    const { stopReason, output } = response;
-    const assistantMessage = output.message;
-    messages.push(assistantMessage);
-
-    // No tool use — final answer.
-    // MiniMax M2.5 prepends a reasoningContent block; skip it, extract text only.
-    if (stopReason !== "tool_use") {
-      const text = assistantMessage.content
-        .filter((b) => b.text && !b.reasoningContent)
-        .map((b) => b.text)
-        .join("")
-        .trim();
-      return { text: text || "Done.", scheduleChanged };
-    }
-
-    const toolResults = [];
-    for (const block of assistantMessage.content) {
-      if (block.toolUse) {
-        const result = await executeTool(block.toolUse.name, block.toolUse.input);
-        if (result.schedule_changed) scheduleChanged = true;
-        toolResults.push({
-          toolResult: {
-            toolUseId: block.toolUse.toolUseId,
-            content: [{ json: result }],
-          },
-        });
-      }
-    }
-
-    messages.push({ role: "user", content: toolResults });
-  }
-
-  return { text: "I hit my reasoning limit. Please try a simpler request.", scheduleChanged };
-}
-
 // ─── Gemini agentic loop (Vertex AI generateContent) ─────────────────────────
 // Gemini uses a different message shape:
 //   user/model turns use "parts" arrays
 //   tool calls come back as functionCall parts
 //   tool results are sent back as functionResponse parts in a "user" turn
-async function runGeminiLoop(contents) {
+async function runGeminiLoop(contents, modelId) {
   const MAX_ROUNDS = 10;
   let scheduleChanged = false;
 
   for (let round = 0; round < MAX_ROUNDS; round++) {
-    const response = await vertexRequest(contents, SYSTEM_PROMPT, GEMINI_TOOLS);
+    const response = await vertexRequest(contents, SYSTEM_PROMPT, GEMINI_TOOLS, modelId);
 
     // Gemini response shape: { candidates: [{ content: { role, parts }, finishReason }] }
     const candidate = response.candidates?.[0];
@@ -808,7 +620,6 @@ async function runGeminiLoop(contents) {
 }
 
 // ─── Session store (in-memory; fine for short-lived functions) ───────────────
-// Each session stores { model, history } to keep message formats separate.
 const sessions = new Map();
 
 // ─── Netlify handler ──────────────────────────────────────────────────────────
@@ -823,29 +634,15 @@ exports.handler = async (event) => {
       return { statusCode: 400, body: JSON.stringify({ error: "message is required" }) };
     }
 
-    const useGemini = model === "thinking";
-    const sid = sessionId || `session-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    const modelId = model === "thinking" ? VERTEX_THINK_MODEL : VERTEX_FAST_MODEL;
+    const sid     = sessionId || `session-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
-    // Retrieve or initialise history for this session.
-    // If the model changed, start fresh (different message formats are incompatible).
-    let session = sessions.get(sid);
-    if (!session || session.model !== model) {
-      session = { model, history: [] };
-    }
+    // Both models use Gemini message format — sessions are always compatible.
+    let session = sessions.get(sid) || { model, history: [] };
 
-    let result;
-
-    if (useGemini) {
-      // Gemini message format: { role: "user"|"model", parts: [...] }
-      session.history.push({ role: "user", parts: [{ text: message }] });
-      result = await runGeminiLoop([...session.history]);
-      session.history.push({ role: "model", parts: [{ text: result.text }] });
-    } else {
-      // Bedrock Converse format: { role: "user"|"assistant", content: [...] }
-      session.history.push({ role: "user", content: [{ text: message }] });
-      result = await runBedrockLoop([...session.history]);
-      session.history.push({ role: "assistant", content: [{ text: result.text }] });
-    }
+    session.history.push({ role: "user", parts: [{ text: message }] });
+    const result = await runGeminiLoop([...session.history], modelId);
+    session.history.push({ role: "model", parts: [{ text: result.text }] });
 
     // Trim to last 20 messages to avoid token blowup
     session.history = session.history.slice(-20);

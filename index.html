@@ -3506,14 +3506,11 @@ let agentModel     = 'fast'; // 'fast' | 'thinking'
 function setAgentModel(model) {
   if (model === agentModel) return;
   agentModel = model;
-  // Clear session when switching models — message formats are incompatible
-  agentSessionId = null;
 
   document.getElementById('model-fast').classList.toggle('active', model === 'fast');
   document.getElementById('model-thinking').classList.toggle('active', model === 'thinking');
 
-  // Show a hint so the user knows context was cleared
-  addAgentMessage(`Switched to ${model === 'thinking' ? '🧠 Thinking (Gemini)' : '⚡ Fast (MiniMax)'} mode. Starting fresh conversation.`, 'assistant');
+  addAgentMessage(`Switched to ${model === 'thinking' ? '🧠 Thinking (Gemini 2.5 Pro)' : '⚡ Fast (Gemini 3.5 Flash)'} mode.`, 'assistant');
 }
 
 function toggleAgentChat(e) {
