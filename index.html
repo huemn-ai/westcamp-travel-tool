@@ -1382,16 +1382,17 @@ body::after{
 /* ── Chip (the hilt) ────────────────────────── */
 .luna-chip {
   position: fixed;
-  bottom: 24px;
-  right: 20px;
-  width: 48px;
-  height: 48px;
+  bottom: 20px;
+  right: 16px;
+  width: 64px;
+  height: 64px;
   border-radius: 50%;
   cursor: pointer;
   z-index: 1010;
   border: none;
   padding: 0;
   background: none;
+  overflow: visible;
   transition: transform 0.2s cubic-bezier(.34,1.56,.64,1);
   filter: drop-shadow(0 3px 12px rgba(72,38,120,0.5));
 }
@@ -1935,7 +1936,7 @@ body::after{
 
 <!-- Luna hilt chip -->
 <button id="luna-chip" class="luna-chip" onclick="openLunaChat()" aria-label="Chat with Luna">
-  <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" width="62" height="62">
+  <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" width="64" height="64">
     <!-- dark purple circle bg -->
     <circle cx="32" cy="32" r="32" fill="#3d1278"/>
     <!-- Hair back layer -->
@@ -2089,5 +2090,5 @@ body::after{
     </div>
   </div>
 </div>
-<script src="/app.js?v=20260708165000"></script>
+<script src="/app.js?v=20260708170000"></script>
 </body></html>
