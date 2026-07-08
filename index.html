@@ -3471,48 +3471,52 @@ function toggleAgentChat(e) {
 
 async function sendAgentMessage() {
   const input = document.getElementById('agent-input');
+  const sendBtn = document.getElementById('agent-send');
   const message = input.value.trim();
-  
   if (!message) return;
-  
-  // Add user message to chat
+
   addAgentMessage(message, 'user');
   input.value = '';
-  
-  // Show loading indicator
+  sendBtn.disabled = true;
+
   const loadingEl = document.createElement('div');
   loadingEl.className = 'agent-message assistant';
   loadingEl.innerHTML = '<div class="agent-loading"><span></span><span></span><span></span></div>';
   document.getElementById('agent-messages').appendChild(loadingEl);
   scrollAgentToBottom();
-  
+
   try {
-    // Call the Netlify function
     const response = await fetch('/.netlify/functions/trip-agent', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        message,
-        sessionId: agentSessionId
-      })
+      body: JSON.stringify({ message, sessionId: agentSessionId })
     });
-    
+
     const data = await response.json();
-    
+    loadingEl.remove();
+
     if (data.success) {
       agentSessionId = data.sessionId;
-      loadingEl.remove();
       addAgentMessage(data.message, 'assistant');
+
+      // If the agent moved blocks, reload schedule from DB and re-render every calendar
+      if (data.scheduleChanged) {
+        await loadAllShared();
+        ['thu','fri','sat'].forEach(d => {
+          const el = document.getElementById('cal-' + d);
+          if (el) buildCalendar(d, el);
+        });
+      }
     } else {
-      loadingEl.remove();
-      addAgentMessage('Sorry, I encountered an error: ' + (data.error || 'Unknown error'), 'assistant');
+      addAgentMessage('Sorry, something went wrong: ' + (data.error || 'Unknown error'), 'assistant');
     }
-  } catch (error) {
-    console.error('Agent error:', error);
+  } catch (err) {
+    console.error('Agent error:', err);
     loadingEl.remove();
-    addAgentMessage('Sorry, I couldn\'t connect to the agent. Please try again.', 'assistant');
+    addAgentMessage('Couldn\'t reach the agent — check your connection and try again.', 'assistant');
   }
-  
+
+  sendBtn.disabled = false;
   scrollAgentToBottom();
 }
 
