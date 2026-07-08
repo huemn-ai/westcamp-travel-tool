@@ -1454,6 +1454,15 @@ body::after{
   transform: translateX(-50%) translateY(0);
   pointer-events: all;
 }
+.luna-panel.fullscreen {
+  top: max(12px, env(safe-area-inset-top, 12px)) !important;
+  bottom: calc(58px + env(safe-area-inset-bottom, 0px)) !important;
+  left: 50% !important;
+  right: auto !important;
+  width: calc(100% - 32px) !important;
+  max-width: 420px !important;
+  transform: translateX(-50%) translateY(0) !important;
+}
 .luna-panel {
   will-change: transform;
 }
@@ -2158,5 +2167,5 @@ body::after{
     </div>
   </div>
 </div>
-<script src="/app.js?v=20260708224000"></script>
+<script src="/app.js?v=20260708225000"></script>
 </body></html>

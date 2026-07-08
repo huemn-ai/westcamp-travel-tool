@@ -1898,6 +1898,7 @@ function openLunaChat() {
   if (saberBar.classList.contains('open')) { closeLunaChat(); return; }
 
   chip.classList.add('active');
+  chip.style.display = 'none'; // Hide chip when chat opens
   if (backdrop) backdrop.classList.add('open');
 
   // Step 1: ignite the saber bar (blade extends left)
@@ -1937,6 +1938,11 @@ function closeLunaChat() {
   // Panel and backdrop fade out immediately
   if (panel)    panel.classList.remove('open');
   if (backdrop) backdrop.classList.remove('open');
+  // Show chip again when chat closes
+  if (chip) {
+    chip.style.display = '';
+    chip.classList.remove('active');
+  }
   // Reset keyboard-lift transforms so closed state is always clean
   const saberWrap2 = document.getElementById('luna-saber-wrap');
   if (saberWrap2) saberWrap2.style.transform = 'translateX(-50%)';
@@ -1944,7 +1950,13 @@ function closeLunaChat() {
   setTimeout(() => {
     if (saberBar) saberBar.classList.remove('open');
   }, 120);
-  if (chip) chip.classList.remove('active');
+}
+
+function expandLunaChatFullscreen() {
+  const panel = document.getElementById('luna-panel');
+  if (!panel) return;
+  panel.classList.add('fullscreen');
+}
 }
 
 async function sendAgentMessage() {
@@ -2053,6 +2065,11 @@ function setupLunaListeners() {
       if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
         sendAgentMessage();
+        // Collapse keyboard and expand chat to fullscreen
+        setTimeout(() => {
+          input.blur();
+          expandLunaChatFullscreen();
+        }, 100);
       }
     });
     // Prevent blur on iOS when keyboard appears
@@ -2067,13 +2084,21 @@ function setupLunaListeners() {
   // Tap backdrop to close
   const backdrop = document.getElementById('luna-backdrop');
   if (backdrop) backdrop.addEventListener('click', closeLunaChat);
-  // Swipe down on the panel header to close
+  
+  // Swipe down on the panel header ONLY to close (not on messages)
   let touchStartY = 0;
-  const panel = document.getElementById('luna-panel');
-  if (panel) {
-    panel.addEventListener('touchstart', e => { touchStartY = e.touches[0].clientY; }, { passive: true });
-    panel.addEventListener('touchend', e => {
-      if (e.changedTouches[0].clientY - touchStartY > 60) closeLunaChat();
+  let touchStartX = 0;
+  const panelHeader = document.querySelector('.luna-panel-header');
+  if (panelHeader) {
+    panelHeader.addEventListener('touchstart', e => { 
+      touchStartY = e.touches[0].clientY;
+      touchStartX = e.touches[0].clientX;
+    }, { passive: true });
+    panelHeader.addEventListener('touchend', e => {
+      const deltaY = e.changedTouches[0].clientY - touchStartY;
+      const deltaX = Math.abs(e.changedTouches[0].clientX - touchStartX);
+      // Only close if swiping down more than sideways
+      if (deltaY > 60 && deltaX < 30) closeLunaChat();
     }, { passive: true });
   }
   // Track iOS virtual keyboard — lift elements using transform (GPU) not bottom (layout)
