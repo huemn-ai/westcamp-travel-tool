@@ -1881,6 +1881,12 @@ function openLunaChat() {
   // (panel CSS has transition-delay: 0.42s already built in)
   panel.classList.add('open');
 
+  // Show welcome message if no messages yet
+  const msgs = document.getElementById('luna-messages');
+  if (msgs && msgs.children.length === 0) {
+    addAgentMessage("Hi! I'm **Luna** 👋 — your West Camp trip planner. Ask me anything about the schedule, meals, activities, or let me search for ideas nearby.", 'assistant');
+  }
+
   // Focus input after animations settle
   setTimeout(() => document.getElementById('luna-input')?.focus(), 600);
 }
@@ -2021,6 +2027,21 @@ function setupLunaListeners() {
     panel.addEventListener('touchend', e => {
       if (e.changedTouches[0].clientY - touchStartY > 60) closeLunaChat();
     }, { passive: true });
+  }
+  // Track iOS virtual keyboard so saber bar stays above it
+  if (window.visualViewport) {
+    const onViewportChange = () => {
+      const saberWrap = document.getElementById('luna-saber-wrap');
+      const panel     = document.getElementById('luna-panel');
+      if (!saberWrap || !panel) return;
+      const keyboardH = Math.max(0, window.innerHeight - window.visualViewport.height - window.visualViewport.offsetTop);
+      const saberBottom = Math.max(20, keyboardH + 8) + 'px';
+      const panelBottom = (Math.max(20, keyboardH + 8) + 78) + 'px';
+      saberWrap.style.bottom = saberBottom;
+      panel.style.bottom     = panelBottom;
+    };
+    window.visualViewport.addEventListener('resize', onViewportChange);
+    window.visualViewport.addEventListener('scroll', onViewportChange);
   }
 }
 if (document.readyState === 'loading') {
