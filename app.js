@@ -1915,8 +1915,17 @@ function openLunaChat() {
     addAgentMessage("Hi! I'm **Luna** 👋 — your West Camp trip planner. Ask me anything about the schedule, meals, activities, or let me search for ideas nearby.", 'assistant');
   }
 
-  // Focus input after animations settle
-  setTimeout(() => document.getElementById('luna-input')?.focus(), 600);
+  // Focus input after animations settle — use aggressive focus for iOS
+  setTimeout(() => {
+    const input = document.getElementById('luna-input');
+    if (input) {
+      input.focus();
+      // On iOS, sometimes we need to trigger a click to ensure keyboard appears
+      if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
+        input.click?.();
+      }
+    }
+  }, 600);
 }
 
 function closeLunaChat() {
@@ -2044,6 +2053,14 @@ function setupLunaListeners() {
       if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
         sendAgentMessage();
+      }
+    });
+    // Prevent blur on iOS when keyboard appears
+    input.addEventListener('blur', (e) => {
+      // Re-focus if the chat is still open
+      const panel = document.getElementById('luna-panel');
+      if (panel && panel.classList.contains('open')) {
+        setTimeout(() => input.focus(), 100);
       }
     });
   }
