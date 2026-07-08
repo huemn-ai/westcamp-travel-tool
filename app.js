@@ -3,7 +3,6 @@
 /* Capture originals before the wrapper assignments below overwrite window.X */
 var _fnOpenLunaChat    = openLunaChat;
 var _fnCloseLunaChat   = closeLunaChat;
-var _fnSetAgentModel   = setAgentModel;
 var _fnSendAgentMsg    = sendAgentMessage;
 var _fnOpenVoteModal   = openVoteModal;
 var _fnCloseVoteModal  = closeVoteModal;
@@ -19,7 +18,6 @@ var _fnWizardSkip      = wizardSkip;
 var _fnDoRefresh       = doRefresh;
 window.openLunaChat    = function(){ openLunaChat(); };
 window.closeLunaChat   = function(){ closeLunaChat(); };
-window.setAgentModel   = function(m){ setAgentModel(m); };
 window.sendAgentMessage= function(){ sendAgentMessage(); };
 window.openVoteModal   = function(p){ openVoteModal(p); };
 window.closeVoteModal  = function(){ closeVoteModal(); };
@@ -37,7 +35,6 @@ window.doRefresh       = function(){ doRefresh(); };
    call real implementations without infinite recursion. */
 window.openLunaChat    = function(){ _fnOpenLunaChat(); };
 window.closeLunaChat   = function(){ _fnCloseLunaChat(); };
-window.setAgentModel   = function(m){ _fnSetAgentModel(m); };
 window.sendAgentMessage= function(){ _fnSendAgentMsg(); };
 window.openVoteModal   = function(p){ _fnOpenVoteModal(p); };
 window.closeVoteModal  = function(){ _fnCloseVoteModal(); };
@@ -1814,14 +1811,6 @@ function closeLunaChat() {
     if (saberBar) saberBar.classList.remove('open');
   }, 120);
   if (chip) chip.classList.remove('active');
-}
-
-function setAgentModel(model) {
-  if (model === agentModel) return;
-  agentModel = model;
-  document.getElementById('model-fast').classList.toggle('active', model === 'fast');
-  document.getElementById('model-thinking').classList.toggle('active', model === 'thinking');
-  addAgentMessage(`Switched to ${model === 'thinking' ? '🧠 Thinking (Gemini 2.5 Pro)' : '⚡ Fast (Gemini 3.5 Flash)'} mode.`, 'assistant');
 }
 
 async function sendAgentMessage() {

@@ -1466,26 +1466,6 @@ body::after{
 }
 .luna-close-btn:hover { background: #e0e0e0; }
 
-/* ── Model toggle ───────────────────────────── */
-.luna-model-toggle { display: flex; gap: 5px; flex-shrink: 0; }
-.luna-model-btn {
-  background: #f0f0f0;
-  border: 1px solid #ddd;
-  border-radius: 18px;
-  color: #666;
-  cursor: pointer;
-  font-size: 10px; font-weight: 600;
-  padding: 4px 10px;
-  transition: background 0.15s, color 0.15s;
-  white-space: nowrap;
-  font-family: var(--sans);
-}
-.luna-model-btn.active {
-  background: #5b2d9e;
-  border-color: #5b2d9e;
-  color: #fff;
-}
-
 /* ── Messages ───────────────────────────────────────────── */
 .luna-messages {
   flex: 1;
@@ -2013,10 +1993,6 @@ body::after{
       <div class="luna-header-name">Luna</div>
       <div class="luna-header-sub">Trip Planner · Google Search &amp; Maps</div>
     </div>
-    <div class="luna-model-toggle">
-      <button id="model-fast"     class="luna-model-btn active" onclick="setAgentModel('fast')"    >⚡ Fast</button>
-      <button id="model-thinking" class="luna-model-btn"        onclick="setAgentModel('thinking')">🧠 Thinking</button>
-    </div>
     <button class="luna-close-btn" onclick="closeLunaChat()" aria-label="Close chat">✕</button>
   </div>
   <div id="luna-messages" class="luna-messages"></div>
@@ -2113,5 +2089,5 @@ body::after{
     </div>
   </div>
 </div>
-<script src="/app.js?v=1783539037"></script>
+<script src="/app.js?v=1783541861"></script>
 </body></html>
