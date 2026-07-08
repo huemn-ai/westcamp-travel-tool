@@ -1673,12 +1673,12 @@ const ACTIVITIES = {
 const POLLS = {
   'poll-thu-dinner':   { label:'Thursday Dinner',   type:'meal',     options:['nyt-sheetpan-chicken','ar-sausage-orzo','lcc-flank-steak','_writein'], day:'thu' },
   'poll-thu-snack':    { label:'Thursday Fire-Pit Snack', type:'snack', options:['hershey-smores','tbfs-brie','ft-grilled-peaches'], day:'thu' },
-  'poll-thu-walk':     { label:'Evening Walk',       type:'activity', options:['thu-lighthouse','thu-falling','thu-esopus'], day:'thu' },
   'poll-fri-breakfast':{ label:'Friday Breakfast',   type:'meal',     options:['nyt-dutch-baby','ds-shakshuka','ar-strata'], day:'fri' },
   'poll-fri-lunch':    { label:'Friday Lunch',       type:'meal',     options:['hbh-peach-burrata','nyt-nicoise','tesco-orzo','eo-cinco','eo-stella','eo-tinker-taco','eo-kingston-brew','eo-lasting-lunch'], day:'fri' },
   'poll-fri-dinner':   { label:'Friday Dinner',      type:'meal',     options:['nyt-short-ribs','ar-shish-tawook','rtk-tritip','eo-pearl-moon','eo-shelter','eo-ship-to-shore','eo-partition'], day:'fri' },
   'poll-fri-physical': { label:'Friday Activity',    type:'activity', options:['fri-kaaterskill','fri-overlook','fri-rail-trail','fri-ns-lake'], day:'fri' },
   'poll-fri-leisure':  { label:'Friday Leisure',     type:'activity', options:['fri-lasting-joy','fri-woodstock','fri-hangout','fri-blue-duck','fri-keegan'], day:'fri' },
+  'poll-fri-evening-walk': { label:'Friday Evening Walk', type:'activity', options:['thu-lighthouse','thu-falling','thu-esopus'], day:'fri' },
   'poll-fri-snack':    { label:'Friday Fire-Pit Snack', type:'snack', options:['hershey-smores','tbfs-brie','ft-grilled-peaches'], day:'fri' },
   'poll-sat-breakfast':{ label:'Saturday Breakfast', type:'meal',     options:['ar-crepes','cg-sucuklu','rte-bibimbap'], day:'sat' },
   'poll-sat-lunch':    { label:'Saturday Lunch',     type:'meal',     options:['ar-cubano','ar-quesadillas','diy-kale-caesar','eo-cinco','eo-stella','eo-tinker-taco','eo-kingston-brew','eo-lasting-lunch'], day:'sat' },
@@ -1794,7 +1794,7 @@ function tallyPoll(pollId) {
   return { scores, firsts, seconds, winner, isTied, tied };
 }
 
-function castVote(pollId, optionId, rank) {
+async function castVote(pollId, optionId, rank) {
   const name = ST.guestName;
   if (!name) return;
   if (!ST.votes[pollId]) ST.votes[pollId] = {};
@@ -1809,7 +1809,7 @@ function castVote(pollId, optionId, rank) {
     else if (g.first === optionId) { const old=g.second; g.second=optionId; g.first=old; }
     else { g.second = optionId; if (g.first===optionId) g.first=null; }
   }
-  storageSet('wcd-votes', ST.votes);
+  await storageSet('wcd-votes', ST.votes);
   // Update tallies in-place without rebuilding the calendar (preserves open panels)
   updateTalliesInPlace(pollId);
   renderShoppingList();
@@ -1897,11 +1897,6 @@ function autoPlaceDay(dayKey){
     placeBlock('arrival',minFrom10(14),120);
     // Dinner 6:30PM = minFrom10(18,30)=510
     placeBlock('thu-dinner',minFrom10(20,0),90);
-    // Evening walk poll — 19:30–20:30 range
-    const walkWinner=tallyPoll('poll-thu-walk').winner||'thu-lighthouse';
-    const walkAct=ACTIVITIES[walkWinner];
-    const walkStart=bestStart(dayKey,walkAct.type,19,21,walkAct.durationMin);
-    placeBlock('thu-walk',walkStart,walkAct.durationMin);
     // Fire-pit snack 9:45PM = minFrom10(21,45)=705
     placeBlock('thu-snack',minFrom10(21,45),45);
     // Wind-down 10:30PM
@@ -1929,6 +1924,13 @@ function autoPlaceDay(dayKey){
     placeBlock('fri-leisure',Math.min(leisureStart,minFrom10(18)),leisureAct.durationMin);
     // Dinner 6:30PM
     placeBlock('fri-dinner',minFrom10(18,30),90);
+    // Evening walk (optional, after dinner)
+    const ewWinner=tallyPoll('poll-fri-evening-walk').winner;
+    if(ewWinner){
+      const ewAct=ACTIVITIES[ewWinner];
+      const ewStart=bestStart(dayKey,ewAct.type,19,21,ewAct.durationMin);
+      placeBlock('fri-evening-walk',ewStart,ewAct.durationMin);
+    }
     // Backgammon Tournament 8PM fixed
     placeBlock('fri-backgammon',minFrom10(20),90);
     // Snack 9:30PM
@@ -2127,7 +2129,7 @@ function buildVotePanel(pollId){
 
     let writeinField='';
     if(optId==='_writein'){
-      writeinField=`<input class="writein-input" id="writein-input-${pollId}" type="text" maxlength="200" placeholder="Cook's choice — type a dish" value="${escHtml(ST.writein.text||'')}" oninput="onWriteinChange(this.value,'${pollId}')">
+      writeinField=`<input class="writein-input" id="writein-input-${pollId}" type="text" maxlength="200" placeholder="Cook's choice — type a dish" value="${escHtml(ST.writein.text||'')}" oninput="onWriteinChange(this.value,'${pollId}').catch(e=>console.error('Write-in save failed',e))">
       <div class="writein-saved" id="writein-saved-${pollId}">Saved ✓</div>`;
     }
 
@@ -2146,12 +2148,12 @@ function buildVotePanel(pollId){
       <div class="vote-chips">
         <button class="chip ${gVote.first===optId?'selected-1':''}" 
           ${!hasName?'disabled title="Enter your name above to vote"':''}
-          onclick="castVote('${pollId}','${optId}',1)" 
+          onclick="castVote('${pollId}','${optId}',1).catch(e=>console.error('Vote save failed',e))" 
           aria-pressed="${gVote.first===optId}"
           aria-label="Vote 1st choice for ${escHtml(optName)}">1st</button>
         <button class="chip ${gVote.second===optId?'selected-2':''}" 
           ${!hasName?'disabled title="Enter your name above to vote"':''}
-          onclick="castVote('${pollId}','${optId}',2)"
+          onclick="castVote('${pollId}','${optId}',2).catch(e=>console.error('Vote save failed',e))"
           aria-pressed="${gVote.second===optId}"
           aria-label="Vote 2nd choice for ${escHtml(optName)}">2nd</button>
       </div>
@@ -2195,11 +2197,6 @@ function dayBlocks(dayKey){
     const dWin=tallyPoll('poll-thu-dinner').winner;
     const dTitle=dWin&&dWin!=='_eatout'&&dWin!=='_writein'?RECIPES[dWin]?.name:dWin==='_eatout'?'Dinner':dWin==='_writein'?(ST.writein.text||'Cook\'s Choice'):'Dinner';
     addBlock('thu-dinner',dTitle,'meal','poll-thu-dinner',minFrom10(20,0),90,'','dinner','');
-    // Walk
-    const wWin=tallyPoll('poll-thu-walk').winner;
-    const wAct=ACTIVITIES[wWin]||ACTIVITIES['thu-lighthouse'];
-    const wTitle=wWin?wAct.name:'Evening Walk';
-    addBlock('thu-walk',wTitle,'activity','poll-thu-walk',minFrom10(19,30),wAct.durationMin,wAct.addr,'','flexible');
     const sWin=tallyPoll('poll-thu-snack').winner;
     const sTitle=sWin?RECIPES[sWin]?.name:'Fire-Pit Snack';
     addBlock('thu-snack',sTitle,'snack','poll-thu-snack',minFrom10(21,45),45,'Fire pit','','');
@@ -2578,7 +2575,7 @@ function attachDrag(el, dayKey, blockId){
     // Persist
     if(!ST.schedule[_dragState.dayKey]) ST.schedule[_dragState.dayKey]={};
     ST.schedule[_dragState.dayKey][_dragState.blockId]={start:newStart,duration:_dragState.dur,manual:true};
-    storageSet('wcd-schedule',ST.schedule);
+    storageSet('wcd-schedule',ST.schedule).catch(e=>console.error('Schedule save failed',e));
     el.dataset.start=newStart;
     // Re-render this block's label in the DOM (settle animation)
     el.style.transition='top 120ms ease';
@@ -2607,12 +2604,12 @@ function onBlockKeydown(e, dayKey, blockId){
   el.setAttribute('aria-label',`${el.getAttribute('aria-label').split(',')[0]}, ${minToTime(cur)}–${minToTime(cur+dur)}, arrow keys to move`);
   if(!ST.schedule[dayKey])ST.schedule[dayKey]={};
   ST.schedule[dayKey][blockId]={start:cur,duration:dur,manual:true};
-  storageSet('wcd-schedule',ST.schedule);
+  storageSet('wcd-schedule',ST.schedule).catch(e=>console.error('Schedule save failed',e));
 }
 
-function onWriteinChange(val, pollId){
+async function onWriteinChange(val, pollId){
   ST.writein={text:val.trim(), updatedBy:ST.guestName||'anonymous'};
-  storageSet('wcd-writein',ST.writein);
+  await storageSet('wcd-writein',ST.writein);
   const saved=document.getElementById('writein-saved-'+pollId);
   if(saved){saved.classList.add('show');setTimeout(()=>saved.classList.remove('show'),1800);}
   // Update vote rows that show the write-in name
@@ -2735,7 +2732,7 @@ function renderShoppingList(){
 function toggleShopItem(id, rowEl){
   if(ST.shopping[id]){ delete ST.shopping[id]; }
   else { ST.shopping[id]=true; }
-  storageSet('wcd-shopping',ST.shopping);
+  storageSet('wcd-shopping',ST.shopping).catch(e=>console.error('Shopping list save failed',e));
   const checked=!!ST.shopping[id];
   rowEl.classList.toggle('checked-item',checked);
   const cb=rowEl.querySelector('.shop-cb');
@@ -2917,13 +2914,13 @@ function updateNameButton(){
 const WIZARD_POLLS = [
   { id:'poll-drinks',       day:'The Trip'           },
   { id:'poll-thu-dinner',   day:'Thursday · July 9'  },
-  { id:'poll-thu-walk',     day:'Thursday · July 9'   },
   { id:'poll-thu-snack',    day:'Thursday · July 9'   },
   { id:'poll-fri-breakfast',day:'Friday · July 10'    },
   { id:'poll-fri-lunch',    day:'Friday · July 10'    },
   { id:'poll-fri-dinner',   day:'Friday · July 10'    },
   { id:'poll-fri-physical', day:'Friday · July 10'    },
   { id:'poll-fri-leisure',  day:'Friday · July 10'    },
+  { id:'poll-fri-evening-walk', day:'Friday · July 10' },
   { id:'poll-fri-snack',    day:'Friday · July 10'    },
   { id:'poll-sat-breakfast',day:'Saturday · July 11'  },
   { id:'poll-sat-lunch',    day:'Saturday · July 11'  },
