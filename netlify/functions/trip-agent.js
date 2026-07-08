@@ -1,12 +1,56 @@
-const { BedrockRuntimeClient, ConverseCommand } = require("@aws-sdk/client-bedrock-runtime");
+const https = require("https");
 const { createClient } = require("@supabase/supabase-js");
-
-const bedrock = new BedrockRuntimeClient({ region: process.env.AWS_REGION || "us-east-1" });
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_SERVICE_KEY
 );
+
+const BEDROCK_REGION  = process.env.AWS_REGION || "us-east-1";
+const BEDROCK_API_KEY = process.env.BEDROCK_API_KEY;
+const BEDROCK_MODEL   = process.env.BEDROCK_MODEL_ID || "anthropic.claude-3-5-sonnet-20241022-v2:0";
+
+// ─── Bedrock Converse call via bearer-token REST endpoint ────────────────────
+function bedrockRequest(body) {
+  return new Promise((resolve, reject) => {
+    const payload = JSON.stringify(body);
+    const hostname = `bedrock-runtime.${BEDROCK_REGION}.amazonaws.com`;
+    const path     = `/model/${encodeURIComponent(BEDROCK_MODEL)}/converse`;
+
+    const req = https.request(
+      {
+        hostname,
+        path,
+        method: "POST",
+        headers: {
+          "Content-Type":  "application/json",
+          "Content-Length": Buffer.byteLength(payload),
+          "Authorization": `Bearer ${BEDROCK_API_KEY}`,
+        },
+      },
+      (res) => {
+        let data = "";
+        res.on("data", (chunk) => (data += chunk));
+        res.on("end", () => {
+          try {
+            const parsed = JSON.parse(data);
+            if (res.statusCode >= 400) {
+              reject(new Error(parsed.message || parsed.error || `HTTP ${res.statusCode}`));
+            } else {
+              resolve(parsed);
+            }
+          } catch {
+            reject(new Error(`Non-JSON response: ${data}`));
+          }
+        });
+      }
+    );
+
+    req.on("error", reject);
+    req.write(payload);
+    req.end();
+  });
+}
 
 // ─── Time helpers (mirror of what the frontend uses) ────────────────────────
 // "minutes from 10 AM" is what the DB stores.
@@ -421,15 +465,12 @@ async function runAgentLoop(messages) {
   let scheduleChanged = false;
 
   for (let round = 0; round < MAX_ROUNDS; round++) {
-    const response = await bedrock.send(
-      new ConverseCommand({
-        modelId: process.env.BEDROCK_MODEL_ID || "anthropic.claude-3-5-sonnet-20241022-v2:0",
-        system: [{ text: SYSTEM_PROMPT }],
-        messages,
-        toolConfig: TOOL_CONFIG,
-        inferenceConfig: { maxTokens: 2048, temperature: 0.3 },
-      })
-    );
+    const response = await bedrockRequest({
+      system: [{ text: SYSTEM_PROMPT }],
+      messages,
+      toolConfig: TOOL_CONFIG,
+      inferenceConfig: { maxTokens: 2048, temperature: 0.3 },
+    });
 
     const { stopReason, output } = response;
     const assistantMessage = output.message;
