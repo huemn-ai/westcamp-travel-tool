@@ -2111,6 +2111,25 @@ body::after{
   </div>
 </div>
 <script>
+/* expose hoisted function declarations to window immediately — safe because
+   function declarations are hoisted before any code runs */
+window.openLunaChat    = function(){ openLunaChat(); };
+window.closeLunaChat   = function(){ closeLunaChat(); };
+window.setAgentModel   = function(m){ setAgentModel(m); };
+window.sendAgentMessage= function(){ sendAgentMessage(); };
+window.openVoteModal   = function(p){ openVoteModal(p); };
+window.closeVoteModal  = function(){ closeVoteModal(); };
+window.castVote        = function(p,r,v){ castVote(p,r,v); };
+window.onWriteinChange = function(e){ onWriteinChange(e); };
+window.toggleShopItem  = function(id){ toggleShopItem(id); };
+window.openNameModal   = function(){ openNameModal(); };
+window.confirmName     = function(){ confirmName(); };
+window.closeWizard     = function(){ closeWizard(); };
+window.wizardNext      = function(){ wizardNext(); };
+window.wizardBack      = function(){ wizardBack(); };
+window.wizardSkip      = function(){ wizardSkip(); };
+window.doRefresh       = function(){ doRefresh(); };
+
 /* ═══════════════════════════════════════════════════════════
    SUPABASE INITIALIZATION
 ═══════════════════════════════════════════════════════════ */
@@ -3936,21 +3955,5 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /* expose functions used in inline event handlers to window for all browser environments */
-window.openLunaChat   = openLunaChat;
-window.closeLunaChat  = closeLunaChat;
-window.setAgentModel  = setAgentModel;
-window.sendAgentMessage = sendAgentMessage;
-window.openVoteModal  = openVoteModal;
-window.closeVoteModal = closeVoteModal;
-window.castVote       = castVote;
-window.onWriteinChange = onWriteinChange;
-window.toggleShopItem = toggleShopItem;
-window.openNameModal  = openNameModal;
-window.confirmName    = confirmName;
-window.closeWizard    = closeWizard;
-window.wizardNext     = wizardNext;
-window.wizardBack     = wizardBack;
-window.wizardSkip     = wizardSkip;
-window.doRefresh      = doRefresh;
 </script>
 </body></html>
