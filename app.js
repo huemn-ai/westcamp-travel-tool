@@ -1744,16 +1744,38 @@ let agentSessionId = null;
 let agentModel     = 'fast';
 
 function openLunaChat() {
-  document.getElementById('luna-chip').classList.add('hidden');
-  document.getElementById('luna-backdrop').classList.add('open');
-  document.getElementById('luna-modal').classList.add('open');
-  setTimeout(() => document.getElementById('luna-input').focus(), 380);
+  const chip = document.getElementById('luna-chip');
+  const backdrop = document.getElementById('luna-backdrop');
+  const modal = document.getElementById('luna-modal');
+  if (!chip || !modal || !backdrop) return;
+
+  // If already open, close instead
+  if (modal.classList.contains('open')) { closeLunaChat(); return; }
+
+  // Trigger chip flip
+  chip.classList.add('flipping');
+
+  function onFlipDone() {
+    chip.removeEventListener('animationend', onFlipDone);
+    chip.classList.remove('flipping');
+    chip.classList.add('luna-active');
+    // Open the overlay
+    backdrop.classList.add('open');
+    modal.classList.add('open');
+    setTimeout(() => document.getElementById('luna-input')?.focus(), 350);
+  }
+  chip.addEventListener('animationend', onFlipDone);
 }
 
 function closeLunaChat() {
-  document.getElementById('luna-backdrop').classList.remove('open');
-  document.getElementById('luna-modal').classList.remove('open');
-  setTimeout(() => document.getElementById('luna-chip').classList.remove('hidden'), 300);
+  const chip = document.getElementById('luna-chip');
+  const backdrop = document.getElementById('luna-backdrop');
+  const modal = document.getElementById('luna-modal');
+  backdrop.classList.remove('open');
+  modal.classList.remove('open');
+  if (chip) {
+    chip.classList.remove('luna-active', 'flipping');
+  }
 }
 
 function setAgentModel(model) {
