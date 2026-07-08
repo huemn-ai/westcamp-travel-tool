@@ -1306,79 +1306,107 @@ function updateCalendarWinners(){
 let _dragState = null;
 const tooltip = ()=>document.getElementById('drag-tooltip');
 
+/** Return the same row height used in buildCalendar. */
+function _calRowH(){ return window.innerWidth<=768?68:80; }
+/** Total pixel height of the calendar's timed region (no padding). */
+function _calTotalH(){ return CAL_MINUTES/60*_calRowH(); }
+
 function attachDrag(el, dayKey, blockId){
+  let _moved = false; // distinguish tap vs drag
+
   el.addEventListener('pointerdown', e=>{
     if(e.target.closest('.block-vote-toggle,.block-vote-panel,.writein-input,.chip,.restaurant-list,a'))return;
     e.preventDefault();
     el.setPointerCapture(e.pointerId);
-    const rect=el.getBoundingClientRect();
-    const calEl=document.getElementById('cal-'+dayKey);
-    const calRect=calEl.getBoundingClientRect();
-    const rowH=window.innerWidth<=768?48:56;
-    const totalH=CAL_MINUTES/60*rowH;
+    _moved = false;
+
+    const calH = _calTotalH();
     _dragState={
       el, dayKey, blockId,
       startY: e.clientY,
       origTop: parseFloat(el.style.top)||0,
-      calTop: calRect.top,
-      calH: totalH,
+      calH,
       dur: parseInt(el.dataset.dur),
       startMin: parseInt(el.dataset.start),
+      currentStart: parseInt(el.dataset.start),
     };
     el.classList.add('dragging');
     el.style.zIndex=200;
-    tooltip().style.display='block';
   });
 
   el.addEventListener('pointermove', e=>{
     if(!_dragState||_dragState.el!==el)return;
     const dy=e.clientY-_dragState.startY;
+    // Only engage drag visuals after a few pixels of movement (avoids
+    // accidental drags from short taps/button presses).
+    if(Math.abs(dy)>4) _moved=true;
+    if(!_moved) return;
+
     const minsMoved=Math.round((dy/_dragState.calH)*CAL_MINUTES/15)*15;
     let newStart=_dragState.startMin+minsMoved;
-    newStart=Math.max(0,Math.min(CAL_MINUTES-_dragState.dur,newStart));
-    // Snap to 15-min
-    newStart=Math.round(newStart/15)*15;
-    const newTop=(_dragState.origTop+dy/_dragState.calH*_dragState.calH);
+    // Snap to 15-min and clamp to calendar range
+    newStart=Math.round(Math.max(0,Math.min(CAL_MINUTES-_dragState.dur,newStart))/15)*15;
     const clampedTop=(newStart/CAL_MINUTES)*_dragState.calH;
     el.style.top=clampedTop+'px';
     _dragState.currentStart=newStart;
-    // Tooltip
+
+    // Show tooltip
     const tt=tooltip();
+    if(!tt.style.display||tt.style.display==='none') tt.style.display='block';
     tt.textContent=`${minToTime(newStart)} – ${minToTime(newStart+_dragState.dur)}`;
-    tt.style.left=(e.clientX+12)+'px';
-    tt.style.top=(e.clientY-8)+'px';
+    // Keep tooltip on-screen (clamp to right edge)
+    const ttW=200;
+    const leftX=Math.min(e.clientX+12, window.innerWidth-ttW-4);
+    tt.style.left=leftX+'px';
+    tt.style.top=(e.clientY-28)+'px';
   });
 
-  el.addEventListener('pointerup', e=>{
+  const _finishDrag = (e)=>{
     if(!_dragState||_dragState.el!==el)return;
     el.classList.remove('dragging');
     el.style.zIndex='';
     tooltip().style.display='none';
-    const newStart=_dragState.currentStart??_dragState.startMin;
-    // Persist
-    if(!ST.schedule[_dragState.dayKey]) ST.schedule[_dragState.dayKey]={};
-    ST.schedule[_dragState.dayKey][_dragState.blockId]={start:newStart,duration:_dragState.dur,manual:true};
-    storageSet('wcd-schedule',ST.schedule).catch(e=>console.error('Schedule save failed',e));
+
+    if(!_moved){
+      // It was a tap, not a drag — don't save or rebuild
+      _dragState=null;
+      return;
+    }
+
+    const newStart=_dragState.currentStart;
+    const capturedDayKey=_dragState.dayKey;
+    const capturedBlockId=_dragState.blockId;
+    const capturedDur=_dragState.dur;
+
+    // Persist to in-memory state and Supabase
+    if(!ST.schedule[capturedDayKey]) ST.schedule[capturedDayKey]={};
+    ST.schedule[capturedDayKey][capturedBlockId]={start:newStart,duration:capturedDur,manual:true};
+    storageSet('wcd-schedule',ST.schedule).catch(err=>console.error('Schedule save failed',err));
     el.dataset.start=newStart;
-    // Re-render this block's label in the DOM (settle animation)
+
+    // Settle animation on the block before full rebuild
     el.style.transition='top 120ms ease';
     setTimeout(()=>{ el.style.transition=''; },150);
+
     _dragState=null;
-    // Rebuild calendar so manual pin and aria-label update
-    setTimeout(()=>buildCalendar(_dragState2?.dayKey||_dragState?.dayKey||el.dataset.day,document.getElementById('cal-'+el.dataset.day)),160);
-  });
-  // Keyboard movement
+
+    // Full calendar rebuild to update aria-labels, manual-pin icon, and overlap layout
+    setTimeout(()=>{
+      const cal=document.getElementById('cal-'+capturedDayKey);
+      if(cal) buildCalendar(capturedDayKey, cal);
+    }, 160);
+  };
+
+  el.addEventListener('pointerup', _finishDrag);
+  el.addEventListener('pointercancel', _finishDrag);
 }
-// keep reference to clean rebuild
-let _dragState2=null;
 
 function onBlockKeydown(e, dayKey, blockId){
   if(e.key!=='ArrowUp'&&e.key!=='ArrowDown')return;
   e.preventDefault();
   const el=document.getElementById(`cb-${dayKey}-${blockId}`);
   if(!el)return;
-  const rowH=window.innerWidth<=768?48:56;
-  const totalH=CAL_MINUTES/60*rowH;
+  const totalH=_calTotalH();
   let cur=parseInt(el.dataset.start);
   const dur=parseInt(el.dataset.dur);
   cur=e.key==='ArrowUp'?Math.max(0,cur-15):Math.min(CAL_MINUTES-dur,cur+15);
@@ -1387,7 +1415,7 @@ function onBlockKeydown(e, dayKey, blockId){
   el.setAttribute('aria-label',`${el.getAttribute('aria-label').split(',')[0]}, ${minToTime(cur)}–${minToTime(cur+dur)}, arrow keys to move`);
   if(!ST.schedule[dayKey])ST.schedule[dayKey]={};
   ST.schedule[dayKey][blockId]={start:cur,duration:dur,manual:true};
-  storageSet('wcd-schedule',ST.schedule).catch(e=>console.error('Schedule save failed',e));
+  storageSet('wcd-schedule',ST.schedule).catch(err=>console.error('Schedule save failed',err));
 }
 
 async function onWriteinChange(val, pollId){
