@@ -1957,7 +1957,6 @@ function expandLunaChatFullscreen() {
   if (!panel) return;
   panel.classList.add('fullscreen');
 }
-}
 
 async function sendAgentMessage() {
   const input   = document.getElementById('luna-input');
