@@ -1374,6 +1374,205 @@ body::after{
   transition:opacity 600ms var(--ease-out),transform 600ms var(--ease-out);
 }
 .reveal.visible{opacity:1;transform:none;}
+
+/* AGENT CHAT IN HEADER */
+.agent-chat-widget {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 380px;
+  max-height: 500px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+  display: flex;
+  flex-direction: column;
+  z-index: 1000;
+  font-family: var(--sans);
+}
+
+.agent-chat-widget.collapsed {
+  max-height: 56px;
+}
+
+.agent-header-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--line);
+  cursor: pointer;
+  background: linear-gradient(135deg, var(--river) 0%, var(--rain) 100%);
+  color: var(--foam);
+  border-radius: 12px 12px 0 0;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.agent-header-bar:hover {
+  opacity: 0.95;
+}
+
+.agent-chat-widget.collapsed .agent-header-bar {
+  border-radius: 12px;
+}
+
+.agent-close-btn {
+  background: none;
+  border: none;
+  color: var(--foam);
+  cursor: pointer;
+  font-size: 18px;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.agent-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 380px;
+}
+
+.agent-message {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+  animation: slideIn 300ms ease-out;
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.agent-message.user {
+  justify-content: flex-end;
+}
+
+.agent-message-content {
+  max-width: 85%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.agent-message.user .agent-message-content {
+  background: var(--river);
+  color: var(--foam);
+  border-radius: 8px 2px 8px 8px;
+}
+
+.agent-message.assistant .agent-message-content {
+  background: var(--foam);
+  color: var(--river);
+  border: 1px solid var(--line);
+  border-radius: 2px 8px 8px 8px;
+}
+
+.agent-input-area {
+  display: flex;
+  gap: 8px;
+  padding: 12px;
+  border-top: 1px solid var(--line);
+  background: var(--card);
+  border-radius: 0 0 12px 12px;
+}
+
+.agent-input {
+  flex: 1;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-family: var(--sans);
+  background: white;
+  color: var(--river);
+}
+
+.agent-input:focus {
+  outline: none;
+  border-color: var(--buoy);
+  box-shadow: 0 0 0 2px rgba(190,90,52,0.1);
+}
+
+.agent-send-btn {
+  background: var(--river);
+  color: var(--foam);
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 200ms ease;
+}
+
+.agent-send-btn:hover {
+  background: var(--rain);
+}
+
+.agent-send-btn:active {
+  transform: scale(0.98);
+}
+
+.agent-send-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.agent-loading {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  padding: 10px 12px;
+  background: var(--foam);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--river);
+  font-size: 13px;
+}
+
+.agent-loading span {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--river);
+  animation: pulse 1.4s infinite;
+}
+
+.agent-loading span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.agent-loading span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes pulse {
+  0%, 60%, 100% { opacity: 0.3; }
+  30% { opacity: 1; }
+}
+
+@media (max-width: 768px) {
+  .agent-chat-widget {
+    width: 100%;
+    max-width: calc(100vw - 20px);
+    bottom: 10px;
+    right: 10px;
+    left: 10px;
+  }
+}
 </style>
 </head>
 <body>
@@ -1473,6 +1672,19 @@ body::after{
     </div>
   </div>
 </main>
+
+<!-- TRIP PLANNING AGENT CHAT WIDGET -->
+<div id="agent-chat-widget" class="agent-chat-widget">
+  <div class="agent-header-bar" onclick="toggleAgentChat()">
+    <span>🤖 Trip Agent</span>
+    <button class="agent-close-btn" onclick="toggleAgentChat(event)" aria-label="Toggle chat">−</button>
+  </div>
+  <div id="agent-messages" class="agent-messages"></div>
+  <div class="agent-input-area">
+    <input type="text" id="agent-input" class="agent-input" placeholder="Ask about meals, activities..." />
+    <button id="agent-send" class="agent-send-btn" onclick="sendAgentMessage()">Send</button>
+  </div>
+</div>
 
 <div id="drag-tooltip" class="drag-tooltip" style="display:none"></div>
 
@@ -3242,5 +3454,99 @@ window.addEventListener('DOMContentLoaded', init);
     window.switchTab=async function(k){await _wrap(k);setTimeout(attachReveals,160);};
   }
 })();
+
+/* ═══════════════════════════════════════════════════════════
+   TRIP PLANNING AGENT CHAT
+═══════════════════════════════════════════════════════════ */
+let agentSessionId = null;
+
+function toggleAgentChat(e) {
+  if (e) e.stopPropagation();
+  const widget = document.getElementById('agent-chat-widget');
+  widget.classList.toggle('collapsed');
+  if (!widget.classList.contains('collapsed')) {
+    document.getElementById('agent-input').focus();
+  }
+}
+
+async function sendAgentMessage() {
+  const input = document.getElementById('agent-input');
+  const message = input.value.trim();
+  
+  if (!message) return;
+  
+  // Add user message to chat
+  addAgentMessage(message, 'user');
+  input.value = '';
+  
+  // Show loading indicator
+  const loadingEl = document.createElement('div');
+  loadingEl.className = 'agent-message assistant';
+  loadingEl.innerHTML = '<div class="agent-loading"><span></span><span></span><span></span></div>';
+  document.getElementById('agent-messages').appendChild(loadingEl);
+  scrollAgentToBottom();
+  
+  try {
+    // Call the Netlify function
+    const response = await fetch('/.netlify/functions/trip-agent', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        message,
+        sessionId: agentSessionId
+      })
+    });
+    
+    const data = await response.json();
+    
+    if (data.success) {
+      agentSessionId = data.sessionId;
+      loadingEl.remove();
+      addAgentMessage(data.message, 'assistant');
+    } else {
+      loadingEl.remove();
+      addAgentMessage('Sorry, I encountered an error: ' + (data.error || 'Unknown error'), 'assistant');
+    }
+  } catch (error) {
+    console.error('Agent error:', error);
+    loadingEl.remove();
+    addAgentMessage('Sorry, I couldn\'t connect to the agent. Please try again.', 'assistant');
+  }
+  
+  scrollAgentToBottom();
+}
+
+function addAgentMessage(text, role) {
+  const messagesEl = document.getElementById('agent-messages');
+  const messageEl = document.createElement('div');
+  messageEl.className = `agent-message ${role}`;
+  
+  const contentEl = document.createElement('div');
+  contentEl.className = 'agent-message-content';
+  contentEl.textContent = text;
+  
+  messageEl.appendChild(contentEl);
+  messagesEl.appendChild(messageEl);
+}
+
+function scrollAgentToBottom() {
+  const messagesEl = document.getElementById('agent-messages');
+  setTimeout(() => {
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+  }, 0);
+}
+
+// Allow sending message with Enter key
+document.addEventListener('DOMContentLoaded', () => {
+  const input = document.getElementById('agent-input');
+  if (input) {
+    input.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendAgentMessage();
+      }
+    });
+  }
+});
 </script>
 </body></html>

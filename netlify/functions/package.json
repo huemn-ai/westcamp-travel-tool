@@ -1,0 +1,17 @@
+{
+  "name": "west-camp-debrief-functions",
+  "version": "1.0.0",
+  "description": "Netlify Functions for West Camp Debrief trip planning",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "netlify dev",
+    "build": "echo 'Functions ready'"
+  },
+  "dependencies": {
+    "@aws-sdk/client-bedrock-agent-runtime": "^3.500.0",
+    "@aws-sdk/client-bedrock-runtime": "^3.500.0",
+    "@supabase/supabase-js": "^2.38.0"
+  },
+  "devDependencies": {}
+}
