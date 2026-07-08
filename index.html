@@ -1414,15 +1414,12 @@ body::after{
 /* ── Messages panel ─────────────────────────── */
 .luna-panel {
   position: fixed;
-  left: 0;
-  right: 0;
-  /* sits above the saber bar; saber bar = bottom:24px, height:58px → top of saber = bottom:82px, add 12px gap */
-  bottom: 102px;
+  left: 20px;
+  right: 20px;
+  bottom: 90px;
   top: 6dvh;
-  background: rgba(12, 6, 28, 0.86);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border-radius: 20px 20px 0 0;
+  background: #fff;
+  border-radius: 20px;
   display: flex;
   flex-direction: column;
   z-index: 1006;
@@ -1431,6 +1428,7 @@ body::after{
   pointer-events: none;
   transition: opacity 0.38s ease 0.42s, transform 0.38s ease 0.42s;
   overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
 }
 .luna-panel.open {
   opacity: 1;
@@ -1445,36 +1443,36 @@ body::after{
   align-items: center;
   gap: 10px;
   padding: 12px 14px 10px;
-  background: linear-gradient(135deg, rgba(61,26,120,0.95) 0%, rgba(107,63,160,0.9) 100%);
-  border-bottom: 1px solid rgba(140,90,210,0.2);
+  background: #f8f8f8;
+  border-bottom: 1px solid #e8e8e8;
 }
 .luna-header-avatar {
   width: 38px; height: 38px;
   border-radius: 50%;
   flex-shrink: 0;
-  border: 2px solid rgba(255,255,255,0.3);
+  border: 2px solid #ddd;
 }
 .luna-header-info { flex: 1; min-width: 0; }
-.luna-header-name { font-size: 17px; font-weight: 800; color: #fff; line-height: 1.1; }
-.luna-header-sub  { font-size: 10px; color: rgba(255,255,255,0.5); margin-top: 2px; }
+.luna-header-name { font-size: 17px; font-weight: 800; color: #333; line-height: 1.1; }
+.luna-header-sub  { font-size: 10px; color: #999; margin-top: 2px; }
 .luna-close-btn {
   width: 30px; height: 30px;
   border-radius: 50%;
-  background: rgba(255,255,255,0.12);
-  border: none; color: #fff; font-size: 16px;
+  background: #f0f0f0;
+  border: none; color: #666; font-size: 16px;
   cursor: pointer; flex-shrink: 0;
   display: flex; align-items: center; justify-content: center;
   transition: background 0.15s;
 }
-.luna-close-btn:hover { background: rgba(255,255,255,0.25); }
+.luna-close-btn:hover { background: #e0e0e0; }
 
 /* ── Model toggle ───────────────────────────── */
 .luna-model-toggle { display: flex; gap: 5px; flex-shrink: 0; }
 .luna-model-btn {
-  background: rgba(255,255,255,0.1);
-  border: 1px solid rgba(255,255,255,0.22);
+  background: #f0f0f0;
+  border: 1px solid #ddd;
   border-radius: 18px;
-  color: rgba(255,255,255,0.75);
+  color: #666;
   cursor: pointer;
   font-size: 10px; font-weight: 600;
   padding: 4px 10px;
@@ -1483,9 +1481,9 @@ body::after{
   font-family: var(--sans);
 }
 .luna-model-btn.active {
-  background: rgba(255,255,255,0.9);
-  border-color: transparent;
-  color: #3d1a78;
+  background: #5b2d9e;
+  border-color: #5b2d9e;
+  color: #fff;
 }
 
 /* ── Messages ───────────────────────────────────────────── */
@@ -1495,6 +1493,7 @@ body::after{
   padding: 14px 14px;
   display: flex; flex-direction: column; gap: 10px;
   -webkit-overflow-scrolling: touch;
+  background: #fff;
 }
 .luna-message {
   display: flex; gap: 8px;
@@ -1519,22 +1518,22 @@ body::after{
   border-radius: 16px 4px 16px 16px;
 }
 .luna-message.assistant .luna-bubble {
-  background: rgba(255,255,255,0.08);
-  color: rgba(255,255,255,0.92);
-  border: 1px solid rgba(140,90,210,0.25);
+  background: #f5f5f5;
+  color: #333;
+  border: 1px solid #e8e8e8;
   border-radius: 4px 16px 16px 16px;
 }
 .luna-typing {
   display: flex; gap: 5px; align-items: center;
   padding: 10px 14px;
-  background: rgba(255,255,255,0.07);
-  border: 1px solid rgba(140,90,210,0.2);
+  background: #f5f5f5;
+  border: 1px solid #e8e8e8;
   border-radius: 4px 16px 16px 16px;
   width: fit-content;
 }
 .luna-typing span {
   width: 6px; height: 6px; border-radius: 50%;
-  background: #a78bfa;
+  background: #5b2d9e;
   animation: lunaTyping 1.4s infinite;
 }
 .luna-typing span:nth-child(2) { animation-delay: 0.2s; }
@@ -1545,104 +1544,79 @@ body::after{
 }
 
 /* ── Saber bar wrapper ───────────────────────── */
-/* Anchored to bottom-right, exactly overlapping the Luna chip's position */
+/* Positioned below the panel, centered */
 .luna-saber-wrap {
   position: fixed;
-  bottom: 24px;
-  right: 20px;
-  height: 62px;
-  /* width is as wide as possible, but the bar inside starts at 0 */
-  left: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 20px;
+  width: calc(100% - 40px);
+  max-width: 480px;
+  height: 58px;
   z-index: 1008;
   display: flex;
   align-items: center;
-  justify-content: flex-end; /* bar grows from right side */
+  justify-content: flex-end;
   pointer-events: none;
 }
 
-/* The blade itself */
+/* The blade itself — clean white */
 .luna-saber-bar {
   height: 58px;
   width: 0;
-  /* Leave 66px gap on right so the Luna chip shows through */
-  max-width: calc(100% - 66px);
-  border-radius: 29px 0 0 29px;
-  background: linear-gradient(90deg,
-    rgba(45, 15, 100, 0.96) 0%,
-    rgba(80, 35, 160, 0.97) 55%,
-    rgba(120, 70, 210, 0.99) 85%,
-    rgba(155, 100, 230, 1)  100%
-  );
+  max-width: 100%;
+  border-radius: 29px;
+  background: #fff;
   box-shadow:
-    0 0 20px rgba(130, 70, 220, 0.6),
-    0 0 40px rgba(100, 50, 180, 0.35),
-    inset 0 1px 0 rgba(255,255,255,0.12),
-    inset 0 -1px 0 rgba(0,0,0,0.2);
+    0 2px 8px rgba(0, 0, 0, 0.12),
+    0 4px 16px rgba(0, 0, 0, 0.08);
   overflow: hidden;
   display: flex;
   align-items: center;
   padding: 0;
-  /* Ignite: expand from 0 to full width, right-anchored */
   transition: width 0.52s cubic-bezier(0.16, 1, 0.3, 1),
               box-shadow 0.3s ease;
   pointer-events: none;
   position: relative;
 }
-/* Glowing tip at the LEFT leading edge of the saber */
-.luna-saber-bar::before {
-  content: '';
-  position: absolute;
-  left: 0; top: 8px; bottom: 8px;
-  width: 3px;
-  border-radius: 2px;
-  background: rgba(220,190,255,0.95);
-  box-shadow:
-    0 0 8px rgba(220,190,255,1),
-    0 0 18px rgba(190,140,255,0.9),
-    0 0 32px rgba(160,100,255,0.6);
-  opacity: 0;
-  transition: opacity 0.18s ease 0.48s;
-}
 .luna-saber-bar.open {
-  width: calc(100% - 66px);
+  width: 100%;
   pointer-events: all;
   box-shadow:
-    0 0 28px rgba(130, 70, 220, 0.75),
-    0 0 56px rgba(100, 50, 180, 0.45),
-    inset 0 1px 0 rgba(255,255,255,0.15),
-    inset 0 -1px 0 rgba(0,0,0,0.2);
+    0 4px 12px rgba(0, 0, 0, 0.15),
+    0 8px 24px rgba(0, 0, 0, 0.1);
 }
-.luna-saber-bar.open::before { opacity: 1; }
 
 /* Input inside the saber */
 .luna-saber-input {
   flex: 1;
   background: transparent;
   border: none;
-  color: rgba(255,255,255,0.95);
+  color: #333;
   font-size: 14px;
   font-family: var(--sans);
-  padding: 0 10px 0 20px;
+  padding: 0 16px 0 20px;
   outline: none;
   opacity: 0;
   transition: opacity 0.25s ease 0.38s;
   -webkit-appearance: none;
-  width: 0; /* prevents overflow before bar opens */
+  width: 0;
   min-width: 0;
 }
 .luna-saber-bar.open .luna-saber-input {
   opacity: 1;
   width: auto;
 }
-.luna-saber-input::placeholder { color: rgba(200,170,255,0.55); }
+.luna-saber-input::placeholder { color: #999; }
 
 /* Send button */
 .luna-saber-send {
   width: 44px; height: 44px;
   border-radius: 50%;
-  background: rgba(255,255,255,0.14);
-  border: 1px solid rgba(255,255,255,0.22);
-  color: #fff; cursor: pointer;
+  background: linear-gradient(135deg, #5b2d9e, #7c4db8);
+  border: none;
+  color: #fff;
+  cursor: pointer;
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
   margin-right: 7px;
@@ -1650,10 +1624,10 @@ body::after{
   transition: opacity 0.2s ease 0.42s, background 0.15s, transform 0.15s;
 }
 .luna-saber-bar.open .luna-saber-send { opacity: 1; }
-.luna-saber-send:hover:not(:disabled) { background: rgba(255,255,255,0.24); transform: scale(1.06); }
+.luna-saber-send:hover:not(:disabled) { transform: scale(1.06); }
 .luna-saber-send:disabled { opacity: 0.35 !important; cursor: default; }
 
-/* Desktop: cap the width */
+/* Desktop: already centered */
 @media (min-width: 520px) {
   .luna-panel {
     left: 50%;
@@ -1663,11 +1637,6 @@ body::after{
   }
   .luna-panel.open {
     transform: translateX(-50%) translateY(0);
-  }
-  .luna-saber-wrap {
-    right: 20px;
-    left: auto;
-    width: 480px;
   }
 }
 
@@ -2144,5 +2113,5 @@ body::after{
     </div>
   </div>
 </div>
-<script src="/app.js?v=1783538214"></script>
+<script src="/app.js?v=1783538621"></script>
 </body></html>
