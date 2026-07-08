@@ -22,14 +22,14 @@ window.doRefresh       = function(){ doRefresh(); };
 ═══════════════════════════════════════════════════════════ */
 const SUPABASE_URL = 'https://xstcdokwuhivywqedkni.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhzdGNkb2t3dWhpdnl3cWVka25pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1MTQzOTgsImV4cCI6MjA5OTA5MDM5OH0.5N2cPOrj7REhUc0rz3wat6eAZ_k9vFlnoLRJRdbZKtg';
-let supabase;
+let _db;
 try {
-  supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+  _db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
     auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false }
   });
 } catch(e) {
   console.warn('Supabase init failed:', e);
-  supabase = null;
+  _db = null;
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -206,10 +206,10 @@ const ST = {
 };
 
 async function storageGet(key) {
-  if (!supabase) return null;
+  if (!_db) return null;
   try {
     if (key === 'wcd-votes') {
-      const { data, error } = await supabase
+      const { data, error } = await _db
         .from('preferences')
         .select('guest_name, poll_id, first_choice, second_choice');
       if (error) throw error;
@@ -227,7 +227,7 @@ async function storageGet(key) {
     }
     
     if (key === 'wcd-writein') {
-      const { data, error } = await supabase
+      const { data, error } = await _db
         .from('write_ins')
         .select('text, updated_by')
         .limit(1);
@@ -236,7 +236,7 @@ async function storageGet(key) {
     }
     
     if (key === 'wcd-schedule') {
-      const { data, error } = await supabase
+      const { data, error } = await _db
         .from('schedule_changes')
         .select('day_key, block_id, start_minutes, duration, manual');
       if (error) throw error;
@@ -255,7 +255,7 @@ async function storageGet(key) {
     }
     
     if (key === 'wcd-shopping') {
-      const { data, error } = await supabase
+      const { data, error } = await _db
         .from('shopping_items')
         .select('item_id')
         .eq('checked', true);
@@ -277,11 +277,11 @@ async function storageGet(key) {
 }
 
 async function storageSet(key, value) {
-  if (!supabase) return;
+  if (!_db) return;
   try {
     if (key === 'wcd-votes') {
       // Clear existing votes and insert new ones
-      await supabase.from('preferences').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+      await _db.from('preferences').delete().neq('id', '00000000-0000-0000-0000-000000000000');
       
       // Insert all votes
       const rows = [];
@@ -297,13 +297,13 @@ async function storageSet(key, value) {
       }
       
       if (rows.length > 0) {
-        const { error } = await supabase.from('preferences').upsert(rows, { onConflict: 'guest_name,poll_id' });
+        const { error } = await _db.from('preferences').upsert(rows, { onConflict: 'guest_name,poll_id' });
         if (error) throw error;
       }
     }
     
     if (key === 'wcd-writein') {
-      const { error } = await supabase
+      const { error } = await _db
         .from('write_ins')
         .upsert({ poll_id: 'writein', text: value.text, updated_by: value.updatedBy }, { onConflict: 'poll_id' });
       if (error) throw error;
@@ -311,7 +311,7 @@ async function storageSet(key, value) {
     
     if (key === 'wcd-schedule') {
       // Clear existing schedule and insert new ones
-      await supabase.from('schedule_changes').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+      await _db.from('schedule_changes').delete().neq('id', '00000000-0000-0000-0000-000000000000');
       
       // Insert all schedule changes
       const rows = [];
@@ -328,14 +328,14 @@ async function storageSet(key, value) {
       }
       
       if (rows.length > 0) {
-        const { error } = await supabase.from('schedule_changes').upsert(rows, { onConflict: 'day_key,block_id' });
+        const { error } = await _db.from('schedule_changes').upsert(rows, { onConflict: 'day_key,block_id' });
         if (error) throw error;
       }
     }
     
     if (key === 'wcd-shopping') {
       // Get all shopping items first
-      const { data: allItems, error: fetchError } = await supabase
+      const { data: allItems, error: fetchError } = await _db
         .from('shopping_items')
         .select('item_id');
       if (fetchError) throw fetchError;
@@ -350,7 +350,7 @@ async function storageSet(key, value) {
       }
       
       if (rows.length > 0) {
-        const { error } = await supabase.from('shopping_items').upsert(rows, { onConflict: 'item_id' });
+        const { error } = await _db.from('shopping_items').upsert(rows, { onConflict: 'item_id' });
         if (error) throw error;
       }
     }
@@ -384,9 +384,9 @@ async function loadAllShared() {
 
 // Subscribe to real-time changes from Supabase
 function subscribeToChanges() {
-  if (!supabase) return;
+  if (!_db) return;
   // Subscribe to preference changes
-  supabase
+  _db
     .channel('preferences-changes')
     .on('postgres_changes', { event: '*', schema: 'public', table: 'preferences' }, async (payload) => {
       console.log('Preferences updated:', payload);
@@ -401,7 +401,7 @@ function subscribeToChanges() {
     .subscribe();
 
   // Subscribe to write-in changes
-  supabase
+  _db
     .channel('writein-changes')
     .on('postgres_changes', { event: '*', schema: 'public', table: 'write_ins' }, async (payload) => {
       console.log('Write-in updated:', payload);
@@ -414,7 +414,7 @@ function subscribeToChanges() {
     .subscribe();
 
   // Subscribe to schedule changes
-  supabase
+  _db
     .channel('schedule-changes')
     .on('postgres_changes', { event: '*', schema: 'public', table: 'schedule_changes' }, async (payload) => {
       console.log('Schedule updated:', payload);
@@ -427,7 +427,7 @@ function subscribeToChanges() {
     .subscribe();
 
   // Subscribe to shopping list changes
-  supabase
+  _db
     .channel('shopping-changes')
     .on('postgres_changes', { event: '*', schema: 'public', table: 'shopping_items' }, async (payload) => {
       console.log('Shopping list updated:', payload);
@@ -1706,7 +1706,13 @@ function closeWizard(){
   renderShoppingList();
 }
 
-window.addEventListener('DOMContentLoaded', init);
+// Guard against DOMContentLoaded already having fired (bfcache, async load, mobile Safari)
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  // DOM already ready — run immediately (covers bfcache restores and late script execution)
+  setTimeout(init, 0);
+}
 
 // Scroll reveal via IntersectionObserver
 (function(){
@@ -1718,7 +1724,11 @@ window.addEventListener('DOMContentLoaded', init);
       if(!el.classList.contains('reveal')){el.classList.add('reveal');io.observe(el);}
     });
   }
-  window.addEventListener('DOMContentLoaded',()=>setTimeout(attachReveals,120));
+  if (document.readyState === 'loading') {
+    window.addEventListener('DOMContentLoaded',()=>setTimeout(attachReveals,120));
+  } else {
+    setTimeout(attachReveals, 120);
+  }
   // Re-run after tab switches (calendar renders async)
   const _orig = window.switchTab;
   if(typeof switchTab!=='undefined'){
@@ -1820,7 +1830,7 @@ function scrollLunaToBottom() {
   if (el) setTimeout(() => { el.scrollTop = el.scrollHeight; }, 0);
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+function setupLunaListeners() {
   const input = document.getElementById('luna-input');
   if (input) {
     input.addEventListener('keypress', (e) => {
@@ -1839,6 +1849,11 @@ document.addEventListener('DOMContentLoaded', () => {
       if (e.changedTouches[0].clientY - touchStartY > 60) closeLunaChat();
     }, { passive: true });
   }
-});
+}
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', setupLunaListeners);
+} else {
+  setupLunaListeners();
+}
 
 /* expose functions used in inline event handlers to window for all browser environments */
