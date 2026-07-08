@@ -11,7 +11,7 @@ const supabase = createClient(
 const VERTEX_PROJECT       = process.env.GOOGLE_CLOUD_PROJECT    || "r41-prod";
 const VERTEX_LOCATION      = process.env.VERTEX_LOCATION         || "us-central1";
 const VERTEX_FAST_MODEL    = process.env.VERTEX_FAST_MODEL_ID    || "gemini-3.5-flash";
-const VERTEX_THINK_MODEL   = process.env.VERTEX_THINKING_MODEL_ID || "gemini-2.5-pro-002";
+const VERTEX_THINK_MODEL   = process.env.VERTEX_THINKING_MODEL_ID || "gemini-3.1-pro-001";
 
 // ─── Google Custom Search (web_search tool fallback) ─────────────────────────
 const SEARCH_API_KEY = process.env.GOOGLE_SEARCH_API_KEY;
