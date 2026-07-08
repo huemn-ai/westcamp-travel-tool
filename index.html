@@ -1516,15 +1516,24 @@ body::after{
   border-radius: 16px;
 }
 .luna-message.user .luna-bubble {
-  background: linear-gradient(135deg, #5b2d9e, #7c4db8);
-  color: #fff;
+  background: #ffffff;
+  color: #1a1a2e;
   border-radius: 16px 4px 16px 16px;
+  border: 1px solid rgba(0,0,0,0.08);
+  box-shadow: 0 4px 14px rgba(0,0,0,0.10), 0 1px 3px rgba(0,0,0,0.06);
+  animation: bubbleFloat 0.35s cubic-bezier(0.34,1.56,0.64,1) both;
 }
 .luna-message.assistant .luna-bubble {
-  background: #f5f5f5;
-  color: #333;
-  border: 1px solid #e8e8e8;
+  background: #f7f7f8;
+  color: #1a1a2e;
+  border: 1px solid #ebebeb;
   border-radius: 4px 16px 16px 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  animation: bubbleFloat 0.35s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+@keyframes bubbleFloat {
+  from { opacity: 0; transform: translateY(10px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0)   scale(1);    }
 }
 .luna-typing {
   display: flex; gap: 5px; align-items: center;
@@ -2113,5 +2122,5 @@ body::after{
     </div>
   </div>
 </div>
-<script src="/app.js?v=20260708180000"></script>
+<script src="/app.js?v=20260708173500"></script>
 </body></html>
