@@ -1921,37 +1921,55 @@ body::after{
 <!-- TRIP PLANNING AGENT CHAT WIDGET -->
 <!-- LUNA FLOATING CHIP -->
 <button id="luna-chip" class="luna-chip" onclick="openLunaChat()" aria-label="Chat with Luna">
-  <svg viewBox="0 0 62 62" xmlns="http://www.w3.org/2000/svg" width="62" height="62">
-    <!-- Background circle -->
-    <circle cx="31" cy="31" r="31" fill="#2d1057"/>
-    <!-- Hair back layer -->
-    <ellipse cx="31" cy="24" rx="16" ry="17" fill="#1a0a2e"/>
-    <!-- Neck -->
-    <rect x="26" y="42" width="10" height="8" rx="4" fill="#f0c8a0"/>
-    <!-- Face -->
-    <ellipse cx="31" cy="32" rx="13" ry="14" fill="#f0c8a0"/>
-    <!-- Hair front / top -->
-    <path d="M18 28 Q17 14 31 12 Q45 14 44 28 Q42 18 31 18 Q20 18 18 28Z" fill="#1a0a2e"/>
-    <!-- Hair sides -->
-    <path d="M18 28 Q15 36 17 44 Q20 40 21 36Z" fill="#1a0a2e"/>
-    <path d="M44 28 Q47 36 45 44 Q42 40 41 36Z" fill="#1a0a2e"/>
-    <!-- Left eye -->
-    <ellipse cx="25.5" cy="31" rx="3.5" ry="2.8" fill="#3b1a6e"/>
-    <ellipse cx="25.5" cy="31" rx="2.2" ry="2.2" fill="#5a2d96"/>
-    <circle cx="25.5" cy="31" r="1.1" fill="#1e0840"/>
-    <circle cx="26.5" cy="30.2" r="0.6" fill="rgba(255,255,255,0.7)"/>
-    <!-- Right eye -->
-    <ellipse cx="36.5" cy="31" rx="3.5" ry="2.8" fill="#3b1a6e"/>
-    <ellipse cx="36.5" cy="31" rx="2.2" ry="2.2" fill="#5a2d96"/>
-    <circle cx="36.5" cy="31" r="1.1" fill="#1e0840"/>
-    <circle cx="37.5" cy="30.2" r="0.6" fill="rgba(255,255,255,0.7)"/>
-    <!-- Eyebrows -->
-    <path d="M22 27.5 Q25.5 26 29 27.5" stroke="#1a0a2e" stroke-width="1.2" fill="none" stroke-linecap="round"/>
-    <path d="M33 27.5 Q36.5 26 40 27.5" stroke="#1a0a2e" stroke-width="1.2" fill="none" stroke-linecap="round"/>
-    <!-- Nose -->
-    <path d="M30 33.5 Q31 35.5 32 33.5" stroke="#d4a070" stroke-width="0.9" fill="none" stroke-linecap="round"/>
-    <!-- Mouth -->
-    <path d="M27 38 Q31 40.5 35 38" stroke="#c07050" stroke-width="1.3" fill="none" stroke-linecap="round"/>
+  <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" width="62" height="62">
+    <!-- bg -->
+    <circle cx="32" cy="32" r="32" fill="#3b0f6e"/>
+    <!-- hair back mass -->
+    <ellipse cx="32" cy="26" rx="17" ry="19" fill="#120828"/>
+    <!-- neck -->
+    <rect x="27.5" y="44" width="9" height="8" rx="4" fill="#fbd9b8"/>
+    <!-- face -->
+    <ellipse cx="32" cy="34" rx="13.5" ry="14" fill="#fbd9b8"/>
+    <!-- hair top + bangs -->
+    <path d="M15 32 Q14 11 32 10 Q50 11 49 32 Q47 18 32 17 Q17 18 15 32Z" fill="#120828"/>
+    <!-- bang fringe pieces -->
+    <path d="M19 21 Q18 28 20 34 Q19 27 20 21Z" fill="#120828"/>
+    <path d="M45 21 Q46 28 44 34 Q45 27 44 21Z" fill="#120828"/>
+    <!-- hair sides -->
+    <path d="M18 32 Q14 45 16 54" stroke="#120828" stroke-width="5" stroke-linecap="round" fill="none"/>
+    <path d="M46 32 Q50 45 48 54" stroke="#120828" stroke-width="5" stroke-linecap="round" fill="none"/>
+    <!-- blush -->
+    <ellipse cx="22.5" cy="37.5" rx="3.5" ry="2" fill="#f9a8c9" opacity="0.45"/>
+    <ellipse cx="41.5" cy="37.5" rx="3.5" ry="2" fill="#f9a8c9" opacity="0.45"/>
+    <!-- eyebrows -->
+    <path d="M22 27.5 Q26 25 29.5 26.5" stroke="#120828" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+    <path d="M34.5 26.5 Q38 25 42 27.5" stroke="#120828" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+    <!-- left eye white -->
+    <ellipse cx="26" cy="32" rx="4.8" ry="4.2" fill="white"/>
+    <!-- left iris -->
+    <ellipse cx="26" cy="32" rx="3.6" ry="3.8" fill="#4e1a8a"/>
+    <!-- left pupil -->
+    <circle cx="26" cy="32" r="2" fill="#0a0318"/>
+    <!-- left shimmer -->
+    <circle cx="27.4" cy="30.4" r="1.1" fill="white" opacity="0.95"/>
+    <circle cx="24.8" cy="33.2" r="0.5" fill="white" opacity="0.55"/>
+    <!-- right eye white -->
+    <ellipse cx="38" cy="32" rx="4.8" ry="4.2" fill="white"/>
+    <!-- right iris -->
+    <ellipse cx="38" cy="32" rx="3.6" ry="3.8" fill="#4e1a8a"/>
+    <!-- right pupil -->
+    <circle cx="38" cy="32" r="2" fill="#0a0318"/>
+    <!-- right shimmer -->
+    <circle cx="39.4" cy="30.4" r="1.1" fill="white" opacity="0.95"/>
+    <circle cx="36.8" cy="33.2" r="0.5" fill="white" opacity="0.55"/>
+    <!-- eye lashes top left -->
+    <path d="M21.5 30 Q26 27.5 30.5 30" stroke="#0a0318" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+    <!-- eye lashes top right -->
+    <path d="M33.5 30 Q38 27.5 42.5 30" stroke="#0a0318" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+    <!-- nose (tiny, anime-style) -->
+    <path d="M31 38 Q32 39.5 33 38" stroke="#e09878" stroke-width="0.9" fill="none" stroke-linecap="round"/>
+    <!-- smile -->
+    <path d="M27.5 42 Q32 45.5 36.5 42" stroke="#d96060" stroke-width="1.5" fill="none" stroke-linecap="round"/>
   </svg>
 </button>
 
@@ -1962,26 +1980,34 @@ body::after{
 <div id="luna-modal" class="luna-modal" role="dialog" aria-label="Chat with Luna" aria-modal="true">
   <div class="luna-modal-header">
     <div class="luna-modal-top">
-      <svg class="luna-header-avatar" viewBox="0 0 62 62" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="31" cy="31" r="31" fill="#2d1057"/>
-        <ellipse cx="31" cy="24" rx="16" ry="17" fill="#1a0a2e"/>
-        <rect x="26" y="42" width="10" height="8" rx="4" fill="#f0c8a0"/>
-        <ellipse cx="31" cy="32" rx="13" ry="14" fill="#f0c8a0"/>
-        <path d="M18 28 Q17 14 31 12 Q45 14 44 28 Q42 18 31 18 Q20 18 18 28Z" fill="#1a0a2e"/>
-        <path d="M18 28 Q15 36 17 44 Q20 40 21 36Z" fill="#1a0a2e"/>
-        <path d="M44 28 Q47 36 45 44 Q42 40 41 36Z" fill="#1a0a2e"/>
-        <ellipse cx="25.5" cy="31" rx="3.5" ry="2.8" fill="#3b1a6e"/>
-        <ellipse cx="25.5" cy="31" rx="2.2" ry="2.2" fill="#5a2d96"/>
-        <circle cx="25.5" cy="31" r="1.1" fill="#1e0840"/>
-        <circle cx="26.5" cy="30.2" r="0.6" fill="rgba(255,255,255,0.7)"/>
-        <ellipse cx="36.5" cy="31" rx="3.5" ry="2.8" fill="#3b1a6e"/>
-        <ellipse cx="36.5" cy="31" rx="2.2" ry="2.2" fill="#5a2d96"/>
-        <circle cx="36.5" cy="31" r="1.1" fill="#1e0840"/>
-        <circle cx="37.5" cy="30.2" r="0.6" fill="rgba(255,255,255,0.7)"/>
-        <path d="M22 27.5 Q25.5 26 29 27.5" stroke="#1a0a2e" stroke-width="1.2" fill="none" stroke-linecap="round"/>
-        <path d="M33 27.5 Q36.5 26 40 27.5" stroke="#1a0a2e" stroke-width="1.2" fill="none" stroke-linecap="round"/>
-        <path d="M30 33.5 Q31 35.5 32 33.5" stroke="#d4a070" stroke-width="0.9" fill="none" stroke-linecap="round"/>
-        <path d="M27 38 Q31 40.5 35 38" stroke="#c07050" stroke-width="1.3" fill="none" stroke-linecap="round"/>
+      <svg class="luna-header-avatar" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="32" cy="32" r="32" fill="#3b0f6e"/>
+        <ellipse cx="32" cy="26" rx="17" ry="19" fill="#120828"/>
+        <rect x="27.5" y="44" width="9" height="8" rx="4" fill="#fbd9b8"/>
+        <ellipse cx="32" cy="34" rx="13.5" ry="14" fill="#fbd9b8"/>
+        <path d="M15 32 Q14 11 32 10 Q50 11 49 32 Q47 18 32 17 Q17 18 15 32Z" fill="#120828"/>
+        <path d="M19 21 Q18 28 20 34 Q19 27 20 21Z" fill="#120828"/>
+        <path d="M45 21 Q46 28 44 34 Q45 27 44 21Z" fill="#120828"/>
+        <path d="M18 32 Q14 45 16 54" stroke="#120828" stroke-width="5" stroke-linecap="round" fill="none"/>
+        <path d="M46 32 Q50 45 48 54" stroke="#120828" stroke-width="5" stroke-linecap="round" fill="none"/>
+        <ellipse cx="22.5" cy="37.5" rx="3.5" ry="2" fill="#f9a8c9" opacity="0.45"/>
+        <ellipse cx="41.5" cy="37.5" rx="3.5" ry="2" fill="#f9a8c9" opacity="0.45"/>
+        <path d="M22 27.5 Q26 25 29.5 26.5" stroke="#120828" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+        <path d="M34.5 26.5 Q38 25 42 27.5" stroke="#120828" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+        <ellipse cx="26" cy="32" rx="4.8" ry="4.2" fill="white"/>
+        <ellipse cx="26" cy="32" rx="3.6" ry="3.8" fill="#4e1a8a"/>
+        <circle cx="26" cy="32" r="2" fill="#0a0318"/>
+        <circle cx="27.4" cy="30.4" r="1.1" fill="white" opacity="0.95"/>
+        <circle cx="24.8" cy="33.2" r="0.5" fill="white" opacity="0.55"/>
+        <ellipse cx="38" cy="32" rx="4.8" ry="4.2" fill="white"/>
+        <ellipse cx="38" cy="32" rx="3.6" ry="3.8" fill="#4e1a8a"/>
+        <circle cx="38" cy="32" r="2" fill="#0a0318"/>
+        <circle cx="39.4" cy="30.4" r="1.1" fill="white" opacity="0.95"/>
+        <circle cx="36.8" cy="33.2" r="0.5" fill="white" opacity="0.55"/>
+        <path d="M21.5 30 Q26 27.5 30.5 30" stroke="#0a0318" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+        <path d="M33.5 30 Q38 27.5 42.5 30" stroke="#0a0318" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+        <path d="M31 38 Q32 39.5 33 38" stroke="#e09878" stroke-width="0.9" fill="none" stroke-linecap="round"/>
+        <path d="M27.5 42 Q32 45.5 36.5 42" stroke="#d96060" stroke-width="1.5" fill="none" stroke-linecap="round"/>
       </svg>
       <div>
         <div class="luna-header-name">Luna</div>
@@ -2085,12 +2111,11 @@ body::after{
   </div>
 </div>
 <script>
-window.__APP_SCRIPT_STARTED = true;
 /* ═══════════════════════════════════════════════════════════
    SUPABASE INITIALIZATION
 ═══════════════════════════════════════════════════════════ */
 const SUPABASE_URL = 'https://xstcdokwuhivywqedkni.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_AoCN4tV0yHXHo7eh2YN1JQ_RnXpfsGy';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhzdGNkb2t3dWhpdnl3cWVka25pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1MTQzOTgsImV4cCI6MjA5OTA5MDM5OH0.5N2cPOrj7REhUc0rz3wat6eAZ_k9vFlnoLRJRdbZKtg';
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 /* ═══════════════════════════════════════════════════════════
@@ -3886,6 +3911,5 @@ document.addEventListener('DOMContentLoaded', () => {
     }, { passive: true });
   }
 });
-window.__APP_SCRIPT_ENDED = true;
 </script>
 </body></html>
