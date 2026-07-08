@@ -572,17 +572,17 @@ async function runGeminiLoop(contents, modelId) {
 
     const finishReason = candidate.finishReason;
 
-    // Check for function call parts
+    // Check for function call parts — always execute them even if finishReason is STOP
     const fnCalls = modelContent.parts.filter((p) => p.functionCall);
 
-    if (fnCalls.length === 0 || finishReason === "STOP") {
-      // Final text answer
+    if (fnCalls.length === 0) {
+      // No tool calls → this is the final text answer
       const text = modelContent.parts
         .filter((p) => p.text)
         .map((p) => p.text)
         .join("")
         .trim();
-      return { text: text || "Done.", scheduleChanged };
+      return { text: text || "I'm not sure how to respond to that.", scheduleChanged };
     }
 
     // Execute all function calls and collect responses
