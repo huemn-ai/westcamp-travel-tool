@@ -312,10 +312,6 @@ async function storageSet(key, value) {
   if (!_db) return;
   try {
     if (key === 'wcd-votes') {
-      // Clear existing votes and insert new ones
-      await _db.from('preferences').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-      
-      // Insert all votes
       const rows = [];
       for (const [pollId, guestVotes] of Object.entries(value)) {
         for (const [guestName, votes] of Object.entries(guestVotes)) {
@@ -323,11 +319,11 @@ async function storageSet(key, value) {
             guest_name: guestName,
             poll_id: pollId,
             first_choice: votes.first,
-            second_choice: votes.second
+            second_choice: votes.second,
+            updated_at: new Date().toISOString(),
           });
         }
       }
-      
       if (rows.length > 0) {
         const { error } = await _db.from('preferences').upsert(rows, { onConflict: 'guest_name,poll_id' });
         if (error) throw error;
@@ -337,28 +333,29 @@ async function storageSet(key, value) {
     if (key === 'wcd-writein') {
       const { error } = await _db
         .from('write_ins')
-        .upsert({ poll_id: 'writein', text: value.text, updated_by: value.updatedBy }, { onConflict: 'poll_id' });
+        .upsert({
+          poll_id: 'writein',
+          text: value.text,
+          updated_by: value.updatedBy || 'guest',
+          updated_at: new Date().toISOString(),
+        }, { onConflict: 'poll_id' });
       if (error) throw error;
     }
     
     if (key === 'wcd-schedule') {
-      // Clear existing schedule and insert new ones
-      await _db.from('schedule_changes').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-      
-      // Insert all schedule changes
       const rows = [];
       for (const [dayKey, blocks] of Object.entries(value)) {
-        for (const [blockId, schedule] of Object.entries(blocks)) {
+        for (const [blockId, blockData] of Object.entries(blocks)) {
           rows.push({
             day_key: dayKey,
             block_id: blockId,
-            start_minutes: schedule.start,
-            duration: schedule.duration,
-            manual: schedule.manual
+            start_minutes: blockData.start,
+            duration: blockData.duration ?? null,
+            manual: blockData.manual ?? false,
+            updated_at: new Date().toISOString(),
           });
         }
       }
-      
       if (rows.length > 0) {
         const { error } = await _db.from('schedule_changes').upsert(rows, { onConflict: 'day_key,block_id' });
         if (error) throw error;
@@ -366,21 +363,12 @@ async function storageSet(key, value) {
     }
     
     if (key === 'wcd-shopping') {
-      // Get all shopping items first
-      const { data: allItems, error: fetchError } = await _db
-        .from('shopping_items')
-        .select('item_id');
-      if (fetchError) throw fetchError;
-      
-      // Update checked status for all items
-      const rows = [];
-      for (const item of allItems) {
-        rows.push({
-          item_id: item.item_id,
-          checked: !!value[item.item_id]
-        });
-      }
-      
+      // Upsert every item_id we know about — inserts if new, updates if existing
+      const rows = Object.keys(value).map(itemId => ({
+        item_id: itemId,
+        checked: !!value[itemId],
+        updated_at: new Date().toISOString(),
+      }));
       if (rows.length > 0) {
         const { error } = await _db.from('shopping_items').upsert(rows, { onConflict: 'item_id' });
         if (error) throw error;
