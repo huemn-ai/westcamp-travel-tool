@@ -1,9 +1,6 @@
 [build]
   publish = "."
-  command = "echo 'Static site — no build step needed'"
-
-[context.production]
-  command = "echo 'Production build'"
+  command = "npm install"
 
 [[redirects]]
   from = "/*"
