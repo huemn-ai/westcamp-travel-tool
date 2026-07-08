@@ -6,6 +6,7 @@
 <title>West Camp Debrief · Jul 9–12, 2026</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400;1,9..144,600&family=IBM+Plex+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 /* TOKENS */
 :root {
@@ -1556,6 +1557,13 @@ body::after{
 </div>
 <script>
 /* ═══════════════════════════════════════════════════════════
+   SUPABASE INITIALIZATION
+═══════════════════════════════════════════════════════════ */
+const SUPABASE_URL = 'https://xstcdokwuhivywqedkni.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_AoCN4tV0yHXHo7eh2YN1JQ_RnXpfsGy';
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+/* ═══════════════════════════════════════════════════════════
    ALL BAKED-IN TRIP DATA
 ═══════════════════════════════════════════════════════════ */
 const WEATHER = {
@@ -1730,13 +1738,151 @@ const ST = {
 
 async function storageGet(key) {
   try {
-    const res = await window.storage.get(key, true);
-    return res && res.value ? JSON.parse(res.value) : null;
-  } catch(e) { return null; }
+    if (key === 'wcd-votes') {
+      const { data, error } = await supabase
+        .from('preferences')
+        .select('guest_name, poll_id, first_choice, second_choice');
+      if (error) throw error;
+      
+      // Transform database rows into the expected format
+      const votes = {};
+      for (const row of data) {
+        if (!votes[row.poll_id]) votes[row.poll_id] = {};
+        votes[row.poll_id][row.guest_name] = {
+          first: row.first_choice,
+          second: row.second_choice
+        };
+      }
+      return Object.keys(votes).length > 0 ? votes : null;
+    }
+    
+    if (key === 'wcd-writein') {
+      const { data, error } = await supabase
+        .from('write_ins')
+        .select('text, updated_by')
+        .limit(1);
+      if (error) throw error;
+      return data && data.length > 0 ? data[0] : null;
+    }
+    
+    if (key === 'wcd-schedule') {
+      const { data, error } = await supabase
+        .from('schedule_changes')
+        .select('day_key, block_id, start_minutes, duration, manual');
+      if (error) throw error;
+      
+      // Transform database rows into the expected format
+      const schedule = {};
+      for (const row of data) {
+        if (!schedule[row.day_key]) schedule[row.day_key] = {};
+        schedule[row.day_key][row.block_id] = {
+          start: row.start_minutes,
+          duration: row.duration,
+          manual: row.manual
+        };
+      }
+      return Object.keys(schedule).length > 0 ? schedule : null;
+    }
+    
+    if (key === 'wcd-shopping') {
+      const { data, error } = await supabase
+        .from('shopping_items')
+        .select('item_id')
+        .eq('checked', true);
+      if (error) throw error;
+      
+      // Transform database rows into the expected format
+      const shopping = {};
+      for (const row of data) {
+        shopping[row.item_id] = true;
+      }
+      return Object.keys(shopping).length > 0 ? shopping : null;
+    }
+    
+    return null;
+  } catch(e) {
+    console.error('storageGet error', key, e);
+    return null;
+  }
 }
+
 async function storageSet(key, value) {
   try {
-    await window.storage.set(key, JSON.stringify(value), true);
+    if (key === 'wcd-votes') {
+      // Clear existing votes and insert new ones
+      await supabase.from('preferences').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+      
+      // Insert all votes
+      const rows = [];
+      for (const [pollId, guestVotes] of Object.entries(value)) {
+        for (const [guestName, votes] of Object.entries(guestVotes)) {
+          rows.push({
+            guest_name: guestName,
+            poll_id: pollId,
+            first_choice: votes.first,
+            second_choice: votes.second
+          });
+        }
+      }
+      
+      if (rows.length > 0) {
+        const { error } = await supabase.from('preferences').upsert(rows, { onConflict: 'guest_name,poll_id' });
+        if (error) throw error;
+      }
+    }
+    
+    if (key === 'wcd-writein') {
+      const { error } = await supabase
+        .from('write_ins')
+        .upsert({ poll_id: 'writein', text: value.text, updated_by: value.updatedBy }, { onConflict: 'poll_id' });
+      if (error) throw error;
+    }
+    
+    if (key === 'wcd-schedule') {
+      // Clear existing schedule and insert new ones
+      await supabase.from('schedule_changes').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+      
+      // Insert all schedule changes
+      const rows = [];
+      for (const [dayKey, blocks] of Object.entries(value)) {
+        for (const [blockId, schedule] of Object.entries(blocks)) {
+          rows.push({
+            day_key: dayKey,
+            block_id: blockId,
+            start_minutes: schedule.start,
+            duration: schedule.duration,
+            manual: schedule.manual
+          });
+        }
+      }
+      
+      if (rows.length > 0) {
+        const { error } = await supabase.from('schedule_changes').upsert(rows, { onConflict: 'day_key,block_id' });
+        if (error) throw error;
+      }
+    }
+    
+    if (key === 'wcd-shopping') {
+      // Get all shopping items first
+      const { data: allItems, error: fetchError } = await supabase
+        .from('shopping_items')
+        .select('item_id');
+      if (fetchError) throw fetchError;
+      
+      // Update checked status for all items
+      const rows = [];
+      for (const item of allItems) {
+        rows.push({
+          item_id: item.item_id,
+          checked: !!value[item.item_id]
+        });
+      }
+      
+      if (rows.length > 0) {
+        const { error } = await supabase.from('shopping_items').upsert(rows, { onConflict: 'item_id' });
+        if (error) throw error;
+      }
+    }
   } catch(e) {
     console.warn('storage.set failed', key, e);
     ST.storageOk = false;
