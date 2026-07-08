@@ -1,4 +1,5 @@
-const https = require("https");
+const https  = require("https");
+const crypto = require("crypto");
 const { createClient } = require("@supabase/supabase-js");
 
 const supabase = createClient(
@@ -6,27 +7,29 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_KEY
 );
 
+// ─── Bedrock (Fast / MiniMax) ─────────────────────────────────────────────────
 const BEDROCK_REGION  = process.env.AWS_REGION || "us-east-1";
 const BEDROCK_API_KEY = process.env.BEDROCK_API_KEY;
 const BEDROCK_MODEL   = process.env.BEDROCK_MODEL_ID || "minimax.minimax-m2.5";
 
-// MiniMax on Bedrock uses the bedrock-mantle endpoint (recommended by AWS docs).
-// The Converse API path and payload shape are identical to bedrock-runtime.
-function bedrockRequest(body) {
-  return new Promise((resolve, reject) => {
-    const payload = JSON.stringify(body);
-    const hostname = `bedrock-mantle.${BEDROCK_REGION}.api.aws`;
-    const path     = `/v1/model/${encodeURIComponent(BEDROCK_MODEL)}/converse`;
+// ─── Vertex AI (Thinking / Gemini) ───────────────────────────────────────────
+const VERTEX_PROJECT  = process.env.GOOGLE_CLOUD_PROJECT || "r41-prod";
+const VERTEX_LOCATION = process.env.VERTEX_LOCATION      || "us-central1";
+const VERTEX_MODEL    = process.env.VERTEX_MODEL_ID      || "gemini-2.5-pro-002";
 
+// ─── Generic HTTPS POST ───────────────────────────────────────────────────────
+function httpsPost(hostname, path, body, headers = {}) {
+  return new Promise((resolve, reject) => {
+    const payload = typeof body === "string" ? body : JSON.stringify(body);
     const req = https.request(
       {
         hostname,
         path,
         method: "POST",
         headers: {
-          "Content-Type":  "application/json",
+          "Content-Type":   "application/json",
           "Content-Length": Buffer.byteLength(payload),
-          "Authorization": `Bearer ${BEDROCK_API_KEY}`,
+          ...headers,
         },
       },
       (res) => {
@@ -36,7 +39,9 @@ function bedrockRequest(body) {
           try {
             const parsed = JSON.parse(data);
             if (res.statusCode >= 400) {
-              reject(new Error(parsed.message || parsed.error || `HTTP ${res.statusCode}`));
+              reject(new Error(
+                parsed.error?.message || parsed.message || `HTTP ${res.statusCode}: ${data.slice(0, 300)}`
+              ));
             } else {
               resolve(parsed);
             }
@@ -46,11 +51,79 @@ function bedrockRequest(body) {
         });
       }
     );
-
     req.on("error", reject);
     req.write(payload);
     req.end();
   });
+}
+
+// MiniMax on Bedrock uses bedrock-mantle endpoint.
+function bedrockRequest(body) {
+  const hostname = `bedrock-mantle.${BEDROCK_REGION}.api.aws`;
+  const path     = `/v1/model/${encodeURIComponent(BEDROCK_MODEL)}/converse`;
+  return httpsPost(hostname, path, body, { Authorization: `Bearer ${BEDROCK_API_KEY}` });
+}
+
+// ─── Vertex AI JWT OAuth2 (no external packages; uses Node crypto) ────────────
+let _vertexTokenCache = null; // { token, expiresAt }
+
+async function getVertexAccessToken() {
+  // Re-use cached token if still valid (with 60 s margin)
+  if (_vertexTokenCache && Date.now() < _vertexTokenCache.expiresAt - 60_000) {
+    return _vertexTokenCache.token;
+  }
+
+  const raw = process.env.GOOGLE_SERVICE_ACCOUNT_JSON;
+  if (!raw) throw new Error("GOOGLE_SERVICE_ACCOUNT_JSON env var is not set");
+  const creds = JSON.parse(raw);
+
+  const now = Math.floor(Date.now() / 1000);
+
+  // Build JWT (header.payload.signature) signed with the SA private key
+  const header  = Buffer.from(JSON.stringify({ alg: "RS256", typ: "JWT" })).toString("base64url");
+  const claimset = Buffer.from(JSON.stringify({
+    iss:   creds.client_email,
+    scope: "https://www.googleapis.com/auth/cloud-platform",
+    aud:   "https://oauth2.googleapis.com/token",
+    exp:   now + 3600,
+    iat:   now,
+  })).toString("base64url");
+
+  const unsigned  = `${header}.${claimset}`;
+  const signer    = crypto.createSign("SHA256");
+  signer.update(unsigned);
+  const signature = signer.sign(creds.private_key, "base64url");
+  const jwt       = `${unsigned}.${signature}`;
+
+  // Exchange JWT for an OAuth2 access token
+  const form = `grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer&assertion=${jwt}`;
+  const tokenRes = await httpsPost(
+    "oauth2.googleapis.com",
+    "/token",
+    form,
+    { "Content-Type": "application/x-www-form-urlencoded" }
+  );
+
+  _vertexTokenCache = {
+    token:     tokenRes.access_token,
+    expiresAt: Date.now() + (tokenRes.expires_in || 3600) * 1000,
+  };
+  return _vertexTokenCache.token;
+}
+
+async function vertexRequest(contents, systemInstruction, tools) {
+  const token    = await getVertexAccessToken();
+  const hostname = `${VERTEX_LOCATION}-aiplatform.googleapis.com`;
+  const path     = `/v1/projects/${VERTEX_PROJECT}/locations/${VERTEX_LOCATION}/publishers/google/models/${VERTEX_MODEL}:generateContent`;
+
+  const body = {
+    contents,
+    systemInstruction: { parts: [{ text: systemInstruction }] },
+    tools: [{ functionDeclarations: tools }],
+    generationConfig: { maxOutputTokens: 4096, temperature: 0.7 },
+  };
+
+  return httpsPost(hostname, path, body, { Authorization: `Bearer ${token}` });
 }
 
 // ─── Time helpers (mirror of what the frontend uses) ────────────────────────
@@ -157,7 +230,93 @@ const TRIP_DATA = {
   },
 };
 
-// ─── Tool definitions (Converse API format) ──────────────────────────────────
+// ─── Gemini function declarations (Vertex AI format) ─────────────────────────
+// Parallel structure to TOOL_CONFIG but using Gemini's functionDeclarations schema.
+const GEMINI_TOOLS = [
+  {
+    name: "get_full_schedule",
+    description:
+      "Get the current trip schedule for one or all days. Returns each block with its ID, label, start time, duration, and type. Always call this before moving a block so you have the block IDs.",
+    parameters: {
+      type: "object",
+      properties: {
+        day: {
+          type: "string",
+          enum: ["thu", "fri", "sat", "all"],
+          description: "Day to retrieve. Use 'all' for the full three-day schedule.",
+        },
+      },
+      required: ["day"],
+    },
+  },
+  {
+    name: "move_block",
+    description:
+      "Move a calendar block to a new start time. Use get_full_schedule first to get the block_id. The block's duration stays the same.",
+    parameters: {
+      type: "object",
+      properties: {
+        day:      { type: "string", enum: ["thu", "fri", "sat"], description: "Day the block lives on." },
+        block_id: { type: "string", description: "Block ID from get_full_schedule (e.g. 'fri-dinner')." },
+        new_time: { type: "string", description: "New start time, e.g. '6:30 PM' or '18:30'." },
+      },
+      required: ["day", "block_id", "new_time"],
+    },
+  },
+  {
+    name: "reset_block",
+    description: "Reset a calendar block to its default auto-placed time by removing any manual override.",
+    parameters: {
+      type: "object",
+      properties: {
+        day:      { type: "string", enum: ["thu", "fri", "sat"] },
+        block_id: { type: "string", description: "Block ID to reset." },
+      },
+      required: ["day", "block_id"],
+    },
+  },
+  {
+    name: "get_preferences",
+    description:
+      "Get current voting preferences from the database. Returns each guest's first and second choice for each poll.",
+    parameters: {
+      type: "object",
+      properties: {
+        poll_id: {
+          type: "string",
+          description: "Optional: filter to one poll ID. Omit to get all preferences.",
+        },
+      },
+    },
+  },
+  {
+    name: "update_preferences",
+    description: "Update or cast a vote for a guest on a specific poll.",
+    parameters: {
+      type: "object",
+      properties: {
+        guest_name:    { type: "string", enum: ["Amanda", "Belal", "Luke", "Mina", "Nada", "Stefano", "Yehia"] },
+        poll_id:       { type: "string", description: "Poll ID, e.g. 'poll-fri-dinner'." },
+        first_choice:  { type: "string", description: "Option ID for first choice." },
+        second_choice: { type: "string", description: "Option ID for second choice (optional)." },
+      },
+      required: ["guest_name", "poll_id", "first_choice"],
+    },
+  },
+  {
+    name: "get_trip_info",
+    description: "Get general trip information: dates, location, attendees, or weather forecast.",
+    parameters: {
+      type: "object",
+      properties: {
+        info_type: { type: "string", enum: ["dates", "location", "attendees", "weather", "all"] },
+      },
+      required: ["info_type"],
+    },
+  },
+];
+
+// ─── Tool definitions (Bedrock Converse API format) ───────────────────────────
 const TOOL_CONFIG = {
   tools: [
     {
@@ -460,8 +619,8 @@ Days:
 - Always verify block IDs with get_full_schedule before calling move_block
 - Warn if a proposed time would cause obvious conflicts (e.g. dinner at 4 PM when lunch is at 3 PM)`;
 
-// ─── Agentic loop using Bedrock Converse API ─────────────────────────────────
-async function runAgentLoop(messages) {
+// ─── Bedrock agentic loop (Converse API / MiniMax) ───────────────────────────
+async function runBedrockLoop(messages) {
   const MAX_ROUNDS = 10;
   let scheduleChanged = false;
 
@@ -477,8 +636,8 @@ async function runAgentLoop(messages) {
     const assistantMessage = output.message;
     messages.push(assistantMessage);
 
-    // No tool use — we have the final answer.
-    // MiniMax M2.5 prepends a reasoningContent block; skip it and extract text only.
+    // No tool use — final answer.
+    // MiniMax M2.5 prepends a reasoningContent block; skip it, extract text only.
     if (stopReason !== "tool_use") {
       const text = assistantMessage.content
         .filter((b) => b.text && !b.reasoningContent)
@@ -488,7 +647,6 @@ async function runAgentLoop(messages) {
       return { text: text || "Done.", scheduleChanged };
     }
 
-    // Execute all tool calls in this turn
     const toolResults = [];
     for (const block of assistantMessage.content) {
       if (block.toolUse) {
@@ -509,7 +667,60 @@ async function runAgentLoop(messages) {
   return { text: "I hit my reasoning limit. Please try a simpler request.", scheduleChanged };
 }
 
+// ─── Gemini agentic loop (Vertex AI generateContent) ─────────────────────────
+// Gemini uses a different message shape:
+//   user/model turns use "parts" arrays
+//   tool calls come back as functionCall parts
+//   tool results are sent back as functionResponse parts in a "user" turn
+async function runGeminiLoop(contents) {
+  const MAX_ROUNDS = 10;
+  let scheduleChanged = false;
+
+  for (let round = 0; round < MAX_ROUNDS; round++) {
+    const response = await vertexRequest(contents, SYSTEM_PROMPT, GEMINI_TOOLS);
+
+    // Gemini response shape: { candidates: [{ content: { role, parts }, finishReason }] }
+    const candidate = response.candidates?.[0];
+    if (!candidate) throw new Error("Empty response from Vertex AI");
+
+    const modelContent = candidate.content; // { role: "model", parts: [...] }
+    contents.push(modelContent);
+
+    const finishReason = candidate.finishReason;
+
+    // Check for function call parts
+    const fnCalls = modelContent.parts.filter((p) => p.functionCall);
+
+    if (fnCalls.length === 0 || finishReason === "STOP") {
+      // Final text answer
+      const text = modelContent.parts
+        .filter((p) => p.text)
+        .map((p) => p.text)
+        .join("")
+        .trim();
+      return { text: text || "Done.", scheduleChanged };
+    }
+
+    // Execute all function calls and collect responses
+    const responseParts = [];
+    for (const part of fnCalls) {
+      const { name, args } = part.functionCall;
+      const result = await executeTool(name, args || {});
+      if (result.schedule_changed) scheduleChanged = true;
+      responseParts.push({
+        functionResponse: { name, response: result },
+      });
+    }
+
+    // Return tool results as a "user" turn (Gemini convention)
+    contents.push({ role: "user", parts: responseParts });
+  }
+
+  return { text: "I hit my reasoning limit. Please try a simpler request.", scheduleChanged };
+}
+
 // ─── Session store (in-memory; fine for short-lived functions) ───────────────
+// Each session stores { model, history } to keep message formats separate.
 const sessions = new Map();
 
 // ─── Netlify handler ──────────────────────────────────────────────────────────
@@ -519,25 +730,49 @@ exports.handler = async (event) => {
   }
 
   try {
-    const { message, sessionId } = JSON.parse(event.body || "{}");
+    const { message, sessionId, model = "fast" } = JSON.parse(event.body || "{}");
     if (!message?.trim()) {
       return { statusCode: 400, body: JSON.stringify({ error: "message is required" }) };
     }
 
+    const useGemini = model === "thinking";
     const sid = sessionId || `session-${Date.now()}-${Math.random().toString(36).slice(2)}`;
-    const history = sessions.get(sid) || [];
-    history.push({ role: "user", content: [{ text: message }] });
 
-    const { text, scheduleChanged } = await runAgentLoop([...history]);
+    // Retrieve or initialise history for this session.
+    // If the model changed, start fresh (different message formats are incompatible).
+    let session = sessions.get(sid);
+    if (!session || session.model !== model) {
+      session = { model, history: [] };
+    }
 
-    // Persist history (trim to last 20 messages to avoid token blowup)
-    history.push({ role: "assistant", content: [{ text }] });
-    sessions.set(sid, history.slice(-20));
+    let result;
+
+    if (useGemini) {
+      // Gemini message format: { role: "user"|"model", parts: [...] }
+      session.history.push({ role: "user", parts: [{ text: message }] });
+      result = await runGeminiLoop([...session.history]);
+      session.history.push({ role: "model", parts: [{ text: result.text }] });
+    } else {
+      // Bedrock Converse format: { role: "user"|"assistant", content: [...] }
+      session.history.push({ role: "user", content: [{ text: message }] });
+      result = await runBedrockLoop([...session.history]);
+      session.history.push({ role: "assistant", content: [{ text: result.text }] });
+    }
+
+    // Trim to last 20 messages to avoid token blowup
+    session.history = session.history.slice(-20);
+    sessions.set(sid, session);
 
     return {
       statusCode: 200,
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ success: true, message: text, sessionId: sid, scheduleChanged }),
+      body: JSON.stringify({
+        success: true,
+        message: result.text,
+        sessionId: sid,
+        scheduleChanged: result.scheduleChanged,
+        model,
+      }),
     };
   } catch (err) {
     console.error("Agent error:", err);

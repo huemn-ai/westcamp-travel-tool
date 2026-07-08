@@ -1398,16 +1398,47 @@ body::after{
 
 .agent-header-bar {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 16px;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 16px;
   border-bottom: 1px solid var(--line);
-  cursor: pointer;
   background: linear-gradient(135deg, var(--river) 0%, var(--rain) 100%);
   color: var(--foam);
   border-radius: 12px 12px 0 0;
   font-weight: 600;
   font-size: 14px;
+}
+
+.agent-header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+}
+
+.agent-model-toggle {
+  display: flex;
+  gap: 6px;
+}
+
+.agent-model-btn {
+  flex: 1;
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 20px;
+  color: var(--foam);
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 10px;
+  transition: background 0.15s, border-color 0.15s;
+  white-space: nowrap;
+}
+
+.agent-model-btn.active {
+  background: rgba(255,255,255,0.9);
+  border-color: transparent;
+  color: var(--river);
 }
 
 .agent-header-bar:hover {
@@ -1416,6 +1447,11 @@ body::after{
 
 .agent-chat-widget.collapsed .agent-header-bar {
   border-radius: 12px;
+  border-bottom: none;
+}
+
+.agent-chat-widget.collapsed .agent-model-toggle {
+  display: none;
 }
 
 .agent-close-btn {
@@ -1675,9 +1711,15 @@ body::after{
 
 <!-- TRIP PLANNING AGENT CHAT WIDGET -->
 <div id="agent-chat-widget" class="agent-chat-widget">
-  <div class="agent-header-bar" onclick="toggleAgentChat()">
-    <span>🤖 Trip Agent</span>
-    <button class="agent-close-btn" onclick="toggleAgentChat(event)" aria-label="Toggle chat">−</button>
+  <div class="agent-header-bar">
+    <div class="agent-header-top" onclick="toggleAgentChat()">
+      <span>🤖 Trip Agent</span>
+      <button class="agent-close-btn" onclick="toggleAgentChat(event)" aria-label="Toggle chat">−</button>
+    </div>
+    <div class="agent-model-toggle">
+      <button id="model-fast"     class="agent-model-btn active" onclick="setAgentModel('fast')"    >⚡ Fast</button>
+      <button id="model-thinking" class="agent-model-btn"        onclick="setAgentModel('thinking')">🧠 Thinking</button>
+    </div>
   </div>
   <div id="agent-messages" class="agent-messages"></div>
   <div class="agent-input-area">
@@ -3459,6 +3501,20 @@ window.addEventListener('DOMContentLoaded', init);
    TRIP PLANNING AGENT CHAT
 ═══════════════════════════════════════════════════════════ */
 let agentSessionId = null;
+let agentModel     = 'fast'; // 'fast' | 'thinking'
+
+function setAgentModel(model) {
+  if (model === agentModel) return;
+  agentModel = model;
+  // Clear session when switching models — message formats are incompatible
+  agentSessionId = null;
+
+  document.getElementById('model-fast').classList.toggle('active', model === 'fast');
+  document.getElementById('model-thinking').classList.toggle('active', model === 'thinking');
+
+  // Show a hint so the user knows context was cleared
+  addAgentMessage(`Switched to ${model === 'thinking' ? '🧠 Thinking (Gemini)' : '⚡ Fast (MiniMax)'} mode. Starting fresh conversation.`, 'assistant');
+}
 
 function toggleAgentChat(e) {
   if (e) e.stopPropagation();
@@ -3489,7 +3545,7 @@ async function sendAgentMessage() {
     const response = await fetch('/.netlify/functions/trip-agent', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message, sessionId: agentSessionId })
+      body: JSON.stringify({ message, sessionId: agentSessionId, model: agentModel })
     });
 
     const data = await response.json();
