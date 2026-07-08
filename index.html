@@ -1432,7 +1432,7 @@ body::after{
   position: fixed;
   left: 20px;
   right: 20px;
-  bottom: 98px;
+  bottom: calc(68px + env(safe-area-inset-bottom, 0px));
   top: max(8px, env(safe-area-inset-top, 8px));
   background: #fff;
   border-radius: 20px;
@@ -1570,7 +1570,7 @@ body::after{
   position: fixed;
   left: 50%;
   transform: translateX(-50%);
-  bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+  bottom: calc(12px + env(safe-area-inset-bottom, 0px));
   width: calc(100% - 40px);
   max-width: 480px;
   height: 58px;
@@ -1659,6 +1659,15 @@ body::after{
   }
   .luna-panel.open {
     transform: translateX(-50%) translateY(0);
+  }
+}
+
+/* Mobile: tighter margins for keyboard safety */
+@media (max-width: 519px) {
+  .luna-panel {
+    left: 12px;
+    right: 12px;
+    bottom: calc(72px + env(safe-area-inset-bottom, 0px));
   }
 }
 
@@ -2158,5 +2167,5 @@ body::after{
     </div>
   </div>
 </div>
-<script src="/app.js?v=20260708215000"></script>
+<script src="/app.js?v=20260708220000"></script>
 </body></html>
