@@ -17,6 +17,10 @@ const VERTEX_PROJECT  = process.env.GOOGLE_CLOUD_PROJECT || "r41-prod";
 const VERTEX_LOCATION = process.env.VERTEX_LOCATION      || "us-central1";
 const VERTEX_MODEL    = process.env.VERTEX_MODEL_ID      || "gemini-2.5-pro-002";
 
+// ─── Google Custom Search (web_search tool, both models) ─────────────────────
+const SEARCH_API_KEY = process.env.GOOGLE_SEARCH_API_KEY;
+const SEARCH_CX      = process.env.GOOGLE_SEARCH_CX; // Programmable Search Engine ID
+
 // ─── Generic HTTPS POST ───────────────────────────────────────────────────────
 function httpsPost(hostname, path, body, headers = {}) {
   return new Promise((resolve, reject) => {
@@ -119,7 +123,12 @@ async function vertexRequest(contents, systemInstruction, tools) {
   const body = {
     contents,
     systemInstruction: { parts: [{ text: systemInstruction }] },
-    tools: [{ functionDeclarations: tools }],
+    // Include both function declarations AND native Google Search grounding.
+    // Gemini will decide whether to call a function, search natively, or answer directly.
+    tools: [
+      { functionDeclarations: tools },
+      { googleSearch: {} },
+    ],
     generationConfig: { maxOutputTokens: 4096, temperature: 0.7 },
   };
 
@@ -234,6 +243,21 @@ const TRIP_DATA = {
 // Parallel structure to TOOL_CONFIG but using Gemini's functionDeclarations schema.
 const GEMINI_TOOLS = [
   {
+    name: "web_search",
+    description:
+      "Search the web for current information: restaurants, reviews, activities, recipes, local tips, weather, events, or anything not in the trip database. Returns a list of relevant results with titles, links, and summaries.",
+    parameters: {
+      type: "object",
+      properties: {
+        query: {
+          type: "string",
+          description: "The search query, e.g. 'best restaurants near Saugerties NY' or 'Kaaterskill Falls hike difficulty'.",
+        },
+      },
+      required: ["query"],
+    },
+  },
+  {
     name: "get_full_schedule",
     description:
       "Get the current trip schedule for one or all days. Returns each block with its ID, label, start time, duration, and type. Always call this before moving a block so you have the block IDs.",
@@ -319,6 +343,25 @@ const GEMINI_TOOLS = [
 // ─── Tool definitions (Bedrock Converse API format) ───────────────────────────
 const TOOL_CONFIG = {
   tools: [
+    {
+      toolSpec: {
+        name: "web_search",
+        description:
+          "Search the web for current information: restaurants, reviews, activities, recipes, local tips, weather, events, or anything not in the trip database. Returns a list of relevant results with titles, links, and summaries.",
+        inputSchema: {
+          json: {
+            type: "object",
+            properties: {
+              query: {
+                type: "string",
+                description: "The search query, e.g. 'best restaurants near Saugerties NY' or 'Kaaterskill Falls hike difficulty'.",
+              },
+            },
+            required: ["query"],
+          },
+        },
+      },
+    },
     {
       toolSpec: {
         name: "get_full_schedule",
@@ -577,10 +620,54 @@ function getTripInfo({ info_type }) {
   return { success: true, data: info };
 }
 
+// ─── Web search (Google Custom Search JSON API) ───────────────────────────────
+async function webSearch({ query }) {
+  if (!SEARCH_API_KEY) {
+    return { error: "Web search is not configured (GOOGLE_SEARCH_API_KEY missing)." };
+  }
+  if (!SEARCH_CX) {
+    return { error: "Web search is not configured (GOOGLE_SEARCH_CX missing)." };
+  }
+
+  const encodedQuery = encodeURIComponent(query);
+  const hostname     = "customsearch.googleapis.com";
+  const path         = `/customsearch/v1?q=${encodedQuery}&key=${SEARCH_API_KEY}&cx=${SEARCH_CX}&num=5`;
+
+  return new Promise((resolve) => {
+    const req = require("https").request(
+      { hostname, path, method: "GET" },
+      (res) => {
+        let data = "";
+        res.on("data", (chunk) => (data += chunk));
+        res.on("end", () => {
+          try {
+            const parsed = JSON.parse(data);
+            if (res.statusCode >= 400) {
+              resolve({ error: parsed.error?.message || `HTTP ${res.statusCode}` });
+              return;
+            }
+            const items = (parsed.items || []).map((item) => ({
+              title:   item.title,
+              link:    item.link,
+              snippet: item.snippet,
+            }));
+            resolve({ success: true, query, results: items });
+          } catch {
+            resolve({ error: `Non-JSON response: ${data.slice(0, 200)}` });
+          }
+        });
+      }
+    );
+    req.on("error", (err) => resolve({ error: err.message }));
+    req.end();
+  });
+}
+
 // ─── Tool router ──────────────────────────────────────────────────────────────
 async function executeTool(name, input) {
   console.log("Tool call:", name, JSON.stringify(input));
   switch (name) {
+    case "web_search":          return await webSearch(input);
     case "get_full_schedule":   return await getFullSchedule(input);
     case "move_block":          return await moveBlock(input);
     case "reset_block":         return await resetBlock(input);
@@ -592,9 +679,9 @@ async function executeTool(name, input) {
 }
 
 // ─── System prompt ────────────────────────────────────────────────────────────
-const SYSTEM_PROMPT = `You are the West Camp Trip Planner — a helpful AI assistant for a group of 7 friends (${TRIP_DATA.attendees.join(", ")}) spending ${TRIP_DATA.dates} in the ${TRIP_DATA.location}.
+const SYSTEM_PROMPT = `You are Luna — the West Camp Trip Planner AI for a group of 7 friends (${TRIP_DATA.attendees.join(", ")}) spending ${TRIP_DATA.dates} in the ${TRIP_DATA.location}.
 
-You know everything about this trip: the schedule, meals being voted on, activities, restaurants nearby, recipes, and each person's preferences. You have direct read/write access to the trip database.
+You know everything about this trip: the schedule, meals being voted on, activities, restaurants nearby, recipes, and each person's preferences. You have direct read/write access to the trip database and can search the web for current information.
 
 ## Schedule
 The trip calendar runs 10 AM – midnight each day. Times are stored internally as "minutes from 10 AM" (0 = 10:00 AM, 60 = 11:00 AM, 480 = 6:00 PM, etc.) but you should always display and accept clock times like "6:30 PM".
@@ -605,14 +692,15 @@ Days:
 - Saturday July 11 (sat): Full day — activity in morning, leisure afternoon, dinner, fire pit
 
 ## What you can do
+- **Search the web** with web_search for restaurants, activities, recipes, reviews, weather, local tips — anything current
 - **View the full schedule** for any day with get_full_schedule
 - **Move blocks** to new times with move_block — always call get_full_schedule first so you have the block IDs
 - **Reset blocks** to their default times with reset_block
 - **Read and update voting preferences** for all polls
-- **Answer questions** about the trip, weather, activities, restaurants, and recipes
 
 ## Behavior
-- Be concise and friendly
+- Be concise and friendly. Your name is Luna.
+- Use web_search proactively when asked about restaurants, activities, or local recommendations
 - When moving blocks, confirm the change with the new time
 - When you move a block, the frontend calendar will update automatically
 - If asked to rearrange multiple blocks, do them in sequence

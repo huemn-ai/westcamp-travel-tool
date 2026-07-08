@@ -1713,7 +1713,7 @@ body::after{
 <div id="agent-chat-widget" class="agent-chat-widget">
   <div class="agent-header-bar">
     <div class="agent-header-top" onclick="toggleAgentChat()">
-      <span>🤖 Trip Agent</span>
+      <span>🌙 Luna</span>
       <button class="agent-close-btn" onclick="toggleAgentChat(event)" aria-label="Toggle chat">−</button>
     </div>
     <div class="agent-model-toggle">
@@ -3569,7 +3569,7 @@ async function sendAgentMessage() {
   } catch (err) {
     console.error('Agent error:', err);
     loadingEl.remove();
-    addAgentMessage('Couldn\'t reach the agent — check your connection and try again.', 'assistant');
+    addAgentMessage('Couldn\'t reach Luna — check your connection and try again.', 'assistant');
   }
 
   sendBtn.disabled = false;
