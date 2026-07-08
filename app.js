@@ -1744,38 +1744,41 @@ let agentSessionId = null;
 let agentModel     = 'fast';
 
 function openLunaChat() {
-  const chip = document.getElementById('luna-chip');
-  const backdrop = document.getElementById('luna-backdrop');
-  const modal = document.getElementById('luna-modal');
-  if (!chip || !modal || !backdrop) return;
+  const chip     = document.getElementById('luna-chip');
+  const panel    = document.getElementById('luna-panel');
+  const saberBar = document.getElementById('luna-saber-bar');
+  if (!chip || !panel || !saberBar) return;
 
-  // If already open, close instead
-  if (modal.classList.contains('open')) { closeLunaChat(); return; }
+  // Toggle: if already open, close
+  if (saberBar.classList.contains('open')) { closeLunaChat(); return; }
 
-  // Trigger chip flip
-  chip.classList.add('flipping');
+  chip.classList.add('active');
 
-  function onFlipDone() {
-    chip.removeEventListener('animationend', onFlipDone);
-    chip.classList.remove('flipping');
-    chip.classList.add('luna-active');
-    // Open the overlay
-    backdrop.classList.add('open');
-    modal.classList.add('open');
-    setTimeout(() => document.getElementById('luna-input')?.focus(), 350);
-  }
-  chip.addEventListener('animationend', onFlipDone);
+  // Step 1: ignite the saber bar (blade extends left)
+  requestAnimationFrame(() => {
+    saberBar.classList.add('open');
+  });
+
+  // Step 2: after blade is mostly extended, fade in messages panel
+  // (panel CSS has transition-delay: 0.42s already built in)
+  panel.classList.add('open');
+
+  // Focus input after animations settle
+  setTimeout(() => document.getElementById('luna-input')?.focus(), 600);
 }
 
 function closeLunaChat() {
-  const chip = document.getElementById('luna-chip');
-  const backdrop = document.getElementById('luna-backdrop');
-  const modal = document.getElementById('luna-modal');
-  backdrop.classList.remove('open');
-  modal.classList.remove('open');
-  if (chip) {
-    chip.classList.remove('luna-active', 'flipping');
-  }
+  const chip     = document.getElementById('luna-chip');
+  const panel    = document.getElementById('luna-panel');
+  const saberBar = document.getElementById('luna-saber-bar');
+
+  // Panel fades out immediately
+  if (panel)    panel.classList.remove('open');
+  // Saber retracts after a brief delay (so panel fades while blade retracts)
+  setTimeout(() => {
+    if (saberBar) saberBar.classList.remove('open');
+  }, 120);
+  if (chip) chip.classList.remove('active');
 }
 
 function setAgentModel(model) {
@@ -1862,12 +1865,12 @@ function setupLunaListeners() {
       }
     });
   }
-  // Swipe down on the modal header to close
+  // Swipe down on the panel header to close
   let touchStartY = 0;
-  const modal = document.getElementById('luna-modal');
-  if (modal) {
-    modal.addEventListener('touchstart', e => { touchStartY = e.touches[0].clientY; }, { passive: true });
-    modal.addEventListener('touchend', e => {
+  const panel = document.getElementById('luna-panel');
+  if (panel) {
+    panel.addEventListener('touchstart', e => { touchStartY = e.touches[0].clientY; }, { passive: true });
+    panel.addEventListener('touchend', e => {
       if (e.changedTouches[0].clientY - touchStartY > 60) closeLunaChat();
     }, { passive: true });
   }
