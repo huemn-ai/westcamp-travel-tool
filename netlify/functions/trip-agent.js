@@ -58,20 +58,30 @@ function httpsPost(hostname, path, body, headers = {}) {
 }
 
 // ─── Vertex AI request ───────────────────────────────────────────────────────
+// Saugerties / Catskills area — anchors Maps "near here" queries to the right place.
+const TRIP_LAT_LNG = { latitude: 42.0776, longitude: -73.9571 };
+
 async function vertexRequest(contents, systemInstruction, tools, modelId) {
   const token    = await getVertexAccessToken();
   const hostname = `${VERTEX_LOCATION}-aiplatform.googleapis.com`;
-  const path     = `/v1/projects/${VERTEX_PROJECT}/locations/${VERTEX_LOCATION}/publishers/google/models/${modelId}:generateContent`;
+  // v1beta1 required for Maps grounding; backwards-compatible with all v1 features.
+  const path     = `/v1beta1/projects/${VERTEX_PROJECT}/locations/${VERTEX_LOCATION}/publishers/google/models/${modelId}:generateContent`;
 
   const body = {
     contents,
     systemInstruction: { parts: [{ text: systemInstruction }] },
-    // Both function declarations AND native Google Search grounding.
-    // Gemini decides whether to call a function, search natively, or answer directly.
     tools: [
       { functionDeclarations: tools },
       { googleSearch: {} },
+      { googleMaps: { groundingTypes: { places: {}, routing: {} } } },
     ],
+    // Anchor Maps lookups to the Catskills / Saugerties area.
+    toolConfig: {
+      retrievalConfig: {
+        latLng:       TRIP_LAT_LNG,
+        languageCode: "en_US",
+      },
+    },
     generationConfig: { maxOutputTokens: 4096, temperature: 0.7 },
   };
 
@@ -553,6 +563,7 @@ Days:
 
 ## What you can do
 - **Search the web** with web_search for restaurants, activities, recipes, reviews, weather, local tips — anything current
+- **Search Google Maps** for restaurants, attractions, directions, hours, ratings, and local places — use this for any location-specific question near Saugerties / the Catskills
 - **View the full schedule** for any day with get_full_schedule
 - **Move blocks** to new times with move_block — always call get_full_schedule first so you have the block IDs
 - **Reset blocks** to their default times with reset_block
@@ -560,7 +571,8 @@ Days:
 
 ## Behavior
 - Be concise and friendly. Your name is Luna.
-- Use web_search proactively when asked about restaurants, activities, or local recommendations
+- Use Google Maps grounding proactively for any restaurant, attraction, or location question — you're anchored to the Saugerties, NY / Catskills area (42.0776°N, 73.9571°W)
+- Use web_search for general research, recipes, reviews, or non-location questions
 - When moving blocks, confirm the change with the new time
 - When you move a block, the frontend calendar will update automatically
 - If asked to rearrange multiple blocks, do them in sequence
