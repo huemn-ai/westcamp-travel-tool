@@ -745,6 +745,7 @@ function fmtRating(r, rev, name){
   return `${stars} · ${k} ratings`;
 }
 
+/* buildWeatherSVG removed — calendar background is now clean
 function buildWeatherSVG(dayKey, totalH){
   const hw = getHourlyWeather(dayKey);
   const showPrecip = dayKey !== 'sat';
@@ -801,6 +802,7 @@ function buildWeatherSVG(dayKey, totalH){
     <path d="${tempPath}" fill="none" stroke="rgba(198,138,46,0.55)" stroke-width="0.7" vector-effect="non-scaling-stroke" stroke-linejoin="round"/>
   </svg>`;
 }
+*/
 
 function buildOptionMeta(optId, pollType){
   if(optId==='_eatout') return '<span style="font-style:italic;color:var(--ink2)">Eat out instead — see top picks →</span>';
@@ -1063,8 +1065,6 @@ function buildCalendar(dayKey, containerEl){
   }
   gridHtml+='</div>';
 
-  const weatherSVG=buildWeatherSVG(dayKey,totalH);
-
   // Weather summary
   const hw=getHourlyWeather(dayKey);
   const wd=WEATHER[dayKey];
@@ -1122,7 +1122,7 @@ function buildCalendar(dayKey, containerEl){
 
   containerEl.style.height=(totalH + CAL_PAD_TOP + CAL_PAD_BOT)+'px';
   containerEl.style.position='relative';
-  containerEl.innerHTML=axisHtml+gridHtml+weatherSVG+blocksHtml;
+  containerEl.innerHTML=axisHtml+gridHtml+blocksHtml;
 
   // Attach drag handlers
   for(const b of blocks){
