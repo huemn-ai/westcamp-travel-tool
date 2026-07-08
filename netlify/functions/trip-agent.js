@@ -8,14 +8,15 @@ const supabase = createClient(
 
 const BEDROCK_REGION  = process.env.AWS_REGION || "us-east-1";
 const BEDROCK_API_KEY = process.env.BEDROCK_API_KEY;
-const BEDROCK_MODEL   = process.env.BEDROCK_MODEL_ID || "anthropic.claude-3-5-sonnet-20241022-v2:0";
+const BEDROCK_MODEL   = process.env.BEDROCK_MODEL_ID || "minimax.minimax-m2.5";
 
-// ─── Bedrock Converse call via bearer-token REST endpoint ────────────────────
+// MiniMax on Bedrock uses the bedrock-mantle endpoint (recommended by AWS docs).
+// The Converse API path and payload shape are identical to bedrock-runtime.
 function bedrockRequest(body) {
   return new Promise((resolve, reject) => {
     const payload = JSON.stringify(body);
-    const hostname = `bedrock-runtime.${BEDROCK_REGION}.amazonaws.com`;
-    const path     = `/model/${encodeURIComponent(BEDROCK_MODEL)}/converse`;
+    const hostname = `bedrock-mantle.${BEDROCK_REGION}.api.aws`;
+    const path     = `/v1/model/${encodeURIComponent(BEDROCK_MODEL)}/converse`;
 
     const req = https.request(
       {
@@ -40,7 +41,7 @@ function bedrockRequest(body) {
               resolve(parsed);
             }
           } catch {
-            reject(new Error(`Non-JSON response: ${data}`));
+            reject(new Error(`Non-JSON response (${res.statusCode}): ${data.slice(0, 200)}`));
           }
         });
       }
@@ -476,13 +477,15 @@ async function runAgentLoop(messages) {
     const assistantMessage = output.message;
     messages.push(assistantMessage);
 
-    // No tool use — we have the final answer
+    // No tool use — we have the final answer.
+    // MiniMax M2.5 prepends a reasoningContent block; skip it and extract text only.
     if (stopReason !== "tool_use") {
       const text = assistantMessage.content
-        .filter((b) => b.text)
+        .filter((b) => b.text && !b.reasoningContent)
         .map((b) => b.text)
-        .join("");
-      return { text, scheduleChanged };
+        .join("")
+        .trim();
+      return { text: text || "Done.", scheduleChanged };
     }
 
     // Execute all tool calls in this turn
