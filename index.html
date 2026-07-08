@@ -2116,7 +2116,15 @@ body::after{
 ═══════════════════════════════════════════════════════════ */
 const SUPABASE_URL = 'https://xstcdokwuhivywqedkni.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhzdGNkb2t3dWhpdnl3cWVka25pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1MTQzOTgsImV4cCI6MjA5OTA5MDM5OH0.5N2cPOrj7REhUc0rz3wat6eAZ_k9vFlnoLRJRdbZKtg';
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+let supabase;
+try {
+  supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+    auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false }
+  });
+} catch(e) {
+  console.warn('Supabase init failed:', e);
+  supabase = null;
+}
 
 /* ═══════════════════════════════════════════════════════════
    ALL BAKED-IN TRIP DATA
@@ -2292,6 +2300,7 @@ const ST = {
 };
 
 async function storageGet(key) {
+  if (!supabase) return null;
   try {
     if (key === 'wcd-votes') {
       const { data, error } = await supabase
@@ -2362,6 +2371,7 @@ async function storageGet(key) {
 }
 
 async function storageSet(key, value) {
+  if (!supabase) return;
   try {
     if (key === 'wcd-votes') {
       // Clear existing votes and insert new ones
@@ -2465,6 +2475,7 @@ async function loadAllShared() {
 
 // Subscribe to real-time changes from Supabase
 function subscribeToChanges() {
+  if (!supabase) return;
   // Subscribe to preference changes
   supabase
     .channel('preferences-changes')
