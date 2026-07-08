@@ -1930,9 +1930,7 @@ function closeLunaChat() {
   if (backdrop) backdrop.classList.remove('open');
   // Reset keyboard-lift transforms so closed state is always clean
   const saberWrap2 = document.getElementById('luna-saber-wrap');
-  const panel2     = document.getElementById('luna-panel');
-  if (saberWrap2) saberWrap2.style.transform = 'translateX(-50%) translateY(0px)';
-  if (panel2)     panel2.style.transform = '';
+  if (saberWrap2) saberWrap2.style.transform = 'translateX(-50%)';
   // Saber retracts after a brief delay (so panel fades while blade retracts)
   setTimeout(() => {
     if (saberBar) saberBar.classList.remove('open');
@@ -2062,32 +2060,9 @@ function setupLunaListeners() {
     }, { passive: true });
   }
   // Track iOS virtual keyboard — lift elements using transform (GPU) not bottom (layout)
-  if (window.visualViewport) {
-    let _kbH = 0;
-    const onViewport = () => {
-      const saberWrap = document.getElementById('luna-saber-wrap');
-      const panel     = document.getElementById('luna-panel');
-      if (!saberWrap) return;
-
-      const newKbH = Math.max(0,
-        window.innerHeight - window.visualViewport.height - window.visualViewport.offsetTop
-      );
-      if (Math.abs(newKbH - _kbH) < 2) return; // ignore tiny sub-pixel jitter
-      _kbH = newKbH;
-
-      // Lift saber bar — keep its existing translateX(-50%) centering
-      saberWrap.style.transform = `translateX(-50%) translateY(-${newKbH}px)`;
-
-      // Lift panel — only when open, so closed state isn't affected
-      if (panel && panel.classList.contains('open')) {
-        panel.style.transform = newKbH > 0
-          ? `translateY(-${newKbH}px)`
-          : '';
-      }
-    };
-    window.visualViewport.addEventListener('resize', onViewport, { passive: true });
-    window.visualViewport.addEventListener('scroll', onViewport, { passive: true });
-  }
+  // Keyboard handling: position:fixed already tracks above the keyboard
+  // via interactive-widget=resizes-visual in the viewport meta tag.
+  // No JS translation needed.
 }
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', setupLunaListeners);
