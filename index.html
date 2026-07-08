@@ -1430,17 +1430,19 @@ body::after{
 /* ── Messages panel ─────────────────────────── */
 .luna-panel {
   position: fixed;
-  left: 20px;
-  right: 20px;
+  left: 50%;
+  transform: translateX(-50%) translateY(16px);
+  width: calc(100% - 32px);
+  max-width: 420px;
+  right: auto;
   bottom: calc(68px + env(safe-area-inset-bottom, 0px));
-  top: max(8px, env(safe-area-inset-top, 8px));
+  top: max(12px, env(safe-area-inset-top, 12px));
   background: #fff;
   border-radius: 20px;
   display: flex;
   flex-direction: column;
   z-index: 1006;
   opacity: 0;
-  transform: translateY(16px);
   pointer-events: none;
   transition: opacity 0.38s ease 0.42s, transform 0.38s ease 0.42s;
   overflow: hidden;
@@ -1650,26 +1652,11 @@ body::after{
 .luna-saber-send:hover:not(:disabled) { transform: scale(1.06); }
 .luna-saber-send:disabled { opacity: 0.35 !important; cursor: default; }
 
-/* Desktop: already centered */
+/* Desktop: wider panel */
 @media (min-width: 520px) {
   .luna-panel {
-    left: 50%;
-    right: auto;
-    transform: translateX(-50%) translateY(16px);
     width: 480px;
-  }
-  .luna-panel.open {
-    transform: translateX(-50%) translateY(0);
-  }
-}
-
-/* Mobile: tighter margins for keyboard safety */
-@media (max-width: 519px) {
-  .luna-panel {
-    left: 8px;
-    right: 8px;
-    bottom: calc(60px + env(safe-area-inset-bottom, 0px));
-    top: max(4px, env(safe-area-inset-top, 4px));
+    max-width: 480px;
   }
 }
 
@@ -2169,5 +2156,5 @@ body::after{
     </div>
   </div>
 </div>
-<script src="/app.js?v=20260708221000"></script>
+<script src="/app.js?v=20260708222000"></script>
 </body></html>
