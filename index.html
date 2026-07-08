@@ -1908,6 +1908,60 @@ async function loadAllShared() {
   }
 }
 
+// Subscribe to real-time changes from Supabase
+function subscribeToChanges() {
+  // Subscribe to preference changes
+  supabase
+    .channel('preferences-changes')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'preferences' }, async (payload) => {
+      console.log('Preferences updated:', payload);
+      await loadAllShared();
+      // Rebuild visible calendars to show updated votes
+      ['thu','fri','sat'].forEach(d=>{
+        const el = document.getElementById('cal-'+d);
+        if(el) buildCalendar(d, el);
+      });
+      renderShoppingList();
+    })
+    .subscribe();
+
+  // Subscribe to write-in changes
+  supabase
+    .channel('writein-changes')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'write_ins' }, async (payload) => {
+      console.log('Write-in updated:', payload);
+      await loadAllShared();
+      ['thu','fri','sat'].forEach(d=>{
+        const el = document.getElementById('cal-'+d);
+        if(el) buildCalendar(d, el);
+      });
+    })
+    .subscribe();
+
+  // Subscribe to schedule changes
+  supabase
+    .channel('schedule-changes')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'schedule_changes' }, async (payload) => {
+      console.log('Schedule updated:', payload);
+      await loadAllShared();
+      ['thu','fri','sat'].forEach(d=>{
+        const el = document.getElementById('cal-'+d);
+        if(el) buildCalendar(d, el);
+      });
+    })
+    .subscribe();
+
+  // Subscribe to shopping list changes
+  supabase
+    .channel('shopping-changes')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'shopping_items' }, async (payload) => {
+      console.log('Shopping list updated:', payload);
+      await loadAllShared();
+      renderShoppingList();
+    })
+    .subscribe();
+}
+
 /* ═══════════════════════════════════════════════════════════
    VOTING LOGIC
 ═══════════════════════════════════════════════════════════ */
@@ -2994,6 +3048,9 @@ async function init(){
 
   // Load shared state
   await loadAllShared();
+  
+  // Subscribe to real-time changes
+  subscribeToChanges();
 
   // Name input — replaced by modal; wire up change-name button
   const changeName=document.getElementById('btn-change-name');
@@ -3045,8 +3102,27 @@ function confirmName(){
   ST.guestName = chosen;
   document.getElementById('name-modal').style.display = 'none';
   updateNameButton();
-  // Launch voting wizard
-  openVotingWizard();
+  
+  // Check if user has already voted on all polls
+  if (!hasUserCompletedSurvey(chosen)) {
+    // Launch voting wizard only if they haven't voted yet
+    openVotingWizard();
+  }
+}
+
+function hasUserCompletedSurvey(guestName) {
+  // Check if user has voted on all required polls
+  const requiredPolls = WIZARD_POLLS.map(p => p.id);
+  
+  for (const pollId of requiredPolls) {
+    const guestVotes = ST.votes[pollId]?.[guestName];
+    // User must have at least a first choice to count as voted
+    if (!guestVotes || !guestVotes.first) {
+      return false;
+    }
+  }
+  
+  return true;
 }
 
 function updateNameButton(){
