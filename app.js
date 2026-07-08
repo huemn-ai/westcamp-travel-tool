@@ -961,9 +961,10 @@ function dayBlocks(dayKey){
 
 function buildCalendar(dayKey, containerEl){
   const blocks=dayBlocks(dayKey);
-  const rowH=window.innerWidth<=768?48:56;
+  const rowH=window.innerWidth<=768?68:80;
   const totalH=CAL_MINUTES/60*rowH; // 14 hours
   const CAL_PAD_TOP = 10; // matches padding-top on .cal-outer
+  const CAL_PAD_BOT = 28; // room for the midnight axis label at the bottom
 
   // Axis + gridlines
   let axisHtml='<div class="cal-axis">';
@@ -1039,7 +1040,7 @@ function buildCalendar(dayKey, containerEl){
   }
   blocksHtml+='</div>';
 
-  containerEl.style.height=(totalH + CAL_PAD_TOP)+'px';
+  containerEl.style.height=(totalH + CAL_PAD_TOP + CAL_PAD_BOT)+'px';
   containerEl.style.position='relative';
   containerEl.innerHTML=axisHtml+gridHtml+weatherSVG+blocksHtml;
 
