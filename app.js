@@ -1859,13 +1859,41 @@ async function sendAgentMessage() {
   scrollLunaToBottom();
 }
 
+function renderMarkdown(text) {
+  // Escape HTML first to prevent XSS
+  let s = text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+  // Bold: **text** or __text__
+  s = s.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  s = s.replace(/__(.+?)__/g, '<strong>$1</strong>');
+  // Italic: *text* or _text_
+  s = s.replace(/\*([^*]+?)\*/g, '<em>$1</em>');
+  s = s.replace(/_([^_]+?)_/g, '<em>$1</em>');
+  // Inline code
+  s = s.replace(/`([^`]+?)`/g, '<code>$1</code>');
+  // Bullet lists: lines starting with * or -
+  s = s.replace(/^[\*\-] (.+)/gm, '<li>$1</li>');
+  s = s.replace(/(<li>.*<\/li>)/gs, '<ul>$1</ul>');
+  // Numbered lists
+  s = s.replace(/^\d+\. (.+)/gm, '<li>$1</li>');
+  // Line breaks: double newline → paragraph break, single → <br>
+  s = s.replace(/\n\n+/g, '</p><p>');
+  s = s.replace(/\n/g, '<br>');
+  s = '<p>' + s + '</p>';
+  // Clean up empty paragraphs
+  s = s.replace(/<p>\s*<\/p>/g, '');
+  return s;
+}
+
 function addAgentMessage(text, role) {
   const messagesEl = document.getElementById('luna-messages');
   const msgEl      = document.createElement('div');
   msgEl.className  = `luna-message ${role}`;
   const bubble     = document.createElement('div');
   bubble.className = 'luna-bubble';
-  bubble.textContent = text;
+  bubble.innerHTML = renderMarkdown(text);
   msgEl.appendChild(bubble);
   messagesEl.appendChild(msgEl);
   scrollLunaToBottom();
