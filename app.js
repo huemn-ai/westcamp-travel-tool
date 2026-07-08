@@ -1514,15 +1514,23 @@ async function switchTab(tabKey){
   document.querySelectorAll('.tab-panel').forEach(p=>{
     p.classList.toggle('active',p.id==='tab-'+tabKey);
   });
-  // Re-fetch shared state on tab switch
-  await loadAllShared();
-  if(tabKey==='thu'||tabKey==='fri'||tabKey==='sat'){
-    buildCalendar(tabKey, document.getElementById('cal-'+tabKey));
-  } else if(tabKey==='sun'){
-    renderSundayTab();
-  } else if(tabKey==='shop'){
-    renderShoppingList();
+
+  // Render immediately with cached ST data so the tab feels instant
+  function renderTab(){
+    if(tabKey==='thu'||tabKey==='fri'||tabKey==='sat'){
+      buildCalendar(tabKey, document.getElementById('cal-'+tabKey));
+    } else if(tabKey==='sun'){
+      renderSundayTab();
+    } else if(tabKey==='shop'){
+      renderShoppingList();
+    }
   }
+  renderTab();
+
+  // Silently refresh data in background and re-render if anything changed
+  loadAllShared().then(()=>{
+    if(_activeTab===tabKey) renderTab();
+  }).catch(()=>{});
 }
 
 async function doRefresh(){
