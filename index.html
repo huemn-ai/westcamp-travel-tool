@@ -1375,8 +1375,226 @@ body::after{
 }
 .reveal.visible{opacity:1;transform:none;}
 
-/* AGENT CHAT IN HEADER */
-.agent-chat-widget {
+/* LUNA CHAT */
+/* ── Floating avatar chip ───────────────────────────────── */
+.luna-chip {
+  position: fixed;
+  bottom: 24px;
+  right: 20px;
+  width: 62px;
+  height: 62px;
+  border-radius: 50%;
+  cursor: pointer;
+  z-index: 1000;
+  border: none;
+  padding: 0;
+  background: none;
+  transition: transform 0.2s cubic-bezier(.34,1.56,.64,1), opacity 0.25s;
+  filter: drop-shadow(0 4px 14px rgba(72,38,120,0.45));
+}
+.luna-chip:hover { transform: scale(1.08); }
+.luna-chip.hidden { opacity: 0; pointer-events: none; transform: scale(0.7); }
+.luna-chip::before {
+  content: '';
+  position: absolute;
+  inset: -5px;
+  border-radius: 50%;
+  border: 2px solid rgba(140,90,210,0.5);
+  animation: luna-ring 2.4s ease-out infinite;
+}
+@keyframes luna-ring {
+  0%   { opacity: 0.7; transform: scale(1); }
+  100% { opacity: 0;   transform: scale(1.35); }
+}
+
+/* ── Backdrop ───────────────────────────────────────────── */
+.luna-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(10,10,20,0.45);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 1001;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+.luna-backdrop.open { opacity: 1; pointer-events: all; }
+
+/* ── Modal ──────────────────────────────────────────────── */
+.luna-modal {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  height: 88dvh;
+  background: var(--card);
+  border-radius: 22px 22px 0 0;
+  display: flex;
+  flex-direction: column;
+  z-index: 1002;
+  overflow: hidden;
+  transform: translateY(100%);
+  transition: transform 0.38s cubic-bezier(.32,.72,0,1);
+  box-shadow: 0 -8px 40px rgba(72,38,120,0.2);
+}
+.luna-modal.open { transform: translateY(0); }
+
+/* ── Modal header ───────────────────────────────────────── */
+.luna-modal-header {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 16px 12px;
+  background: linear-gradient(135deg, #3d1a78 0%, #6b3fa0 100%);
+}
+.luna-modal-top { display: flex; align-items: center; gap: 10px; }
+.luna-header-avatar {
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  border: 2px solid rgba(255,255,255,0.3);
+}
+.luna-header-name { font-size: 16px; font-weight: 700; color: #fff; line-height: 1.2; }
+.luna-header-sub  { font-size: 11px; color: rgba(255,255,255,0.6); margin-top: 2px; }
+.luna-close-btn {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.15);
+  border: none; color: #fff; font-size: 18px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+.luna-close-btn:hover { background: rgba(255,255,255,0.28); }
+
+/* ── Model toggle ───────────────────────────────────────── */
+.luna-model-toggle { display: flex; gap: 6px; }
+.luna-model-btn {
+  flex: 1;
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 20px;
+  color: rgba(255,255,255,0.8);
+  cursor: pointer;
+  font-size: 11px; font-weight: 600;
+  padding: 5px 12px;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  white-space: nowrap;
+  font-family: var(--sans);
+}
+.luna-model-btn.active {
+  background: rgba(255,255,255,0.92);
+  border-color: transparent;
+  color: #3d1a78;
+}
+
+/* ── Messages ───────────────────────────────────────────── */
+.luna-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 14px;
+  display: flex; flex-direction: column; gap: 10px;
+  -webkit-overflow-scrolling: touch;
+}
+.luna-message {
+  display: flex; gap: 8px;
+  animation: lunaIn 280ms cubic-bezier(.22,1,.36,1);
+}
+@keyframes lunaIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.luna-message.user { justify-content: flex-end; }
+.luna-bubble {
+  max-width: 82%;
+  padding: 10px 14px;
+  font-size: 14px; line-height: 1.45;
+  font-family: var(--sans);
+  white-space: pre-wrap; word-break: break-word;
+  border-radius: 18px;
+}
+.luna-message.user .luna-bubble {
+  background: linear-gradient(135deg, #5b2d9e, #7c4db8);
+  color: #fff;
+  border-radius: 18px 4px 18px 18px;
+}
+.luna-message.assistant .luna-bubble {
+  background: var(--foam);
+  color: var(--text);
+  border: 1px solid var(--line);
+  border-radius: 4px 18px 18px 18px;
+}
+
+/* Typing dots */
+.luna-typing {
+  display: flex; gap: 5px; align-items: center;
+  padding: 12px 16px;
+  background: var(--foam);
+  border: 1px solid var(--line);
+  border-radius: 4px 18px 18px 18px;
+  width: fit-content;
+}
+.luna-typing span {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: #8b5cf6;
+  animation: lunaTyping 1.4s infinite;
+}
+.luna-typing span:nth-child(2) { animation-delay: 0.2s; }
+.luna-typing span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes lunaTyping {
+  0%,60%,100% { opacity: 0.25; transform: scale(0.85); }
+  30%          { opacity: 1;    transform: scale(1); }
+}
+
+/* ── Input row ──────────────────────────────────────────── */
+.luna-input-area {
+  flex-shrink: 0;
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 14px;
+  padding-bottom: max(12px, env(safe-area-inset-bottom));
+  border-top: 1px solid var(--line);
+  background: var(--card);
+}
+.luna-input {
+  flex: 1;
+  border: 1.5px solid var(--line);
+  border-radius: 22px;
+  padding: 10px 16px;
+  font-size: 14px; font-family: var(--sans);
+  background: var(--foam); color: var(--text);
+  outline: none;
+  transition: border-color 0.15s;
+  -webkit-appearance: none;
+}
+.luna-input:focus { border-color: #8b5cf6; }
+.luna-send-btn {
+  width: 40px; height: 40px; border-radius: 50%;
+  background: linear-gradient(135deg, #5b2d9e, #7c4db8);
+  border: none; color: #fff; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  transition: transform 0.15s, opacity 0.15s;
+}
+.luna-send-btn:hover:not(:disabled) { transform: scale(1.07); }
+.luna-send-btn:disabled { opacity: 0.45; cursor: default; }
+
+@keyframes pulse {
+  0%,60%,100% { opacity: 0.3; }
+  30%          { opacity: 1; }
+}
+
+/* Desktop: corner panel instead of full-screen sheet */
+@media (min-width: 480px) {
+  .luna-modal {
+    left: auto;
+    right: 20px;
+    bottom: 24px;
+    width: 400px;
+    height: 580px;
+    border-radius: 22px;
+  }
+}
   position: fixed;
   bottom: 20px;
   right: 20px;
@@ -1600,15 +1818,7 @@ body::after{
   30% { opacity: 1; }
 }
 
-@media (max-width: 768px) {
-  .agent-chat-widget {
-    width: 100%;
-    max-width: calc(100vw - 20px);
-    bottom: 10px;
-    right: 10px;
-    left: 10px;
-  }
-}
+
 </style>
 </head>
 <body>
@@ -1710,21 +1920,87 @@ body::after{
 </main>
 
 <!-- TRIP PLANNING AGENT CHAT WIDGET -->
-<div id="agent-chat-widget" class="agent-chat-widget">
-  <div class="agent-header-bar">
-    <div class="agent-header-top" onclick="toggleAgentChat()">
-      <span>🌙 Luna</span>
-      <button class="agent-close-btn" onclick="toggleAgentChat(event)" aria-label="Toggle chat">−</button>
+<!-- LUNA FLOATING CHIP -->
+<button id="luna-chip" class="luna-chip" onclick="openLunaChat()" aria-label="Chat with Luna">
+  <svg viewBox="0 0 62 62" xmlns="http://www.w3.org/2000/svg" width="62" height="62">
+    <!-- Background circle -->
+    <circle cx="31" cy="31" r="31" fill="#2d1057"/>
+    <!-- Hair back layer -->
+    <ellipse cx="31" cy="24" rx="16" ry="17" fill="#1a0a2e"/>
+    <!-- Neck -->
+    <rect x="26" y="42" width="10" height="8" rx="4" fill="#f0c8a0"/>
+    <!-- Face -->
+    <ellipse cx="31" cy="32" rx="13" ry="14" fill="#f0c8a0"/>
+    <!-- Hair front / top -->
+    <path d="M18 28 Q17 14 31 12 Q45 14 44 28 Q42 18 31 18 Q20 18 18 28Z" fill="#1a0a2e"/>
+    <!-- Hair sides -->
+    <path d="M18 28 Q15 36 17 44 Q20 40 21 36Z" fill="#1a0a2e"/>
+    <path d="M44 28 Q47 36 45 44 Q42 40 41 36Z" fill="#1a0a2e"/>
+    <!-- Left eye -->
+    <ellipse cx="25.5" cy="31" rx="3.5" ry="2.8" fill="#3b1a6e"/>
+    <ellipse cx="25.5" cy="31" rx="2.2" ry="2.2" fill="#5a2d96"/>
+    <circle cx="25.5" cy="31" r="1.1" fill="#1e0840"/>
+    <circle cx="26.5" cy="30.2" r="0.6" fill="rgba(255,255,255,0.7)"/>
+    <!-- Right eye -->
+    <ellipse cx="36.5" cy="31" rx="3.5" ry="2.8" fill="#3b1a6e"/>
+    <ellipse cx="36.5" cy="31" rx="2.2" ry="2.2" fill="#5a2d96"/>
+    <circle cx="36.5" cy="31" r="1.1" fill="#1e0840"/>
+    <circle cx="37.5" cy="30.2" r="0.6" fill="rgba(255,255,255,0.7)"/>
+    <!-- Eyebrows -->
+    <path d="M22 27.5 Q25.5 26 29 27.5" stroke="#1a0a2e" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+    <path d="M33 27.5 Q36.5 26 40 27.5" stroke="#1a0a2e" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+    <!-- Nose -->
+    <path d="M30 33.5 Q31 35.5 32 33.5" stroke="#d4a070" stroke-width="0.9" fill="none" stroke-linecap="round"/>
+    <!-- Mouth -->
+    <path d="M27 38 Q31 40.5 35 38" stroke="#c07050" stroke-width="1.3" fill="none" stroke-linecap="round"/>
+  </svg>
+</button>
+
+<!-- LUNA BACKDROP -->
+<div id="luna-backdrop" class="luna-backdrop" onclick="closeLunaChat()"></div>
+
+<!-- LUNA CHAT MODAL -->
+<div id="luna-modal" class="luna-modal" role="dialog" aria-label="Chat with Luna" aria-modal="true">
+  <div class="luna-modal-header">
+    <div class="luna-modal-top">
+      <svg class="luna-header-avatar" viewBox="0 0 62 62" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="31" cy="31" r="31" fill="#2d1057"/>
+        <ellipse cx="31" cy="24" rx="16" ry="17" fill="#1a0a2e"/>
+        <rect x="26" y="42" width="10" height="8" rx="4" fill="#f0c8a0"/>
+        <ellipse cx="31" cy="32" rx="13" ry="14" fill="#f0c8a0"/>
+        <path d="M18 28 Q17 14 31 12 Q45 14 44 28 Q42 18 31 18 Q20 18 18 28Z" fill="#1a0a2e"/>
+        <path d="M18 28 Q15 36 17 44 Q20 40 21 36Z" fill="#1a0a2e"/>
+        <path d="M44 28 Q47 36 45 44 Q42 40 41 36Z" fill="#1a0a2e"/>
+        <ellipse cx="25.5" cy="31" rx="3.5" ry="2.8" fill="#3b1a6e"/>
+        <ellipse cx="25.5" cy="31" rx="2.2" ry="2.2" fill="#5a2d96"/>
+        <circle cx="25.5" cy="31" r="1.1" fill="#1e0840"/>
+        <circle cx="26.5" cy="30.2" r="0.6" fill="rgba(255,255,255,0.7)"/>
+        <ellipse cx="36.5" cy="31" rx="3.5" ry="2.8" fill="#3b1a6e"/>
+        <ellipse cx="36.5" cy="31" rx="2.2" ry="2.2" fill="#5a2d96"/>
+        <circle cx="36.5" cy="31" r="1.1" fill="#1e0840"/>
+        <circle cx="37.5" cy="30.2" r="0.6" fill="rgba(255,255,255,0.7)"/>
+        <path d="M22 27.5 Q25.5 26 29 27.5" stroke="#1a0a2e" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+        <path d="M33 27.5 Q36.5 26 40 27.5" stroke="#1a0a2e" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+        <path d="M30 33.5 Q31 35.5 32 33.5" stroke="#d4a070" stroke-width="0.9" fill="none" stroke-linecap="round"/>
+        <path d="M27 38 Q31 40.5 35 38" stroke="#c07050" stroke-width="1.3" fill="none" stroke-linecap="round"/>
+      </svg>
+      <div>
+        <div class="luna-header-name">Luna</div>
+        <div class="luna-header-sub">Trip Planner · Google Search &amp; Maps</div>
+      </div>
+      <button class="luna-close-btn" onclick="closeLunaChat()" aria-label="Close chat">✕</button>
     </div>
-    <div class="agent-model-toggle">
-      <button id="model-fast"     class="agent-model-btn active" onclick="setAgentModel('fast')"    >⚡ Fast</button>
-      <button id="model-thinking" class="agent-model-btn"        onclick="setAgentModel('thinking')">🧠 Thinking</button>
+    <div class="luna-model-toggle">
+      <button id="model-fast"     class="luna-model-btn active" onclick="setAgentModel('fast')"    >⚡ Fast</button>
+      <button id="model-thinking" class="luna-model-btn"        onclick="setAgentModel('thinking')">🧠 Thinking</button>
     </div>
   </div>
-  <div id="agent-messages" class="agent-messages"></div>
-  <div class="agent-input-area">
-    <input type="text" id="agent-input" class="agent-input" placeholder="Ask about meals, activities..." />
-    <button id="agent-send" class="agent-send-btn" onclick="sendAgentMessage()">Send</button>
+  <div id="luna-messages" class="luna-messages"></div>
+  <div class="luna-input-area">
+    <input type="text" id="luna-input" class="luna-input" placeholder="Ask Luna anything…" autocomplete="off" />
+    <button id="luna-send" class="luna-send-btn" onclick="sendAgentMessage()" aria-label="Send">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+    </button>
   </div>
 </div>
 
@@ -3498,33 +3774,35 @@ window.addEventListener('DOMContentLoaded', init);
 })();
 
 /* ═══════════════════════════════════════════════════════════
-   TRIP PLANNING AGENT CHAT
+   LUNA CHAT
 ═══════════════════════════════════════════════════════════ */
 let agentSessionId = null;
-let agentModel     = 'fast'; // 'fast' | 'thinking'
+let agentModel     = 'fast';
+
+function openLunaChat() {
+  document.getElementById('luna-chip').classList.add('hidden');
+  document.getElementById('luna-backdrop').classList.add('open');
+  document.getElementById('luna-modal').classList.add('open');
+  setTimeout(() => document.getElementById('luna-input').focus(), 380);
+}
+
+function closeLunaChat() {
+  document.getElementById('luna-backdrop').classList.remove('open');
+  document.getElementById('luna-modal').classList.remove('open');
+  setTimeout(() => document.getElementById('luna-chip').classList.remove('hidden'), 300);
+}
 
 function setAgentModel(model) {
   if (model === agentModel) return;
   agentModel = model;
-
   document.getElementById('model-fast').classList.toggle('active', model === 'fast');
   document.getElementById('model-thinking').classList.toggle('active', model === 'thinking');
-
   addAgentMessage(`Switched to ${model === 'thinking' ? '🧠 Thinking (Gemini 2.5 Pro)' : '⚡ Fast (Gemini 3.5 Flash)'} mode.`, 'assistant');
 }
 
-function toggleAgentChat(e) {
-  if (e) e.stopPropagation();
-  const widget = document.getElementById('agent-chat-widget');
-  widget.classList.toggle('collapsed');
-  if (!widget.classList.contains('collapsed')) {
-    document.getElementById('agent-input').focus();
-  }
-}
-
 async function sendAgentMessage() {
-  const input = document.getElementById('agent-input');
-  const sendBtn = document.getElementById('agent-send');
+  const input   = document.getElementById('luna-input');
+  const sendBtn = document.getElementById('luna-send');
   const message = input.value.trim();
   if (!message) return;
 
@@ -3532,11 +3810,11 @@ async function sendAgentMessage() {
   input.value = '';
   sendBtn.disabled = true;
 
-  const loadingEl = document.createElement('div');
-  loadingEl.className = 'agent-message assistant';
-  loadingEl.innerHTML = '<div class="agent-loading"><span></span><span></span><span></span></div>';
-  document.getElementById('agent-messages').appendChild(loadingEl);
-  scrollAgentToBottom();
+  const typingEl = document.createElement('div');
+  typingEl.className = 'luna-message assistant';
+  typingEl.innerHTML = '<div class="luna-typing"><span></span><span></span><span></span></div>';
+  document.getElementById('luna-messages').appendChild(typingEl);
+  scrollLunaToBottom();
 
   try {
     const response = await fetch('/.netlify/functions/trip-agent', {
@@ -3546,13 +3824,11 @@ async function sendAgentMessage() {
     });
 
     const data = await response.json();
-    loadingEl.remove();
+    typingEl.remove();
 
     if (data.success) {
       agentSessionId = data.sessionId;
       addAgentMessage(data.message, 'assistant');
-
-      // If the agent moved blocks, reload schedule from DB and re-render every calendar
       if (data.scheduleChanged) {
         await loadAllShared();
         ['thu','fri','sat'].forEach(d => {
@@ -3564,38 +3840,34 @@ async function sendAgentMessage() {
       addAgentMessage('Sorry, something went wrong: ' + (data.error || 'Unknown error'), 'assistant');
     }
   } catch (err) {
-    console.error('Agent error:', err);
-    loadingEl.remove();
-    addAgentMessage('Couldn\'t reach Luna — check your connection and try again.', 'assistant');
+    console.error('Luna error:', err);
+    typingEl.remove();
+    addAgentMessage("Couldn't reach Luna — check your connection.", 'assistant');
   }
 
   sendBtn.disabled = false;
-  scrollAgentToBottom();
+  scrollLunaToBottom();
 }
 
 function addAgentMessage(text, role) {
-  const messagesEl = document.getElementById('agent-messages');
-  const messageEl = document.createElement('div');
-  messageEl.className = `agent-message ${role}`;
-  
-  const contentEl = document.createElement('div');
-  contentEl.className = 'agent-message-content';
-  contentEl.textContent = text;
-  
-  messageEl.appendChild(contentEl);
-  messagesEl.appendChild(messageEl);
+  const messagesEl = document.getElementById('luna-messages');
+  const msgEl      = document.createElement('div');
+  msgEl.className  = `luna-message ${role}`;
+  const bubble     = document.createElement('div');
+  bubble.className = 'luna-bubble';
+  bubble.textContent = text;
+  msgEl.appendChild(bubble);
+  messagesEl.appendChild(msgEl);
+  scrollLunaToBottom();
 }
 
-function scrollAgentToBottom() {
-  const messagesEl = document.getElementById('agent-messages');
-  setTimeout(() => {
-    messagesEl.scrollTop = messagesEl.scrollHeight;
-  }, 0);
+function scrollLunaToBottom() {
+  const el = document.getElementById('luna-messages');
+  if (el) setTimeout(() => { el.scrollTop = el.scrollHeight; }, 0);
 }
 
-// Allow sending message with Enter key
 document.addEventListener('DOMContentLoaded', () => {
-  const input = document.getElementById('agent-input');
+  const input = document.getElementById('luna-input');
   if (input) {
     input.addEventListener('keypress', (e) => {
       if (e.key === 'Enter' && !e.shiftKey) {
@@ -3603,6 +3875,15 @@ document.addEventListener('DOMContentLoaded', () => {
         sendAgentMessage();
       }
     });
+  }
+  // Swipe down on the modal header to close
+  let touchStartY = 0;
+  const modal = document.getElementById('luna-modal');
+  if (modal) {
+    modal.addEventListener('touchstart', e => { touchStartY = e.touches[0].clientY; }, { passive: true });
+    modal.addEventListener('touchend', e => {
+      if (e.changedTouches[0].clientY - touchStartY > 60) closeLunaChat();
+    }, { passive: true });
   }
 });
 </script>
