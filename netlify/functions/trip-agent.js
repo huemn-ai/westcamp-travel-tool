@@ -133,25 +133,6 @@ async function getVertexAccessToken() {
   return _vertexTokenCache.token;
 }
 
-async function vertexRequest(contents, systemInstruction, tools) {
-  const token    = await getVertexAccessToken();
-  const hostname = `${VERTEX_LOCATION}-aiplatform.googleapis.com`;
-  const path     = `/v1/projects/${VERTEX_PROJECT}/locations/${VERTEX_LOCATION}/publishers/google/models/${VERTEX_MODEL}:generateContent`;
-
-  const body = {
-    contents,
-    systemInstruction: { parts: [{ text: systemInstruction }] },
-    // Include both function declarations AND native Google Search grounding.
-    // Gemini will decide whether to call a function, search natively, or answer directly.
-    tools: [
-      { functionDeclarations: tools },
-      { googleSearch: {} },
-    ],
-    generationConfig: { maxOutputTokens: 4096, temperature: 0.7 },
-  };
-
-  return httpsPost(hostname, path, body, { Authorization: `Bearer ${token}` });
-}
 
 // ─── Time helpers (mirror of what the frontend uses) ────────────────────────
 // "minutes from 10 AM" is what the DB stores.
