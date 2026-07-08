@@ -1445,6 +1445,7 @@ body::after{
   transition: opacity 0.38s ease 0.42s, transform 0.38s ease 0.42s;
   overflow: hidden;
   box-shadow: 0 8px 32px rgba(0,0,0,0.14), 0 2px 8px rgba(0,0,0,0.08);
+  max-height: 100vh;
 }
 .luna-panel.open {
   opacity: 1;
@@ -1665,9 +1666,10 @@ body::after{
 /* Mobile: tighter margins for keyboard safety */
 @media (max-width: 519px) {
   .luna-panel {
-    left: 12px;
-    right: 12px;
-    bottom: calc(72px + env(safe-area-inset-bottom, 0px));
+    left: 8px;
+    right: 8px;
+    bottom: calc(60px + env(safe-area-inset-bottom, 0px));
+    top: max(4px, env(safe-area-inset-top, 4px));
   }
 }
 
@@ -2167,5 +2169,5 @@ body::after{
     </div>
   </div>
 </div>
-<script src="/app.js?v=20260708220000"></script>
+<script src="/app.js?v=20260708221000"></script>
 </body></html>
