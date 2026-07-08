@@ -2455,12 +2455,14 @@ async function storageSet(key, value) {
   }
 }
 async function loadAllShared() {
+  const TIMEOUT_MS = 5000;
+  const withTimeout = (p) => Promise.race([p, new Promise(res => setTimeout(() => res(null), TIMEOUT_MS))]);
   try {
     const [votes, schedule, writein, shopping] = await Promise.all([
-      storageGet('wcd-votes'),
-      storageGet('wcd-schedule'),
-      storageGet('wcd-writein'),
-      storageGet('wcd-shopping'),
+      withTimeout(storageGet('wcd-votes')),
+      withTimeout(storageGet('wcd-schedule')),
+      withTimeout(storageGet('wcd-writein')),
+      withTimeout(storageGet('wcd-shopping')),
     ]);
     if (votes)    ST.votes    = votes;
     if (schedule) ST.schedule = schedule;
@@ -2469,7 +2471,8 @@ async function loadAllShared() {
   } catch(e) {
     console.warn('loadAllShared error', e);
     ST.storageOk = false;
-    document.getElementById('storage-banner').classList.add('visible');
+    const banner = document.getElementById('storage-banner');
+    if (banner) banner.classList.add('visible');
   }
 }
 
@@ -3612,44 +3615,53 @@ async function init(){
     if(el) el.innerHTML='<div style="padding:12px"><div class="skeleton-bar" style="height:48px;margin-bottom:6px"></div><div class="skeleton-bar" style="height:80px;margin-bottom:6px"></div><div class="skeleton-bar" style="height:56px"></div></div>';
   });
 
-  // Load shared state
+  // Load shared state (with 5s timeout so we always proceed)
   await loadAllShared();
   
   // Subscribe to real-time changes
   subscribeToChanges();
 
-  // Name input — replaced by modal; wire up change-name button
-  const changeName=document.getElementById('btn-change-name');
-  if(changeName) changeName.addEventListener('click', openNameModal);
+  try {
+    // Name input — replaced by modal; wire up change-name button
+    const changeName=document.getElementById('btn-change-name');
+    if(changeName) changeName.addEventListener('click', openNameModal);
 
-  // Show name modal on load if no name set
-  if(!ST.guestName) {
-    openNameModal();
-  } else {
-    updateNameButton();
-  }
+    // Show name modal on load if no name set
+    if(!ST.guestName) {
+      openNameModal();
+    } else {
+      updateNameButton();
+    }
 
-  // Wire up name-select enable/disable confirm
-  const nameSelect = document.getElementById('name-select');
-  if(nameSelect){
-    nameSelect.addEventListener('change', ()=>{
-      document.getElementById('nmodal-confirm').disabled = !nameSelect.value;
+    // Wire up name-select enable/disable confirm
+    const nameSelect = document.getElementById('name-select');
+    if(nameSelect){
+      nameSelect.addEventListener('change', ()=>{
+        document.getElementById('nmodal-confirm').disabled = !nameSelect.value;
+      });
+      // Pre-select if name already known
+      if(ST.guestName) nameSelect.value = ST.guestName;
+    }
+
+    // Tab buttons
+    document.querySelectorAll('.tab-btn').forEach(btn=>{
+      btn.addEventListener('click',()=>switchTab(btn.dataset.tab));
     });
-    // Pre-select if name already known
-    if(ST.guestName) nameSelect.value = ST.guestName;
+
+    // Refresh button
+    const btnRefresh = document.getElementById('btn-refresh');
+    if(btnRefresh) btnRefresh.addEventListener('click',doRefresh);
+  } catch(e) {
+    console.error('init setup error', e);
   }
 
-  // Tab buttons
-  document.querySelectorAll('.tab-btn').forEach(btn=>{
-    btn.addEventListener('click',()=>switchTab(btn.dataset.tab));
-  });
-
-  // Refresh button
-  document.getElementById('btn-refresh').addEventListener('click',doRefresh);
-
-  // Build initial active tab
-  buildCalendar('thu', document.getElementById('cal-thu'));
-  renderSundayTab();
+  // Always build calendar regardless of any other errors
+  try {
+    buildCalendar('thu', document.getElementById('cal-thu'));
+    renderSundayTab();
+  } catch(e) {
+    console.error('buildCalendar error', e);
+  }
 }
 
 function openNameModal(){
