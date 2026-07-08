@@ -1,0 +1,3027 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>West Camp Debrief · Jul 9–12, 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400;1,9..144,600&family=IBM+Plex+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* TOKENS */
+:root {
+  --river:#1F3B42;--foam:#F1EFE6;--buoy:#BE5A34;--moss:#6E8F53;
+  --card:#FAF8F1;--line:#D8D2C0;--rain:#3C6B78;--warm:#C68A2E;
+  --ink1:#44555A;--ink2:#8A9BA0;
+  --vote1:#2E5E1E;--vote2:#B8860B;
+  --serif:"Fraunces",Georgia,serif;
+  --mono:"IBM Plex Mono","Courier New",monospace;
+  --sans:"Plus Jakarta Sans",system-ui,sans-serif;
+  --ease-spring:cubic-bezier(0.32,0.72,0,1);
+  --ease-out:cubic-bezier(0.23,1,0.32,1);
+  --row-h:56px;
+}
+@media(max-width:768px){:root{--row-h:48px;}}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{font-size:16px;scroll-behavior:smooth;}
+body{background:var(--foam);color:var(--river);font-family:var(--sans);min-height:100vh;}
+
+/* ── Global mobile touch baseline ─────────────────────────── */
+button,a,[role="button"]{
+  touch-action:manipulation;      /* remove 300ms tap delay */
+  -webkit-tap-highlight-color:transparent;
+}
+input,textarea,select{
+  -webkit-tap-highlight-color:transparent;
+  font-size:16px; /* prevent iOS auto-zoom on focus */
+}
+a{color:var(--buoy);text-decoration:none;}
+a:hover{text-decoration:underline;}
+button{cursor:pointer;font-family:var(--sans);}
+/* HERO */
+.hero{
+  background:linear-gradient(160deg,#162B31 0%,#1F3B42 45%,#172D33 100%);
+  color:var(--foam);
+  padding:36px 28px 26px;
+  position:relative;
+  overflow:hidden;
+}
+.hero::before{
+  content:"";
+  position:absolute;
+  left:0;right:0;top:0;
+  height:2px;
+  background:linear-gradient(90deg,var(--vote1) 0%,var(--buoy) 35%,var(--warm) 65%,var(--rain) 100%);
+}
+.hero::after{
+  content:"";
+  position:absolute;
+  right:-80px;bottom:-60px;
+  width:420px;height:420px;
+  border-radius:50%;
+  background:radial-gradient(circle,rgba(190,90,52,.07) 0%,rgba(46,94,30,.04) 45%,transparent 72%);
+  pointer-events:none;
+}
+.hero-inner{max-width:760px;margin:0 auto;position:relative;}
+.hero-eyebrow{
+  font-family:var(--mono);
+  font-size:10px;
+  letter-spacing:.22em;
+  text-transform:uppercase;
+  color:rgba(161,180,183,.65);
+  margin-bottom:12px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+.hero-eyebrow::before{
+  content:"";
+  display:inline-block;
+  width:24px;height:1px;
+  background:linear-gradient(90deg,var(--vote1),var(--buoy));
+  flex-shrink:0;
+}
+.hero-title{
+  font-family:var(--serif);
+  font-size:clamp(34px,6vw,54px);
+  font-weight:600;
+  line-height:1.0;
+  letter-spacing:-.03em;
+  color:var(--foam);
+  margin-bottom:12px;
+}
+.hero-title em{
+  font-style:italic;
+  color:var(--buoy);
+  font-weight:400;
+  letter-spacing:-.01em;
+}
+.hero-sub{
+  font-size:13px;
+  color:rgba(161,180,183,.72);
+  max-width:480px;
+  line-height:1.6;
+  font-weight:400;
+}
+.hero-disclosure{
+  font-family:var(--mono);
+  font-size:9.5px;
+  color:rgba(138,155,160,.45);
+  margin-top:14px;
+  padding-top:12px;
+  border-top:1px solid rgba(255,255,255,.07);
+  letter-spacing:.03em;
+}
+.stamp{
+  position:absolute;
+  right:0;top:0;
+  transform:rotate(-9deg);
+  width:100px;height:100px;
+  border:1.5px solid rgba(190,90,52,.32);
+  border-radius:50%;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:2px;
+  background:radial-gradient(circle,rgba(190,90,52,.04),transparent 70%);
+}
+.stamp::before{
+  content:"";
+  position:absolute;
+  inset:5px;
+  border-radius:50%;
+  border:1px dashed rgba(190,90,52,.18);
+}
+.stamp span{
+  font-family:var(--mono);
+  font-size:7px;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  color:rgba(190,90,52,.48);
+  text-align:center;
+  line-height:1.5;
+}
+@media(max-width:520px){.stamp{display:none;}}
+.hero-controls{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-top:18px;
+  flex-wrap:wrap;
+}
+.btn-change-name-placeholder{display:none;}
+.btn-refresh{
+  margin-left:auto;
+  background:transparent;
+  border:1px solid rgba(255,255,255,.16);
+  border-radius:20px;
+  color:rgba(241,239,230,.65);
+  font-family:var(--mono);
+  font-size:9.5px;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  padding:5px 12px;
+  display:flex;
+  align-items:center;
+  gap:5px;
+  transition:background 220ms var(--ease-out),border-color 220ms var(--ease-out),color 220ms var(--ease-out),transform 150ms var(--ease-out);
+}
+.btn-refresh:hover{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.28);color:var(--foam);}
+@media(hover:hover) and (pointer:fine){
+.tab-btn:hover{color:rgba(241,239,230,.8);background:rgba(255,255,255,.04);}
+}.btn-refresh:active{transform:scale(.97);}
+.btn-refresh.spinning svg{animation:spin 600ms linear;}
+@keyframes spin{to{transform:rotate(360deg);}}
+/* TABS */
+.tabs-nav{
+  position:sticky;top:0;z-index:100;
+  background:linear-gradient(180deg,#182E34 0%,#1F3B42 100%);
+  border-bottom:1px solid rgba(190,90,52,.3);
+  display:flex;
+  overflow-x:auto;
+  scrollbar-width:none;
+  box-shadow:0 2px 16px rgba(0,0,0,.18),0 1px 0 rgba(255,255,255,.04) inset;
+}
+.tabs-nav::-webkit-scrollbar{display:none;}
+.tab-btn{
+  background:none;
+  border:none;
+  color:rgba(138,155,160,.55);
+  font-family:var(--mono);
+  font-size:10.5px;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  padding:15px 18px;
+  white-space:nowrap;
+  transition:color 200ms var(--ease-out),background 200ms var(--ease-out);
+  position:relative;
+  flex-shrink:0;
+}
+@media(hover:hover) and (pointer:fine){.tab-btn:hover{color:rgba(241,239,230,.8);background:rgba(255,255,255,.04);}}
+.tab-btn.active{color:var(--foam);font-weight:600;}
+.tab-btn.active::after{
+  content:"";
+  position:absolute;
+  bottom:0;left:14px;right:14px;
+  height:2px;
+  background:linear-gradient(90deg,var(--vote1),var(--buoy));
+  border-radius:2px 2px 0 0;
+}
+/* PANELS */
+.tab-panel{display:none;}
+.tab-panel.active{display:block;animation:fadeIn 200ms var(--ease-out);}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:none;}}
+.page-inner{max-width:760px;margin:0 auto;padding:0 16px 80px;}
+/* STORAGE BANNER */
+.storage-banner{
+  background:var(--buoy);
+  color:#fff;
+  font-family:var(--mono);
+  font-size:11px;
+  padding:9px 16px;
+  text-align:center;
+  display:none;
+  letter-spacing:.03em;
+}
+.storage-banner.visible{display:block;}
+/* DAY HEADER */
+.day-header{padding:24px 0 14px;}
+.day-title{
+  font-family:var(--serif);
+  font-size:clamp(20px,4vw,28px);
+  font-weight:600;
+  color:var(--river);
+  letter-spacing:-.02em;
+  line-height:1.1;
+}
+.day-weather-summary{
+  font-family:var(--mono);
+  font-size:11px;
+  color:var(--warm);
+  margin-top:5px;
+  letter-spacing:.04em;
+}
+.day-disclaimer{
+  font-family:var(--mono);
+  font-size:9px;
+  color:var(--ink2);
+  margin-top:4px;
+  font-style:italic;
+  opacity:.7;
+}
+/* CALENDAR CANVAS */
+.cal-outer{
+  position:relative;
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:2px;
+  box-shadow:0 1px 4px rgba(31,59,66,.06),0 4px 20px rgba(31,59,66,.04);
+  overflow:hidden;
+  padding-top:10px;
+}
+.cal-axis{
+  position:absolute;
+  left:0;top:0;bottom:0;
+  width:56px;
+  background:var(--card);
+  z-index:5;
+  border-right:1px solid var(--line);
+}
+.cal-axis-label{
+  position:absolute;
+  left:0;
+  width:54px;
+  text-align:right;
+  font-family:var(--mono);
+  font-size:9px;
+  color:var(--ink2);
+  padding-right:7px;
+  transform:translateY(-50%);
+  pointer-events:none;
+  letter-spacing:.02em;
+}
+.cal-axis-tick{
+  position:absolute;
+  right:0;
+  width:4px;
+  height:1px;
+  background:var(--line);
+  transform:translateY(-50%);
+}
+.cal-grid{
+  position:absolute;
+  left:56px;right:0;top:10px;bottom:0;
+  pointer-events:none;
+}
+.cal-gridline{
+  position:absolute;
+  left:0;right:0;
+  height:1px;
+  background:var(--line);
+  opacity:.35;
+}
+.cal-gridline.noon{opacity:.65;}
+.cal-weather-svg{
+  position:absolute;
+  left:56px;right:0;top:10px;bottom:0;
+  pointer-events:none;
+  z-index:1;
+}
+.cal-blocks{
+  position:absolute;
+  left:56px;right:8px;top:0;bottom:0;
+  z-index:10;
+}
+/* CALENDAR BLOCKS */
+.cal-block{
+  position:absolute;
+  left:0;right:0;
+  border-radius:6px;
+  overflow:visible;
+  transition:box-shadow 200ms var(--ease-out),transform 200ms var(--ease-out);
+  min-height:44px;
+  user-select:none;
+  touch-action:none; /* allow pointer-based drag without scroll interference */
+}
+.cal-block:focus{outline:2px solid var(--buoy);outline-offset:2px;}
+.cal-block.type-activity{
+  background:rgba(31,59,66,.05);
+  border:1px solid rgba(31,59,66,.22);
+  box-shadow:0 1px 3px rgba(31,59,66,.06);
+}
+@media(hover:hover) and (pointer:fine){
+  .cal-block.type-activity:hover{background:rgba(31,59,66,.08);box-shadow:0 2px 8px rgba(31,59,66,.1);}
+}
+.cal-block.type-meal{
+  background:rgba(190,90,52,.05);
+  border-left:3px solid var(--buoy);
+  border-top:1px solid rgba(190,90,52,.18);
+  border-right:1px solid rgba(190,90,52,.12);
+  border-bottom:1px solid rgba(190,90,52,.12);
+  box-shadow:0 1px 4px rgba(190,90,52,.08);
+}
+@media(hover:hover) and (pointer:fine){
+  .cal-block.type-meal:hover{background:rgba(190,90,52,.09);box-shadow:0 2px 10px rgba(190,90,52,.14);}
+}
+.cal-block.type-snack{
+  background:rgba(198,138,46,.05);
+  border-left:3px solid var(--warm);
+  border-top:1px solid rgba(198,138,46,.18);
+  border-right:1px solid rgba(198,138,46,.12);
+  border-bottom:1px solid rgba(198,138,46,.12);
+  box-shadow:0 1px 4px rgba(198,138,46,.08);
+}
+.cal-block.type-personal{
+  background:rgba(110,143,83,.04);
+  border:1px dashed rgba(110,143,83,.4);
+}
+.cal-block.type-fixed{
+  background:linear-gradient(160deg,#162B31 0%,var(--river) 100%);
+  border:none;
+  box-shadow:0 2px 12px rgba(31,59,66,.25),0 1px 3px rgba(31,59,66,.15);
+}
+.cal-block.dragging{
+  border:2px solid var(--buoy) !important;
+  box-shadow:0 8px 28px rgba(190,90,52,.28),0 2px 8px rgba(190,90,52,.18) !important;
+  z-index:100 !important;
+  opacity:.94;
+  transform:scale(1.005);
+}
+.block-inner{padding:7px 9px 6px;overflow:visible;position:relative;}
+.block-header{display:flex;align-items:flex-start;gap:6px;}
+.block-title{
+  font-family:var(--sans);
+  font-size:11.5px;
+  font-weight:600;
+  line-height:1.3;
+  flex:1;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  color:var(--river);
+  letter-spacing:-.01em;
+}
+.cal-block.type-fixed .block-title{color:var(--foam);font-size:12px;}
+.block-weather-chip{
+  font-family:var(--mono);
+  font-size:8.5px;
+  color:var(--ink2);
+  background:rgba(255,255,255,.75);
+  border:1px solid rgba(216,210,192,.7);
+  border-radius:1px;
+  padding:1px 5px;
+  white-space:nowrap;
+  flex-shrink:0;
+  letter-spacing:.02em;
+}
+.cal-block.type-fixed .block-weather-chip{
+  background:rgba(255,255,255,.1);
+  border-color:rgba(255,255,255,.18);
+  color:rgba(241,239,230,.65);
+}
+.block-sub{
+  font-size:10px;
+  color:var(--ink2);
+  margin-top:2px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.cal-block.type-fixed .block-sub{color:rgba(241,239,230,.55);}
+.block-manual-pin{font-size:9px;margin-left:2px;color:var(--buoy);}
+.drag-tooltip{
+  position:fixed;
+  background:var(--river);
+  color:var(--foam);
+  font-family:var(--mono);
+  font-size:11px;
+  padding:4px 9px;
+  border-radius:2px;
+  pointer-events:none;
+  z-index:9999;
+  white-space:nowrap;
+  border-left:2px solid var(--buoy);
+  box-shadow:0 2px 8px rgba(0,0,0,.2);
+}
+/* VOTE TOGGLE — solid button in header row */
+.block-vote-toggle{
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
+  flex-shrink:0;
+  font-family:var(--mono);
+  font-size:7.5px;
+  font-weight:600;
+  color:#fff;
+  background:var(--buoy);
+  border:none;
+  border-radius:4px;
+  padding:2px 5px 2px 7px;
+  cursor:pointer;
+  letter-spacing:.09em;
+  text-transform:uppercase;
+  transition:background 160ms var(--ease-spring),transform 140ms var(--ease-spring),box-shadow 160ms var(--ease-spring);
+  box-shadow:0 1px 0 rgba(0,0,0,.18),0 1px 0 rgba(255,255,255,.14) inset;
+  line-height:1;
+}
+@media(hover:hover) and (pointer:fine){
+  .block-vote-toggle:hover{
+    background:#cc6438;
+    box-shadow:0 2px 6px rgba(190,90,52,.35),0 1px 0 rgba(255,255,255,.14) inset;
+  }
+  .block-vote-toggle:hover .vt-icon-circle{transform:translateY(1px);}
+}
+.block-vote-toggle:active{transform:scale(.94);box-shadow:0 1px 2px rgba(0,0,0,.14);}
+.block-vote-toggle .vt-icon-circle{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:12px;height:12px;
+  border-radius:3px;
+  background:rgba(0,0,0,.18);
+  transition:transform 160ms var(--ease-spring);
+  flex-shrink:0;
+}
+.block-vote-toggle svg{display:block;flex-shrink:0;}
+.block-vote-toggle.open .vt-icon-circle svg{transform:rotate(180deg);}
+/* Panel: animated overlay that drops below the block */
+.block-vote-panel{
+  overflow:hidden;
+  max-height:0;
+  opacity:0;
+  pointer-events:none;
+  position:absolute;
+  left:-1px; right:-1px;
+  top:calc(100% + 2px);
+  z-index:50;
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:0 0 2px 2px;
+  box-shadow:0 6px 20px rgba(31,59,66,.12);
+  padding-left:10px;
+  padding-right:10px;
+  transition:
+    max-height 280ms cubic-bezier(0.23,1,0.32,1),
+    opacity 200ms ease-out;
+}
+.block-vote-panel.open{
+  max-height:1400px;
+  opacity:1;
+  pointer-events:auto;
+  padding-top:10px;
+  padding-bottom:10px;
+  transition:
+    max-height 320ms cubic-bezier(0.23,1,0.32,1),
+    opacity 220ms ease-out;
+}
+/* Stagger vote option rows on open */
+.block-vote-panel.open .vote-option-row{
+  animation: voteRowIn 220ms cubic-bezier(0.23,1,0.32,1) both;
+}
+.block-vote-panel.open .vote-option-row:nth-child(1){animation-delay:40ms;}
+.block-vote-panel.open .vote-option-row:nth-child(2){animation-delay:80ms;}
+.block-vote-panel.open .vote-option-row:nth-child(3){animation-delay:120ms;}
+.block-vote-panel.open .vote-option-row:nth-child(4){animation-delay:155ms;}
+.block-vote-panel.open .vote-option-row:nth-child(5){animation-delay:185ms;}
+@keyframes voteRowIn{
+  from{opacity:0;transform:translateY(5px);}
+  to{opacity:1;transform:translateY(0);}
+}
+@media(prefers-reduced-motion:reduce){
+  .block-vote-panel,.block-vote-panel.open{transition:opacity 120ms ease,max-height 120ms ease;}
+  .block-vote-panel.open .vote-option-row{animation:none;}
+}
+/* VOTE OPTION ROWS */
+.opt-duration{
+  display:inline-flex;
+  align-items:center;
+  gap:3px;
+  background:rgba(31,59,66,.07);
+  border:1px solid rgba(31,59,66,.12);
+  border-radius:4px;
+  padding:1px 6px;
+  font-size:11px;
+  font-weight:600;
+  color:var(--river);
+  letter-spacing:.02em;
+  white-space:nowrap;
+}
+.opt-addr{color:var(--ink2);font-size:12px;}
+.opt-tip{color:var(--ink2);font-size:12px;font-style:italic;}
+.opt-sep{color:var(--ink2);opacity:.5;}
+.vote-section-header{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:12px 0 6px;
+  font-family:var(--sans);
+  font-size:10px;
+  font-weight:700;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  color:var(--ink2);
+  opacity:.6;
+}
+.vote-section-header::before,.vote-section-header::after{
+  content:'';
+  flex:1;
+  height:1px;
+  background:var(--line);
+}
+.vote-section-header:first-child{padding-top:4px;}
+.vote-option-row{
+  display:flex;
+  align-items:flex-start;
+  gap:10px;
+  padding:10px 0;
+  border-bottom:1px solid rgba(216,210,192,.5);
+}
+.vote-option-row:last-child{border-bottom:none;}
+.vote-option-row.is-winner{
+  background:linear-gradient(to right,rgba(46,94,30,.07),rgba(46,94,30,.02));
+  border-left:3px solid #2E5E1E;
+  padding-left:9px;
+  margin-left:-9px;
+  border-bottom-color:rgba(46,94,30,.15);
+}
+.vote-option-content{flex:1;min-width:0;}
+.vote-option-name{
+  font-size:13px;
+  font-weight:600;
+  color:var(--river);
+  display:flex;
+  align-items:center;
+  gap:6px;
+  flex-wrap:wrap;
+  letter-spacing:-.01em;
+}
+.badge-plan{
+  font-family:var(--mono);
+  font-size:8px;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  background:#2E5E1E;
+  color:#fff;
+  padding:2px 6px;
+  border-radius:1px;
+  font-weight:500;
+}
+.badge-veg{
+  font-family:var(--mono);
+  font-size:8px;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  background:var(--moss);
+  color:#fff;
+  padding:2px 5px;
+  border-radius:1px;
+}
+.vote-option-meta{
+  font-family:var(--mono);
+  font-size:10px;
+  color:var(--ink2);
+  margin-top:3px;
+  display:flex;
+  align-items:center;
+  gap:6px;
+  flex-wrap:wrap;
+}
+.vote-option-meta a{color:var(--buoy);font-size:10px;}
+.vote-option-meta a:hover{text-decoration:underline;}
+.vote-option-sides{font-size:11px;color:var(--ink1);margin-top:3px;}
+.vote-option-tip{font-size:11px;color:var(--ink1);margin-top:3px;font-style:italic;}
+/* VOTE CHIPS */
+.vote-chips{
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+  align-items:center;
+  flex-shrink:0;
+}
+.chip{
+  font-family:var(--mono);
+  font-size:9px;
+  font-weight:500;
+  letter-spacing:.08em;
+  padding:4px 9px;
+  border-radius:20px;
+  border:1.5px solid rgba(190,90,52,.55);
+  background:transparent;
+  color:var(--buoy);
+  cursor:pointer;
+  white-space:nowrap;
+  transition:background 180ms var(--ease-out),color 180ms var(--ease-out),border-color 180ms var(--ease-out),transform 120ms var(--ease-out),box-shadow 180ms var(--ease-out);
+  line-height:1;
+}
+@media(hover:hover) and (pointer:fine){.chip:hover{background:rgba(190,90,52,.1);border-color:var(--buoy);}}
+.chip:active{transform:scale(.92);}
+.chip.selected-1{
+  background:#2E5E1E;
+  color:#fff;
+  border-color:#2E5E1E;
+  box-shadow:0 1px 6px rgba(46,94,30,.35);
+}
+.chip.selected-2{
+  background:#B8860B;
+  color:#fff;
+  border-color:#B8860B;
+  box-shadow:0 1px 6px rgba(184,134,11,.35);
+}
+.chip:disabled{opacity:.3;cursor:not-allowed;}
+.vote-tally{
+  font-family:var(--mono);
+  font-size:10px;
+  color:var(--ink2);
+  margin-top:5px;
+  white-space:nowrap;
+  display:flex;
+  align-items:center;
+  gap:4px;
+}
+.vote-tally .pts{color:var(--buoy);font-weight:500;}
+.tied-label{
+  font-family:var(--mono);
+  font-size:8.5px;
+  color:var(--warm);
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  background:rgba(198,138,46,.12);
+  padding:1px 5px;
+  border-radius:1px;
+}
+/* WRITE-IN */
+.writein-input{
+  width:100%;
+  border:1px solid var(--line);
+  border-radius:2px;
+  background:var(--foam);
+  color:var(--river);
+  font-family:var(--sans);
+  font-size:13px;
+  padding:6px 8px;
+  margin-top:5px;
+  outline:none;
+  transition:border-color 150ms;
+}
+.writein-input:focus{border-color:var(--buoy);box-shadow:0 0 0 2px rgba(190,90,52,.1);}
+.writein-saved{font-family:var(--mono);font-size:9px;color:var(--moss);margin-top:2px;display:none;}
+.writein-saved.show{display:block;}
+/* RESTAURANT LIST */
+.restaurant-list{margin-top:8px;}
+.restaurant-item{
+  padding:9px 0;
+  border-bottom:1px solid rgba(216,210,192,.5);
+}
+.restaurant-item:last-child{border-bottom:none;}
+.restaurant-name{font-weight:600;font-size:13px;letter-spacing:-.01em;}
+.restaurant-price{
+  font-family:var(--mono);
+  font-size:10px;
+  color:var(--moss);
+  background:rgba(110,143,83,.1);
+  padding:1px 4px;
+  border-radius:1px;
+  margin-left:3px;
+}
+.restaurant-addr{font-size:11px;color:var(--ink2);margin-top:2px;font-family:var(--mono);letter-spacing:.02em;}
+.restaurant-why{font-size:11.5px;color:var(--ink1);margin-top:3px;font-style:italic;line-height:1.4;}
+.splurge-note{
+  font-size:11px;
+  color:var(--ink1);
+  font-style:italic;
+  margin-top:10px;
+  padding:8px 10px;
+  border:1px dashed rgba(198,138,46,.4);
+  border-radius:2px;
+  background:rgba(198,138,46,.04);
+  line-height:1.5;
+}
+/* SUNDAY CARDS */
+.sunday-card{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:2px;
+  padding:22px 20px;
+  margin-top:16px;
+  box-shadow:0 1px 4px rgba(31,59,66,.04);
+}
+.sunday-card-title{
+  font-family:var(--serif);
+  font-size:20px;
+  font-weight:600;
+  margin-bottom:14px;
+  color:var(--river);
+  letter-spacing:-.015em;
+  padding-bottom:10px;
+  border-bottom:1px solid var(--line);
+}
+.checkout-list{list-style:none;}
+.checkout-list li{
+  padding:7px 0;
+  border-bottom:1px solid rgba(216,210,192,.4);
+  font-size:13px;
+  padding-left:22px;
+  position:relative;
+  line-height:1.4;
+}
+.checkout-list li:last-child{border-bottom:none;}
+.checkout-list li::before{
+  content:"[ ]";
+  position:absolute;
+  left:0;
+  font-family:var(--mono);
+  font-size:9px;
+  color:var(--ink2);
+  top:8px;
+}
+/* SHOPPING LIST */
+.shop-header{
+  display:flex;
+  align-items:baseline;
+  gap:12px;
+  padding:24px 0 14px;
+  border-bottom:2px solid var(--line);
+  margin-bottom:4px;
+}
+.shop-title{
+  font-family:var(--serif);
+  font-size:clamp(18px,4vw,26px);
+  font-weight:600;
+  letter-spacing:-.02em;
+}
+.shop-count{
+  font-family:var(--mono);
+  font-size:11px;
+  color:var(--vote1);
+  background:rgba(46,94,30,.1);
+  padding:2px 9px;
+  border-radius:20px;
+  border:1px solid rgba(46,94,30,.15);
+}
+.shop-section-title{
+  font-family:var(--serif);
+  font-size:17px;
+  font-weight:600;
+  color:var(--river);
+  margin:26px 0 10px;
+  padding-bottom:8px;
+  border-bottom:1px solid var(--line);
+  letter-spacing:-.015em;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.shop-section-title::before{
+  content:"";
+  display:inline-block;
+  width:3px;height:16px;
+  background:linear-gradient(180deg,var(--vote1),var(--buoy));
+  border-radius:2px;
+  flex-shrink:0;
+}
+.shop-meal-title{
+  font-size:12px;
+  font-weight:600;
+  color:var(--ink1);
+  margin:12px 0 4px;
+  display:flex;
+  align-items:center;
+  gap:6px;
+  text-transform:uppercase;
+  letter-spacing:.05em;
+  font-family:var(--mono);
+}
+.shop-eating-out{
+  font-family:var(--mono);
+  font-size:10.5px;
+  color:var(--ink2);
+  font-style:italic;
+  padding:4px 0;
+}
+.shop-other-toggle{
+  font-family:var(--mono);
+  font-size:9px;
+  color:var(--ink2);
+  letter-spacing:.07em;
+  text-transform:uppercase;
+  background:none;
+  border:1px solid var(--line);
+  border-radius:1px;
+  padding:3px 9px;
+  cursor:pointer;
+  margin:5px 0 8px;
+  transition:border-color 120ms,color 120ms;
+}
+@media(hover:hover) and (pointer:fine){.shop-other-toggle:hover{border-color:var(--ink2);color:var(--river);}}
+.shop-other-panel{display:none;}
+.shop-other-panel.open{display:block;}
+.shop-item-row{
+  display:flex;
+  align-items:flex-start;
+  gap:10px;
+  padding:6px 0;
+  border-bottom:1px solid rgba(216,210,192,.3);
+  transition:background 100ms;
+  border-radius:1px;
+}
+.shop-item-row:last-child{border-bottom:none;}
+@media(hover:hover) and (pointer:fine){.shop-item-row:hover{background:rgba(31,59,66,.02);}}
+.shop-cb{
+  width:15px;height:15px;
+  border:1.5px solid var(--line);
+  border-radius:2px;
+  flex-shrink:0;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  margin-top:2px;
+  background:transparent;
+  transition:background 100ms,border-color 100ms;
+}
+@media(hover:hover) and (pointer:fine){.shop-cb:hover{border-color:var(--moss);}}
+.shop-cb.checked{background:var(--moss);border-color:var(--moss);}
+.shop-cb.checked::after{content:"v";color:#fff;font-size:9px;line-height:1;font-family:var(--mono);font-weight:500;}
+.shop-item-label{font-size:13px;color:var(--river);flex:1;line-height:1.4;transition:color 120ms;}
+.shop-item-row.checked-item .shop-item-label{text-decoration:line-through;color:var(--ink2);}
+.shop-placeholder-row{font-family:var(--mono);font-size:11px;color:var(--ink2);font-style:italic;padding:4px 0 4px 25px;}
+/* SKELETON */
+.skeleton-bar{
+  background:linear-gradient(90deg,var(--line) 25%,rgba(216,210,192,.4) 50%,var(--line) 75%);
+  background-size:200% 100%;
+  animation:shimmer 1.2s ease-in-out infinite;
+  border-radius:2px;
+  height:44px;
+  margin-bottom:6px;
+}
+@keyframes shimmer{to{background-position:-200% 0;}}
+/* VOTE MODAL */
+.vmodal-backdrop{
+  position:fixed;
+  inset:0;
+  background:rgba(20,40,44,.6);
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+  z-index:500;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:16px;
+}
+.vmodal-backdrop.entering{animation:backdropIn 250ms var(--ease-out) both;}
+.vmodal-backdrop.exiting{animation:backdropOut 180ms ease-in both;}
+@keyframes backdropIn{from{opacity:0;}to{opacity:1;}}
+@keyframes backdropOut{from{opacity:1;}to{opacity:0;}}
+
+/* Double-bezel outer shell */
+.vmodal-shell{
+  background:rgba(31,59,66,.18);
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:18px;
+  padding:3px;
+  width:100%;
+  max-width:540px;
+  box-shadow:
+    0 2px 0 rgba(255,255,255,.06) inset,
+    0 32px 64px rgba(10,22,25,.55),
+    0 8px 24px rgba(10,22,25,.35),
+    0 2px 8px rgba(10,22,25,.25);
+}
+.vmodal-panel{
+  background:var(--card);
+  border-radius:15px;
+  width:100%;
+  max-height:calc(85vh - 6px);
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+  box-shadow:0 1px 0 rgba(255,255,255,.65) inset;
+}
+.vmodal-backdrop.entering .vmodal-shell{
+  animation:modalIn 300ms cubic-bezier(0.32,0.72,0,1) both;
+}
+.vmodal-backdrop.exiting .vmodal-shell{
+  animation:modalOut 180ms ease-in both;
+}
+@keyframes modalIn{from{opacity:0;transform:scale(.94) translateY(10px);}to{opacity:1;transform:scale(1) translateY(0);}}
+@keyframes modalOut{from{opacity:1;transform:scale(1);}to{opacity:0;transform:scale(.97) translateY(4px);}}
+
+.vmodal-header{
+  display:flex;
+  align-items:flex-start;
+  gap:8px;
+  padding:18px 20px 16px;
+  border-bottom:1px solid rgba(31,59,66,.1);
+  flex-shrink:0;
+  background:linear-gradient(160deg,#162B31 0%,#1F3B42 100%);
+  border-radius:15px 15px 0 0;
+}
+.vmodal-eyebrow{
+  font-family:var(--mono);
+  font-size:9px;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  color:rgba(138,155,160,.65);
+  margin-bottom:4px;
+}
+.vmodal-title{
+  font-family:var(--serif);
+  font-size:19px;
+  font-weight:600;
+  color:var(--foam);
+  letter-spacing:-.02em;
+  line-height:1.15;
+  flex:1;
+}
+.vmodal-close{
+  background:rgba(255,255,255,.07);
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:50%;
+  color:rgba(241,239,230,.5);
+  width:30px;height:30px;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+  cursor:pointer;
+  transition:background 200ms var(--ease-out),color 200ms var(--ease-out),transform 150ms var(--ease-out);
+  margin-top:2px;
+}
+@media(hover:hover) and (pointer:fine){.vmodal-close:hover{background:rgba(255,255,255,.14);color:var(--foam);}}
+.vmodal-close:active{transform:scale(.9);}
+.vmodal-body{
+  overflow-y:auto;
+  padding:6px 20px 20px;
+  flex:1;
+  overscroll-behavior:contain;
+}
+.vmodal-body .vote-option-row{
+  animation:voteRowIn 280ms cubic-bezier(0.32,0.72,0,1) both;
+}
+.vmodal-body .vote-option-row:nth-child(1){animation-delay:20ms;}
+.vmodal-body .vote-option-row:nth-child(2){animation-delay:60ms;}
+.vmodal-body .vote-option-row:nth-child(3){animation-delay:100ms;}
+.vmodal-body .vote-option-row:nth-child(4){animation-delay:135ms;}
+.vmodal-body .vote-option-row:nth-child(5){animation-delay:165ms;}
+.vmodal-name-hint{
+  font-family:var(--mono);
+  font-size:10px;
+  color:var(--ink2);
+  padding:10px 0 4px;
+  font-style:italic;
+}
+@media(max-width:600px){
+  .vmodal-shell{max-height:92vh;}
+  .vmodal-panel{max-height:calc(92vh - 6px);}
+  .vmodal-header{padding:14px 16px 12px;}
+  .vmodal-body{padding:4px 16px 16px;}
+}
+@media(prefers-reduced-motion:reduce){
+  .vmodal-backdrop.entering,.vmodal-backdrop.exiting,
+  .vmodal-backdrop.entering .vmodal-shell,.vmodal-backdrop.exiting .vmodal-shell{animation:none;}
+  .vmodal-body .vote-option-row{animation:none;}
+}
+/* VOTING WIZARD */
+.wizard-backdrop{
+  position:fixed;
+  inset:0;
+  background:rgba(20,40,44,.75);
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+  z-index:550;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:16px;
+  animation:backdropIn 280ms var(--ease-out) both;
+}
+.wizard-shell{
+  background:rgba(31,59,66,.2);
+  border:1px solid rgba(255,255,255,.11);
+  border-radius:20px;
+  padding:3px;
+  width:100%;
+  max-width:520px;
+  box-shadow:
+    0 2px 0 rgba(255,255,255,.06) inset,
+    0 32px 64px rgba(10,22,25,.6),
+    0 8px 24px rgba(10,22,25,.4);
+  animation:modalIn 340ms cubic-bezier(0.32,0.72,0,1) both;
+}
+.wizard-panel{
+  background:var(--card);
+  border-radius:17px;
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+  height:min(640px, calc(92vh - 6px));
+  box-shadow:0 1px 0 rgba(255,255,255,.7) inset;
+}
+.wizard-header{
+  background:linear-gradient(160deg,#162B31 0%,#1F3B42 100%);
+  border-radius:17px 17px 0 0;
+  padding:20px 22px 16px;
+  flex-shrink:0;
+}
+.wizard-header-top{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:14px;
+}
+.wizard-eyebrow{
+  font-family:var(--mono);
+  font-size:9px;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  color:rgba(138,155,160,.6);
+  margin-bottom:4px;
+}
+.wizard-title{
+  font-family:var(--serif);
+  font-size:20px;
+  font-weight:600;
+  color:var(--foam);
+  letter-spacing:-.02em;
+  line-height:1.15;
+}
+.wizard-skip-all{
+  background:rgba(255,255,255,.07);
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:20px;
+  color:rgba(241,239,230,.5);
+  font-family:var(--mono);
+  font-size:9px;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  padding:5px 10px;
+  cursor:pointer;
+  white-space:nowrap;
+  flex-shrink:0;
+  transition:background 180ms var(--ease-out),color 180ms var(--ease-out);
+}
+@media(hover:hover) and (pointer:fine){.wizard-skip-all:hover{background:rgba(255,255,255,.13);color:var(--foam);}}
+.wizard-progress-track{
+  height:3px;
+  background:rgba(255,255,255,.1);
+  border-radius:2px;
+  overflow:hidden;
+  margin-bottom:8px;
+}
+.wizard-progress-fill{
+  height:100%;
+  background:linear-gradient(90deg,var(--vote1),var(--buoy));
+  border-radius:2px;
+  transition:width 400ms cubic-bezier(0.32,0.72,0,1);
+}
+.wizard-step-label{
+  font-family:var(--mono);
+  font-size:9px;
+  letter-spacing:.1em;
+  color:rgba(138,155,160,.55);
+  text-align:right;
+}
+.wizard-body{
+  overflow-y:auto;
+  padding:6px 22px 8px;
+  flex:1;
+  overscroll-behavior:contain;
+}
+.wizard-body .vote-option-row{
+  animation:voteRowIn 260ms cubic-bezier(0.32,0.72,0,1) both;
+}
+.wizard-body .vote-option-row:nth-child(1){animation-delay:20ms;}
+.wizard-body .vote-option-row:nth-child(2){animation-delay:55ms;}
+.wizard-body .vote-option-row:nth-child(3){animation-delay:90ms;}
+.wizard-body .vote-option-row:nth-child(4){animation-delay:120ms;}
+.wizard-body .vote-option-row:nth-child(5){animation-delay:145ms;}
+.wizard-footer{
+  display:flex;
+  align-items:center;
+  padding:14px 22px 18px;
+  border-top:1px solid rgba(216,210,192,.4);
+  flex-shrink:0;
+  gap:8px;
+}
+.wizard-btn-back{
+  background:none;
+  border:1px solid var(--line);
+  border-radius:8px;
+  color:var(--ink2);
+  font-family:var(--sans);
+  font-size:13px;
+  padding:9px 14px;
+  cursor:pointer;
+  white-space:nowrap;
+  transition:background 160ms var(--ease-out),color 160ms var(--ease-out),opacity 160ms var(--ease-out);
+}
+@media(hover:hover) and (pointer:fine){.wizard-btn-back:hover{background:rgba(31,59,66,.05);color:var(--ink1);}}
+.wizard-btn-back:disabled{opacity:.3;cursor:not-allowed;}
+.wizard-btn-skip{
+  background:none;
+  border:1px solid var(--line);
+  border-radius:8px;
+  color:var(--ink2);
+  font-family:var(--sans);
+  font-size:13px;
+  padding:9px 14px;
+  cursor:pointer;
+  white-space:nowrap;
+  transition:background 160ms var(--ease-out),color 160ms var(--ease-out);
+}
+@media(hover:hover) and (pointer:fine){.wizard-btn-skip:hover{background:rgba(31,59,66,.05);color:var(--ink1);}}
+.wizard-btn-next{
+  flex:1;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  background:var(--river);
+  color:var(--foam);
+  border:none;
+  border-radius:8px;
+  font-family:var(--sans);
+  font-size:14px;
+  font-weight:600;
+  padding:10px 20px;
+  cursor:pointer;
+  box-shadow:0 1px 0 rgba(255,255,255,.1) inset,0 2px 8px rgba(31,59,66,.25);
+  transition:background 160ms var(--ease-spring),transform 140ms var(--ease-spring);
+}
+@media(hover:hover) and (pointer:fine){
+  .wizard-btn-next:hover{background:#2a4f58;}
+  .wizard-btn-next:hover .wizard-next-arrow{transform:translateX(3px);}
+}
+.wizard-btn-next:active{transform:scale(.97);}
+.wizard-next-arrow{
+  font-size:16px;
+  transition:transform 180ms var(--ease-spring);
+}
+/* ── Mobile layout overrides (≤ 480px) ──────────────────────── */
+@media(max-width:480px){
+  .hero{padding:20px 16px 16px;}
+  .hero-title{font-size:clamp(28px,8vw,40px);}
+  .page-inner{padding:0 10px 80px;}
+  .day-header{padding:18px 0 10px;}
+
+  /* Wizard: full-screen sheet on phones */
+  .wizard-backdrop{align-items:flex-end;}
+  .wizard-shell{
+    border-bottom-left-radius:0;
+    border-bottom-right-radius:0;
+    max-width:100%;
+    width:100%;
+  }
+  .wizard-panel{
+    height:min(88svh, 88vh);
+    border-bottom-left-radius:0;
+    border-bottom-right-radius:0;
+  }
+  /* Stack footer: Back+Skip on top row, Next full-width below */
+  .wizard-footer{flex-wrap:wrap;gap:8px;}
+  .wizard-btn-next{order:3;flex:1 1 100%;}
+  .wizard-btn-back{order:1;}
+  .wizard-btn-skip{order:2;margin-left:auto;}
+
+  /* vmodal also full-sheet */
+  .vmodal-shell{max-width:100%;width:100%;border-bottom-left-radius:0;border-bottom-right-radius:0;}
+  .vmodal-backdrop{align-items:flex-end;}
+  .vmodal-panel{border-bottom-left-radius:0;border-bottom-right-radius:0;}
+
+  /* Bigger chip tap targets */
+  .chip{padding:8px 12px;min-height:38px;}
+
+  /* Vote toggle: full width of block header */
+  .block-vote-toggle{font-size:11px;padding:3px 7px;}
+}
+
+/* NAME MODAL */
+.nmodal-backdrop{
+  position:fixed;
+  inset:0;
+  background:rgba(20,40,44,.72);
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+  z-index:600;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:16px;
+  animation:backdropIn 300ms var(--ease-out) both;
+}
+.nmodal-shell{
+  background:rgba(31,59,66,.2);
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:20px;
+  padding:3px;
+  width:100%;
+  max-width:380px;
+  box-shadow:
+    0 2px 0 rgba(255,255,255,.06) inset,
+    0 32px 64px rgba(10,22,25,.6),
+    0 8px 24px rgba(10,22,25,.4);
+  animation:modalIn 360ms cubic-bezier(0.32,0.72,0,1) both;
+}
+.nmodal-panel{
+  background:var(--card);
+  border-radius:17px;
+  overflow:hidden;
+  box-shadow:0 1px 0 rgba(255,255,255,.7) inset;
+}
+.nmodal-header{
+  padding:24px 24px 20px;
+  background:linear-gradient(160deg,#162B31 0%,#1F3B42 100%);
+  border-radius:17px 17px 0 0;
+}
+.nmodal-eyebrow{
+  font-family:var(--mono);
+  font-size:9px;
+  letter-spacing:.2em;
+  text-transform:uppercase;
+  color:rgba(138,155,160,.6);
+  margin-bottom:6px;
+}
+.nmodal-title{
+  font-family:var(--serif);
+  font-size:26px;
+  font-weight:600;
+  color:var(--foam);
+  letter-spacing:-.025em;
+  line-height:1.1;
+}
+.nmodal-body{
+  padding:24px;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+.nmodal-label{
+  font-family:var(--mono);
+  font-size:10px;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:var(--ink2);
+  display:block;
+}
+.nmodal-select-wrap{
+  position:relative;
+  display:flex;
+  align-items:center;
+}
+.nmodal-select{
+  width:100%;
+  appearance:none;
+  -webkit-appearance:none;
+  background:rgba(31,59,66,.05);
+  border:1.5px solid var(--line);
+  border-radius:8px;
+  color:var(--river);
+  font-family:var(--sans);
+  font-size:15px;
+  font-weight:500;
+  padding:10px 36px 10px 14px;
+  outline:none;
+  cursor:pointer;
+  transition:border-color 180ms var(--ease-out),background 180ms var(--ease-out);
+}
+.nmodal-select:focus{border-color:var(--river);background:rgba(31,59,66,.07);}
+.nmodal-select-arrow{
+  position:absolute;
+  right:12px;
+  color:var(--ink2);
+  pointer-events:none;
+}
+.nmodal-confirm{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  width:100%;
+  padding:12px;
+  background:var(--river);
+  color:var(--foam);
+  border:none;
+  border-radius:10px;
+  font-family:var(--sans);
+  font-size:14px;
+  font-weight:600;
+  cursor:pointer;
+  letter-spacing:.01em;
+  box-shadow:0 1px 0 rgba(255,255,255,.1) inset,0 2px 8px rgba(31,59,66,.25);
+  transition:background 160ms var(--ease-spring),transform 140ms var(--ease-spring),box-shadow 160ms var(--ease-spring);
+}
+.nmodal-confirm:disabled{opacity:.35;cursor:not-allowed;}
+.nmodal-confirm:not(:disabled):hover{background:#2a4f58;box-shadow:0 1px 0 rgba(255,255,255,.1) inset,0 4px 14px rgba(31,59,66,.35);}
+.nmodal-confirm:not(:disabled):active{transform:scale(.97);}
+.nmodal-confirm-arrow{
+  font-size:16px;
+  transition:transform 180ms var(--ease-spring);
+}
+.nmodal-confirm:not(:disabled):hover .nmodal-confirm-arrow{transform:translateX(3px);}
+/* Change name button in hero */
+.btn-change-name{
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.16);
+  border-radius:20px;
+  color:rgba(241,239,230,.75);
+  font-family:var(--mono);
+  font-size:9.5px;
+  letter-spacing:.06em;
+  padding:5px 12px;
+  cursor:pointer;
+  transition:background 200ms var(--ease-out),color 200ms var(--ease-out);
+  white-space:nowrap;
+}
+.btn-change-name:hover{background:rgba(255,255,255,.13);color:var(--foam);}
+/* UTILITY */
+.visually-hidden{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);}
+/* Grain overlay — fixed, GPU-safe, pointer-events:none */
+body::after{
+  content:"";
+  position:fixed;
+  inset:0;
+  z-index:999;
+  pointer-events:none;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+  background-repeat:repeat;
+  background-size:120px 120px;
+  opacity:.028;
+}
+/* Scroll entry animation support */
+.reveal{
+  opacity:0;
+  transform:translateY(12px);
+  transition:opacity 600ms var(--ease-out),transform 600ms var(--ease-out);
+}
+.reveal.visible{opacity:1;transform:none;}
+</style>
+</head>
+<body>
+<!-- ══ STORAGE ERROR BANNER ══════════════════════════════ -->
+<div id="storage-banner" class="storage-banner">
+  ⚠ Couldn't load shared data — showing defaults; changes may not save.
+</div>
+
+<!-- ══ HERO ═════════════════════════════════════════════ -->
+<header class="hero" role="banner">
+  <div class="hero-inner">
+    <div class="stamp" aria-hidden="true">
+      <span>FIELD</span><span>DEBRIEF</span><span>4 DAYS · 7 PEOPLE</span>
+    </div>
+    <div class="hero-eyebrow">JUL 9 – 12 · ULSTER COUNTY, NY · 7 GUESTS</div>
+    <h1 class="hero-title">West Camp <em>Debrief</em></h1>
+    <p class="hero-sub">The page auto-schedules each day around the weather forecast, the group votes on meals and activities, and the winning choices become the plan.</p>
+    <div class="hero-controls">
+      <button id="btn-refresh" class="btn-refresh" aria-label="Refresh shared data">
+        <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+          <path d="M9 5A4 4 0 1 1 5 1"/>
+          <polyline points="9,1 9,5 5,5"/>
+        </svg>
+        REFRESH
+      </button>
+      <button id="btn-change-name" class="btn-change-name" aria-label="Change your name"></button>
+    </div>
+    <div class="hero-disclosure">Votes, schedule changes, and checkmarks are shared with everyone using this page — honor system among friends.</div>
+  </div>
+</header>
+
+<!-- ══ TAB NAV ══════════════════════════════════════════ -->
+<nav class="tabs-nav" role="tablist" aria-label="Trip days">
+  <button class="tab-btn active" role="tab" aria-selected="true"  aria-controls="tab-thu" id="tbtn-thu" data-tab="thu">Thu 7/9 — Rolling In</button>
+  <button class="tab-btn"        role="tab" aria-selected="false" aria-controls="tab-fri" id="tbtn-fri" data-tab="fri">Fri 7/10 — Falls & Lake</button>
+  <button class="tab-btn"        role="tab" aria-selected="false" aria-controls="tab-sat" id="tbtn-sat" data-tab="sat">Sat 7/11 — Views & Brews</button>
+  <button class="tab-btn"        role="tab" aria-selected="false" aria-controls="tab-sun" id="tbtn-sun" data-tab="sun">Sun 7/12 — Heading Home</button>
+  <button class="tab-btn"        role="tab" aria-selected="false" aria-controls="tab-shop" id="tbtn-shop" data-tab="shop">Shopping List</button>
+</nav>
+
+<!-- ══ TAB PANELS ═══════════════════════════════════════ -->
+<main>
+  <!-- THURSDAY -->
+  <div id="tab-thu" class="tab-panel active" role="tabpanel" aria-labelledby="tbtn-thu">
+    <div class="page-inner">
+      <div class="day-header">
+        <div class="day-title">Thursday, July 9 — Rolling In</div>
+        <div class="day-weather-summary" id="weather-thu"></div>
+        <div class="day-disclaimer">Hourly figures are modeled from the daily outlook — check a live forecast within 48 hours of each day.</div>
+      </div>
+      <div id="cal-thu" class="cal-outer"></div>
+    </div>
+  </div>
+
+  <!-- FRIDAY -->
+  <div id="tab-fri" class="tab-panel" role="tabpanel" aria-labelledby="tbtn-fri">
+    <div class="page-inner">
+      <div class="day-header">
+        <div class="day-title">Friday, July 10 — Falls & Lake</div>
+        <div class="day-weather-summary" id="weather-fri"></div>
+        <div class="day-disclaimer">Hourly figures are modeled from the daily outlook — check a live forecast within 48 hours of each day.</div>
+      </div>
+      <div id="cal-fri" class="cal-outer"></div>
+    </div>
+  </div>
+
+  <!-- SATURDAY -->
+  <div id="tab-sat" class="tab-panel" role="tabpanel" aria-labelledby="tbtn-sat">
+    <div class="page-inner">
+      <div class="day-header">
+        <div class="day-title">Saturday, July 11 — Views & Brews</div>
+        <div class="day-weather-summary" id="weather-sat"></div>
+        <div class="day-disclaimer">Hourly figures are modeled from the daily outlook — check a live forecast within 48 hours of each day.</div>
+      </div>
+      <div id="cal-sat" class="cal-outer"></div>
+    </div>
+  </div>
+
+  <!-- SUNDAY -->
+  <div id="tab-sun" class="tab-panel" role="tabpanel" aria-labelledby="tbtn-sun">
+    <div class="page-inner">
+      <div class="day-header">
+        <div class="day-title">Sunday, July 12 — Heading Home</div>
+      </div>
+      <div id="sun-content"></div>
+    </div>
+  </div>
+
+  <!-- SHOPPING LIST -->
+  <div id="tab-shop" class="tab-panel" role="tabpanel" aria-labelledby="tbtn-shop">
+    <div class="page-inner">
+      <div class="shop-header">
+        <div class="shop-title">Shopping List</div>
+        <div class="shop-count" id="shop-count"></div>
+      </div>
+      <div id="shop-content"></div>
+    </div>
+  </div>
+</main>
+
+<div id="drag-tooltip" class="drag-tooltip" style="display:none"></div>
+
+<!-- NAME PICKER MODAL -->
+<div id="name-modal" class="nmodal-backdrop" aria-modal="true" role="dialog" aria-labelledby="nmodal-title" style="display:none">
+  <div class="nmodal-shell">
+    <div class="nmodal-panel">
+      <div class="nmodal-header">
+        <div class="nmodal-eyebrow">West Camp · Jul 9–12</div>
+        <div id="nmodal-title" class="nmodal-title">Who are you?</div>
+      </div>
+      <div class="nmodal-body">
+        <label class="nmodal-label" for="name-select">Name</label>
+        <div class="nmodal-select-wrap">
+          <select id="name-select" class="nmodal-select">
+            <option value="">— choose your name —</option>
+            <option value="Amanda">Amanda</option>
+            <option value="Belal">Belal</option>
+            <option value="Luke">Luke</option>
+            <option value="Mina">Mina</option>
+            <option value="Nada">Nada</option>
+            <option value="Stefano">Stefano</option>
+            <option value="Yehia">Yehia</option>
+          </select>
+          <svg class="nmodal-select-arrow" width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><polygon points="5,7 1,3 9,3"/></svg>
+        </div>
+        <button id="nmodal-confirm" class="nmodal-confirm" disabled onclick="confirmName()">
+          Enter
+          <span class="nmodal-confirm-arrow">→</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- VOTING WIZARD MODAL -->
+<div id="wizard-modal" class="wizard-backdrop" aria-modal="true" role="dialog" style="display:none">
+  <div class="wizard-shell">
+    <div class="wizard-panel">
+      <div class="wizard-header">
+        <div class="wizard-header-top">
+          <div>
+            <div class="wizard-eyebrow" id="wizard-eyebrow"></div>
+            <div class="wizard-title" id="wizard-title"></div>
+          </div>
+          <button class="wizard-skip-all" onclick="closeWizard()" aria-label="Skip voting wizard">Skip all</button>
+        </div>
+        <div class="wizard-progress-track">
+          <div class="wizard-progress-fill" id="wizard-progress"></div>
+        </div>
+        <div class="wizard-step-label" id="wizard-step-label"></div>
+      </div>
+      <div class="wizard-body" id="wizard-body"></div>
+      <div class="wizard-footer">
+        <button class="wizard-btn-back" id="wizard-back" onclick="wizardBack()">← Back</button>
+        <button class="wizard-btn-skip" onclick="wizardSkip()">Skip</button>
+        <button class="wizard-btn-next" id="wizard-next" onclick="wizardNext()">
+          Next
+          <span class="wizard-next-arrow">→</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- VOTE MODAL -->
+<div id="vote-modal" class="vmodal-backdrop" aria-modal="true" role="dialog" aria-labelledby="vmodal-title" style="display:none" onclick="if(event.target===this)closeVoteModal()">
+  <div class="vmodal-shell">
+    <div class="vmodal-panel">
+      <div class="vmodal-header">
+        <div style="flex:1;min-width:0;">
+          <div class="vmodal-eyebrow">Cast your vote</div>
+          <div id="vmodal-title" class="vmodal-title"></div>
+        </div>
+        <button class="vmodal-close" onclick="closeVoteModal()" aria-label="Close vote panel">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="1" y1="1" x2="11" y2="11"/><line x1="11" y1="1" x2="1" y2="11"/></svg>
+        </button>
+      </div>
+      <div id="vmodal-body" class="vmodal-body"></div>
+    </div>
+  </div>
+</div>
+<script>
+/* ═══════════════════════════════════════════════════════════
+   ALL BAKED-IN TRIP DATA
+═══════════════════════════════════════════════════════════ */
+const WEATHER = {
+  thu: { high: 86.7, precip: 35, label: 'Thu 7/9' },
+  fri: { high: 81.9, precip: 35, label: 'Fri 7/10' },
+  sat: { high: 81.4, precip: 0,  label: 'Sat 7/11' },
+};
+const HOURS = [10,11,12,13,14,15,16,17,18,19,20,21,22,23];
+const TEMP_OFFSET  = [-8,-6,-4,-2,-1,0,0,-2,-4,-6,-8,-10,-11,-12];
+const PRECIP_MULT  = [0.5,0.6,0.7,0.9,1.0,1.1,1.1,1.0,0.8,0.7,0.6,0.5,0.4,0.4];
+function hourlyWeather(dayKey) {
+  const d = WEATHER[dayKey];
+  return HOURS.map((h,i)=>({
+    hour: h,
+    temp: Math.round(d.high + TEMP_OFFSET[i]),
+    precip: Math.min(95, Math.max(0, Math.round(d.precip * PRECIP_MULT[i])))
+  }));
+}
+
+const RESTAURANTS = {
+  breakfast:[
+    {name:'Village Diner', price:'$', addr:'140 Main St, Saugerties', why:'Classic all-day diner, seats 7 easily, opens 6 AM.'},
+    {name:'Bleu Collar Sammies', price:'$$', addr:'239 Ulster Ave, Saugerties', why:'Best breakfast sandwiches in town, fast grab-and-go.'},
+    {name:'Ohana Café', price:'$$', addr:'117 Partition St, Saugerties', why:'Sit-down crepes and egg dishes for a slower morning.'},
+  ],
+  lunch:[
+    {name:'Little Cinco De Mayo', price:'$$', addr:'12 Market St, Saugerties', why:'House-made corn tortillas, casual, no reservation needed.'},
+    {name:"Stella's Station", price:'$$', addr:'150 Partition St, Saugerties', why:'Patio and easy bar food, good post-activity landing spot.'},
+    {name:'Rose 32 (food truck)', price:'$', addr:'2969 NY-32, Saugerties', why:'Big sandwiches, picnic tables, fast.'},
+  ],
+  dinner:[
+    {name:"Miss Lucy's Kitchen", price:'$$', addr:'90 Partition St, Saugerties', why:"Strongest all-around dinner in town; call ahead for 7."},
+    {name:'The Dutch', price:'$$', addr:'253 Main St, Saugerties', why:'Gastropub, casual enough straight off the trail.'},
+    {name:"Sue's", price:'$$', addr:'3101 US-9W, Saugerties', why:'Old-school Italian/pizza bar-and-grill, generous portions.'},
+  ],
+};
+const SPLURGE = "Want one nicer night? Maestri's Prime Italian Steakhouse and BLACKBARN Hudson Valley are above the everyday budget but worth it for a single splurge — reserve well ahead for 7.";
+
+const RECIPES = {
+  'nyt-sheetpan-chicken': { name:'Sheet-Pan Chicken w/ Potatoes, Arugula & Garlic Yogurt', source:'NYT Cooking', rating:5, reviews:9780, url:'https://cooking.nytimes.com/recipes/1017359-sheet-pan-chicken-with-potatoes-arugula-and-garlic-yogurt', sides:'Built in (arugula + garlic yogurt); add crusty bread.' },
+  'ar-sausage-orzo':      { name:'One-Pot Chicken & Sausage Orzo', source:'Allrecipes', rating:4.7, reviews:168, url:'https://www.allrecipes.com/recipe/246126/one-pot-chicken-and-sausage-orzo/', sides:'Simple green salad.', note:'Add sun-dried tomatoes + wilt in spinach at the end.' },
+  'lcc-flank-steak':      { name:'Grilled Flank Steak with Chimichurri', source:'Le Crème de la Crumb', rating:4.95, reviews:344, url:'https://www.lecremedelacrumb.com/flank-steak-with-chimichurri-sauce/', sides:'Tomato-cucumber salad + crusty bread.' },
+  'nyt-dutch-baby':       { name:'Dutch Baby w/ Macerated Stone Fruit', source:'NYT Cooking', rating:5, reviews:18609, url:'https://cooking.nytimes.com/recipes/6648-dutch-baby', sides:'Macerated peaches/plums (sugar + lemon, 30 min).' },
+  'ds-shakshuka':         { name:'Shakshuka', source:'Downshiftology', rating:4.94, reviews:529, url:'https://downshiftology.com/recipes/shakshuka/', sides:'Crusty bread, feta.' },
+  'ar-strata':            { name:'Sausage Strata', source:'Allrecipes', rating:4.6, reviews:435, url:'https://www.allrecipes.com/recipe/20913/easy-sausage-strata/', sides:'', note:'Assemble the night before, bake in the morning.' },
+  'hbh-peach-burrata':    { name:'Tomato, Peach & Burrata Salad', source:'Half Baked Harvest', rating:4.71, reviews:327, url:'https://www.halfbakedharvest.com/tomato-peach-and-burrata-salad/', sides:'Grilled bread.' },
+  'nyt-nicoise':          { name:'Sheet-Pan Salmon Niçoise Salad', source:'NYT Cooking', rating:5, reviews:2569, url:'https://cooking.nytimes.com/recipes/1020220-sheet-pan-roasted-salmon-nicoise-salad', sides:'' },
+  'tesco-orzo':           { name:'Baked Mediterranean Orzo', source:'Tesco Real Food', rating:null, reviews:223, url:'https://realfood.tesco.com/recipes/baked-mediterranean-orzo.html', sides:'' },
+  'nyt-short-ribs':       { name:'Garlic-Braised Short Ribs w/ Red Wine', source:'NYT Cooking', rating:5, reviews:10326, url:'https://cooking.nytimes.com/recipes/1019034-garlic-braised-short-ribs-with-red-wine', sides:'Polenta, arugula-parmesan-lemon salad, garlic bread.' },
+  'ar-shish-tawook':      { name:'Shish Tawook', source:'Allrecipes', rating:4.8, reviews:234, url:'https://www.allrecipes.com/recipe/150251/shish-tawook-grilled-chicken/', sides:'Fattoush + rice pilaf.' },
+  'rtk-tritip':           { name:'Reverse Sear Tri-Tip w/ Chimichurri', source:'Running to the Kitchen', rating:4.75, reviews:48, url:'https://www.runningtothekitchen.com/reverse-sear-tri-tip/', sides:'Grilled corn & tomato salad + crusty bread.' },
+  'ar-crepes':            { name:'Crepes Bar (Savory + Sweet)', source:'Allrecipes', rating:4.8, reviews:3014, url:'https://www.allrecipes.com/recipe/16383/basic-crepes/', sides:'', note:'Set out ham/cheese/spinach + Nutella/fruit/lemon-sugar.' },
+  'cg-sucuklu':           { name:'Sucuklu Yumurta (Turkish Sausage & Eggs)', source:'Cooking Gorgeous', rating:5, reviews:1, url:'https://cookingorgeous.com/blog/sucuklu-yumurta-turkish-sausage-and-eggs/', sides:'', note:'Serve spread-style: olives, feta, cucumber-tomato, honey, warm bread.' },
+  'rte-bibimbap':         { name:'Bibimbap Bowls', source:'RecipeTin Eats', rating:4.99, reviews:100, url:'https://www.recipetineats.com/bibimbap/', sides:'', note:'Breakfast version — fried egg on top.' },
+  'ar-cubano':            { name:"Chef John's Cuban Sandwich", source:'Allrecipes', rating:4.9, reviews:96, url:'https://www.allrecipes.com/recipe/256968/chef-johns-cuban-sandwich/', sides:'' },
+  'ar-quesadillas':       { name:'Chicken Quesadillas', source:'Allrecipes', rating:4.6, reviews:1205, url:'https://www.allrecipes.com/recipe/21659/chicken-quesadillas/', sides:'' },
+  'diy-kale-caesar':      { name:'Kale Caesar w/ Grilled Chicken', source:'house recipe', rating:null, reviews:null, url:null, sides:'', note:"Bottled Caesar dressing brightened with fresh lemon juice; lacinato kale, grilled chicken, parmesan, croutons." },
+  'nyt-bolognese':        { name:"Marcella Hazan's Bolognese w/ Pappardelle", source:'NYT Cooking', rating:5, reviews:30745, url:'https://cooking.nytimes.com/recipes/1015181-marcella-hazans-bolognese-sauce', sides:'Radicchio-fennel salad + crusty bread.', note:'Starts 3+ hrs before dinner — begin by 3 PM.' },
+  'zz-lamb-chops':        { name:'Lebanese Grilled Lamb Chops', source:'Zaatar & Zaytoun', rating:5, reviews:6, url:'https://zaatarandzaytoun.com/lamb-chops/', sides:'Fattoush + rice pilaf.' },
+  'rte-eggplant-parm':    { name:'Eggplant Parmigiana', source:'RecipeTin Eats', rating:4.96, reviews:83, url:'https://www.recipetineats.com/eggplant-parmigiana/', sides:'Simple green salad + garlic bread.', veg:true },
+  'hershey-smores':       { name:"Elevated S'mores", source:"Hershey's", rating:null, reviews:null, url:'https://www.hersheyland.com/recipes/hersheys-smores.html', sides:'', note:'Dark chocolate + flaky salt.' },
+  'tbfs-brie':            { name:'Baked Brie w/ Honey & Rosemary', source:'Tastes Better From Scratch', rating:5, reviews:85, url:'https://tastesbetterfromscratch.com/baked-brie/', sides:'' },
+  'ft-grilled-peaches':   { name:'Grilled Peaches w/ Mascarpone & Cinnamon Sugar', source:'The Floured Table', rating:null, reviews:null, url:'https://www.theflouredtable.com/grilled-peaches-with-mascarpone/', sides:'' },
+};
+
+const SNACK_IDS = ['hershey-smores','tbfs-brie','ft-grilled-peaches'];
+
+const ACTIVITIES = {
+  // Thursday walks
+  'thu-lighthouse':   { name:'Saugerties Lighthouse Trail',    addr:'168 Lighthouse Dr, Saugerties',    tip:'Flat half-mile along the Hudson; check the tide table, the path floods at high tide.', type:'flexible', durationMin:90 },
+  'thu-falling':      { name:'Falling Waters Preserve',        addr:'Dominican Ln, Saugerties',          tip:'Under a mile, gently sloping, Hudson views.', type:'flexible', durationMin:90 },
+  'thu-esopus':       { name:'Esopus Bend Nature Preserve',    addr:'Saugerties',                        tip:'Quiet creekside loop, easy walking.', type:'flexible', durationMin:90 },
+  // Friday physical
+  'fri-kaaterskill':  { name:'Kaaterskill Falls Hike',          addr:'NY-23A, Haines Falls',              tip:'~2 mi round trip; go early for parking.', type:'hike', durationMin:180 },
+  'fri-overlook':     { name:'Overlook Mountain Hike',          addr:'Meads Mountain Rd, Woodstock',      tip:'Fire tower + hotel ruins at top.', type:'hike', durationMin:240 },
+  'fri-rail-trail':   { name:'Ashokan Rail Trail',              addr:'West Hurley trailhead',             tip:'Flat and easy, best rain-friendly option.', type:'flexible', durationMin:150 },
+  'fri-ns-lake':      { name:'North–South Lake Swim',           addr:'874 N Lake Rd, Haines Falls',       tip:'Day-use fee, bathhouse and picnic tables.', type:'swim', durationMin:180 },
+  // Friday leisure
+  'fri-lasting-joy':  { name:'Lasting Joy Brewery',             addr:'485 Lasher Rd, Tivoli',             tip:'Full food, farm fields, fire pits, dog-friendly.', type:'flexible', durationMin:120 },
+  'fri-woodstock':    { name:'Woodstock Town Exploration',      addr:'Tinker Street, Woodstock',          tip:'Shops, galleries, flea market (Saturdays only).', type:'flexible', durationMin:120 },
+  'fri-hangout':      { name:'Indoor Hangout at the House',     addr:'',                                  tip:'Games, music, pool.', type:'flexible', durationMin:120 },
+  'fri-blue-duck':    { name:'Blue Duck Brewing Co.',           addr:'79 Hurley Ave, Kingston',           tip:'Full food, fire pit patio, garage doors open to outside.', type:'flexible', durationMin:120 },
+  'fri-keegan':       { name:'Keegan Ales',                     addr:'20 St James St, Kingston',          tip:'Kingston institution, live music, pub food, open from noon Fri.', type:'flexible', durationMin:120 },
+  // Saturday physical
+  'sat-arboretum':    { name:'Mountain Top Arboretum + Five State Lookout', addr:'4 Maude Adams Rd, Tannersville', tip:'Easy marked trails, short drive to lookout after.', type:'flexible', durationMin:150 },
+  'sat-opus40':       { name:'Opus 40',                         addr:'Fite Rd, Saugerties',               tip:'Bluestone sculpture park, partly shaded, rotating art exhibits.', type:'flexible', durationMin:120 },
+  'sat-village':      { name:'Woodstock Village Stroll + Shops', addr:'Tinker Street, Woodstock',         tip:'Best bad-weather fallback.', type:'flexible', durationMin:120 },
+  // Saturday leisure
+  'sat-lasting-joy':  { name:'Lasting Joy Brewery',             addr:'485 Lasher Rd, Tivoli',             tip:'Full food, farm fields, fire pits.', type:'flexible', durationMin:120 },
+  'sat-rose-hill':    { name:'Rose Hill Winery & Cidery',       addr:'14 Rose Hill, Red Hook',            tip:'Snacks + drinks, lawn seating, beautiful barn.', type:'flexible', durationMin:120 },
+  'sat-flea-market':  { name:'Woodstock Flea Market + Tinker St', addr:'Behind Bread Alone Bakery, Woodstock', tip:'Vintage, crafts, vinyl, art — Saturdays only, free to browse.', type:'flexible', durationMin:120 },
+  'sat-blue-duck':    { name:'Blue Duck Brewing Co.',           addr:'79 Hurley Ave, Kingston',           tip:'Full food, fire pit patio, garage doors.', type:'flexible', durationMin:120 },
+  'sat-keegan':       { name:'Keegan Ales',                     addr:'20 St James St, Kingston',          tip:'Kingston institution, live music, pub food.', type:'flexible', durationMin:120 },
+  // Lunch eat-out options
+  'eo-cinco':         { name:'Little Cinco De Mayo',            addr:'12 Market St, Saugerties',          tip:'House-made corn tortillas, casual, no reservation needed · open Tue–Sat 11 AM–7 PM.', type:'restaurant', price:'$$', rating:4.8, reviews:73, durationMin:90 },
+  'eo-stella':        { name:"Stella's Station",                addr:'150 Partition St, Saugerties',      tip:'Patio bar food, good post-activity landing spot.', type:'restaurant', price:'$$', rating:null, reviews:null, durationMin:90 },
+  'eo-tinker-taco':   { name:'Tinker Taco Lab',                 addr:'261 Tinker St, Woodstock',          tip:'Daily-made corn tortillas, outdoor seating, mezcal bar next door · ~15 min.', type:'restaurant', price:'$', rating:null, reviews:null, durationMin:90 },
+  'eo-kingston-brew': { name:'Kingston Standard Brewing Co.',   addr:'22 Jansen Ave, Kingston',           tip:'Pizza + craft beer, outdoor seating · open Thu–Sun from noon · ~25 min.', type:'restaurant', price:'$', rating:4.7, reviews:142, durationMin:90 },
+  'eo-lasting-lunch': { name:'Lasting Joy Brewery',             addr:'485 Lasher Rd, Tivoli',             tip:'Full food menu, burgers, hummus, vegetarian options · open Sat from noon · ~30 min.', type:'restaurant', price:'$', rating:4.7, reviews:189, durationMin:90 },
+  // Dinner eat-out options
+  'eo-pearl-moon':    { name:'Pearl Moon Woodstock',            addr:'52 Mill Hill Rd, Woodstock',        tip:'Farm-to-table comfort food, live music Fri/Sat, outdoor seating · ~15 min.', type:'restaurant', price:'$$', rating:4.5, reviews:684, durationMin:120 },
+  'eo-shelter':       { name:'Shelter Woodstock',               addr:'21 Mill Hill Rd, Woodstock',        tip:'Eclectic/empanadas, live music from 7 PM Fri/Sat · ~15 min.', type:'restaurant', price:'$$', rating:4.6, reviews:314, durationMin:120 },
+  'eo-ship-to-shore': { name:'Ship to Shore',                   addr:'15 W Strand St, Kingston',          tip:'American waterfront, highest review count in region · ~25 min.', type:'restaurant', price:'$$$', rating:4.6, reviews:928, durationMin:120 },
+  'eo-partition':     { name:'The Partition',                   addr:'124 Partition St, Saugerties',      tip:'Bar & grill, live DJ, open until midnight Fri/Sat · ~5 min.', type:'restaurant', price:'$$', rating:4.5, reviews:221, durationMin:120 },
+
+  // Drinks
+  'drink-martini':    { name:'Martini',  tip:'Classic gin or vodka martini — shaken or stirred.', type:'drink', desc:'Gin or vodka · dry vermouth · olive or twist' },
+  'drink-negroni':    { name:'Negroni',  tip:'Equal parts gin, Campari, sweet vermouth — stirred.', type:'drink', desc:'Gin · Campari · sweet vermouth · orange peel' },
+  'drink-spritz':     { name:'Spritz',   tip:'Aperol or Campari with prosecco and a splash of soda.', type:'drink', desc:'Aperol or Campari · prosecco · soda · orange slice' },
+  'drink-beer':       { name:'Beer',     tip:"Whatever's cold and local.", type:'drink', desc:"Craft cans, bottles, or whatever's in the cooler" },
+  'drink-wine':       { name:'Wine',     tip:"Red, white, or rosé — your call.", type:'drink', desc:'Red · white · rosé' },
+};
+
+/* Poll definitions */
+const POLLS = {
+  'poll-thu-dinner':   { label:'Thursday Dinner',   type:'meal',     options:['nyt-sheetpan-chicken','ar-sausage-orzo','lcc-flank-steak','_writein'], day:'thu' },
+  'poll-thu-snack':    { label:'Thursday Fire-Pit Snack', type:'snack', options:['hershey-smores','tbfs-brie','ft-grilled-peaches'], day:'thu' },
+  'poll-thu-walk':     { label:'Evening Walk',       type:'activity', options:['thu-lighthouse','thu-falling','thu-esopus'], day:'thu' },
+  'poll-fri-breakfast':{ label:'Friday Breakfast',   type:'meal',     options:['nyt-dutch-baby','ds-shakshuka','ar-strata'], day:'fri' },
+  'poll-fri-lunch':    { label:'Friday Lunch',       type:'meal',     options:['hbh-peach-burrata','nyt-nicoise','tesco-orzo','eo-cinco','eo-stella','eo-tinker-taco','eo-kingston-brew','eo-lasting-lunch'], day:'fri' },
+  'poll-fri-dinner':   { label:'Friday Dinner',      type:'meal',     options:['nyt-short-ribs','ar-shish-tawook','rtk-tritip','eo-pearl-moon','eo-shelter','eo-ship-to-shore','eo-partition'], day:'fri' },
+  'poll-fri-physical': { label:'Friday Activity',    type:'activity', options:['fri-kaaterskill','fri-overlook','fri-rail-trail','fri-ns-lake'], day:'fri' },
+  'poll-fri-leisure':  { label:'Friday Leisure',     type:'activity', options:['fri-lasting-joy','fri-woodstock','fri-hangout','fri-blue-duck','fri-keegan'], day:'fri' },
+  'poll-fri-snack':    { label:'Friday Fire-Pit Snack', type:'snack', options:['hershey-smores','tbfs-brie','ft-grilled-peaches'], day:'fri' },
+  'poll-sat-breakfast':{ label:'Saturday Breakfast', type:'meal',     options:['ar-crepes','cg-sucuklu','rte-bibimbap'], day:'sat' },
+  'poll-sat-lunch':    { label:'Saturday Lunch',     type:'meal',     options:['ar-cubano','ar-quesadillas','diy-kale-caesar','eo-cinco','eo-stella','eo-tinker-taco','eo-kingston-brew','eo-lasting-lunch'], day:'sat' },
+  'poll-sat-dinner':   { label:'Saturday Dinner',    type:'meal',     options:['nyt-bolognese','zz-lamb-chops','rte-eggplant-parm','eo-pearl-moon','eo-shelter','eo-ship-to-shore','eo-partition'], day:'sat' },
+  'poll-sat-physical': { label:'Saturday Activity',  type:'activity', options:['sat-arboretum','sat-opus40','sat-village'], day:'sat' },
+  'poll-sat-leisure':  { label:'Saturday Leisure',   type:'activity', options:['sat-lasting-joy','sat-rose-hill','sat-flea-market','sat-blue-duck','sat-keegan'], day:'sat' },
+  'poll-sat-snack':    { label:'Saturday Fire-Pit Snack', type:'snack', options:['hershey-smores','tbfs-brie','ft-grilled-peaches'], day:'sat' },
+  'poll-drinks':       { label:'Drink of Choice',        type:'drink', options:['drink-martini','drink-negroni','drink-spritz','drink-beer','drink-wine'], day:'trip' },
+};
+
+/* Shopping list condensed buy-lists (7 people, original writing) */
+const SHOPPING_LISTS = {
+  'nyt-sheetpan-chicken':  ['Bone-in chicken thighs × 14 (or ~7 lb)', 'Baby potatoes 3 lb', 'Arugula 10 oz', 'Greek yogurt 2 cups', 'Garlic 2 heads', 'Lemons × 3', 'Olive oil, red pepper flakes, dried oregano', 'Crusty baguettes × 2'],
+  'ar-sausage-orzo':       ['Boneless chicken thighs 3 lb', 'Italian sausage links × 4', 'Orzo 2 lb', 'Sun-dried tomatoes (oil-packed) 1 jar', 'Fresh spinach 6 oz', 'Chicken broth 48 oz', 'Onion, garlic, canned diced tomatoes', 'Parmesan block, green salad greens'],
+  'lcc-flank-steak':       ['Flank steak 3–3.5 lb', 'Flat-leaf parsley 2 bunches', 'Fresh oregano, garlic, red wine vinegar', 'Red chili flakes, olive oil', 'Roma tomatoes × 4, English cucumber', 'Crusty baguettes × 2'],
+  'nyt-dutch-baby':        ['Eggs × 12', 'All-purpose flour 2 cups', 'Whole milk 2 cups', 'Butter (unsalted)', 'Ripe peaches × 6 and/or plums × 6', 'Sugar, lemons × 2, vanilla extract', 'Powdered sugar for serving'],
+  'ds-shakshuka':          ['Canned whole tomatoes × 4 (28 oz)', 'Eggs × 12', 'Onion × 2, red bell peppers × 2', 'Garlic, cumin, smoked paprika, cayenne', 'Feta 6 oz', 'Crusty baguettes × 2, fresh parsley'],
+  'ar-strata':             ['Italian sausage 1.5 lb', 'Day-old bread (sourdough) 1 loaf', 'Eggs × 12', 'Whole milk 3 cups', 'Gruyère or cheddar 8 oz', 'Dijon mustard, garlic, onion, fresh herbs'],
+  'hbh-peach-burrata':     ['Ripe tomatoes assorted 3 lb', 'Ripe peaches × 5', 'Burrata 3–4 balls (4 oz each)', 'Prosciutto 4 oz (optional)', 'Basil 1 bunch, balsamic glaze', 'Sourdough for grilling'],
+  'nyt-nicoise':           ['Salmon fillets 3.5 lb', 'Fingerling potatoes 2 lb', 'Green beans 1 lb', 'Eggs × 8, Niçoise olives 1 cup', 'Cherry tomatoes 1 pint', 'Dijon mustard, anchovy paste, capers', 'Arugula or mixed greens 10 oz'],
+  'tesco-orzo':            ['Orzo 2 lb', 'Cherry tomatoes 2 pints', 'Zucchini × 3, eggplant × 2', 'Kalamata olives 1 cup, capers', 'Feta 8 oz, vegetable broth 32 oz', 'Fresh basil, olive oil, garlic'],
+  'nyt-short-ribs':        ['Bone-in short ribs 7–8 lb', 'Red wine (full bottle)', 'Beef broth 32 oz', 'Polenta 1 lb, parmesan block', 'Onion × 2, carrot × 2, celery × 3, garlic 2 heads', 'Arugula 8 oz, fennel × 1, radicchio × 1, lemon', 'Crusty baguettes × 2'],
+  'ar-shish-tawook':       ['Boneless chicken thighs 3.5 lb', 'Plain yogurt 1 cup, lemon × 3', 'Garlic, tomato paste, cumin, paprika, cinnamon', 'Pita breads × 14', 'Rice 3 cups, pine nuts (optional)', 'Romaine, cucumber, tomato, radishes, sumac for fattoush'],
+  'rtk-tritip':            ['Tri-tip roast 4.5–5 lb', 'Flat-leaf parsley 2 bunches, fresh oregano', 'Red wine vinegar, garlic, olive oil, red chili flakes', 'Corn on the cob × 7', 'Cherry tomatoes 2 pints, basil', 'Crusty baguettes × 2'],
+  'ar-crepes':             ['Eggs × 6', 'All-purpose flour 2 cups', 'Whole milk 3 cups', 'Butter (unsalted)', 'Ham slices, Swiss cheese, fresh spinach', 'Nutella 1 jar, strawberries + bananas', 'Lemons × 2, powdered sugar'],
+  'cg-sucuklu':            ['Sucuk (Turkish sausage) 1–1.5 lb', 'Eggs × 12', 'Kalamata olives 1 cup', 'Feta 6 oz, cucumber × 2, tomatoes × 4', 'Honey jar, fresh flatbreads or pita × 14'],
+  'rte-bibimbap':          ['Short-grain rice 4 cups', 'Eggs × 7', 'Ground beef or turkey 1.5 lb', 'Spinach 10 oz, bean sprouts 1 bag', 'Zucchini × 2, carrots × 3, shiitake mushrooms 8 oz', 'Gochujang 1 jar, sesame oil, soy sauce, garlic'],
+  'ar-cubano':             ['Cuban or soft hoagie rolls × 7', 'Pulled pork shoulder 3 lb (or cooked pork loin)', 'Deli ham 1 lb', 'Swiss cheese 12 oz', 'Yellow mustard, dill pickles', 'Butter for pressing'],
+  'ar-quesadillas':        ['Flour tortillas × 20', 'Boneless chicken breasts 3 lb', 'Shredded Mexican cheese blend 2 lb', 'Bell peppers × 3, onion × 2', 'Cumin, chili powder, salsa, sour cream, guacamole'],
+  'diy-kale-caesar':       ['Lacinato (dinosaur) kale 2 large bunches', 'Boneless chicken breasts 3.5 lb for grilling', 'Caesar dressing (bottled) + lemons × 2', 'Parmesan block, croutons 1 large bag'],
+  'nyt-bolognese':         ['Ground beef/pork mix 2.5 lb', 'Pappardelle 2 lb', 'Canned whole tomatoes × 2 (28 oz)', 'Onion × 2, carrot × 2, celery × 3', 'Whole milk 1 cup, dry white wine 1 cup', 'Radicchio, fennel bulb', 'Parmesan block, crusty baguettes × 2'],
+  'zz-lamb-chops':         ['Lamb loin chops 14 pieces (~4.5 lb)', 'Garlic 2 heads, olive oil, lemon × 2', 'Dried oregano, cumin, coriander, cinnamon', 'Rice 3 cups, pine nuts, golden raisins (optional)', 'Romaine, cucumber, tomato, sumac, pita for fattoush'],
+  'rte-eggplant-parm':     ['Large eggplants × 4–5', 'Canned crushed tomatoes × 3 (28 oz)', 'Mozzarella 1.5 lb, parmesan block', 'Eggs × 4, breadcrumbs 2 cups, flour 1 cup', 'Garlic × 1 head, fresh basil, olive oil', 'Mixed greens 10 oz, garlic cloves + baguette for bread'],
+  'hershey-smores':        ['Graham crackers 2 boxes', 'Dark chocolate bars × 4 (70%+)', 'Flaky sea salt (Maldon)', 'Marshmallows 2 bags, skewers × 14'],
+  'tbfs-brie':             ['Brie wheel × 2 (8 oz each)', 'Honey jar, fresh rosemary 2 sprigs', 'Mixed nuts, crackers/baguette for serving'],
+  'ft-grilled-peaches':    ['Ripe peaches × 8', 'Mascarpone 8 oz', 'Cinnamon, brown sugar, vanilla extract', 'Honey jar for drizzling'],
+};
+/* ═══════════════════════════════════════════════════════════
+   STATE & STORAGE WRAPPER
+═══════════════════════════════════════════════════════════ */
+const ST = {
+  votes:    {},   // { [pollId]: { [guestName]: { first, second } } }
+  schedule: {},   // { [dayId]: { [blockId]: { start, duration, manual } } }
+  writein:  { text:'', updatedBy:'' },
+  shopping: {},   // { [itemId]: true }
+  guestName: '',
+  storageOk: true,
+};
+
+async function storageGet(key) {
+  try {
+    const res = await window.storage.get(key, true);
+    return res && res.value ? JSON.parse(res.value) : null;
+  } catch(e) { return null; }
+}
+async function storageSet(key, value) {
+  try {
+    await window.storage.set(key, JSON.stringify(value), true);
+  } catch(e) {
+    console.warn('storage.set failed', key, e);
+    ST.storageOk = false;
+    document.getElementById('storage-banner').classList.add('visible');
+  }
+}
+async function loadAllShared() {
+  try {
+    const [votes, schedule, writein, shopping] = await Promise.all([
+      storageGet('wcd-votes'),
+      storageGet('wcd-schedule'),
+      storageGet('wcd-writein'),
+      storageGet('wcd-shopping'),
+    ]);
+    if (votes)    ST.votes    = votes;
+    if (schedule) ST.schedule = schedule;
+    if (writein)  ST.writein  = writein;
+    if (shopping) ST.shopping = shopping;
+  } catch(e) {
+    console.warn('loadAllShared error', e);
+    ST.storageOk = false;
+    document.getElementById('storage-banner').classList.add('visible');
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   VOTING LOGIC
+═══════════════════════════════════════════════════════════ */
+function getVotes(pollId) { return ST.votes[pollId] || {}; }
+
+function tallyPoll(pollId) {
+  const poll = POLLS[pollId];
+  const pVotes = getVotes(pollId);
+  const scores = {};
+  const firsts = {};
+  const seconds = {};
+  for (const opt of poll.options) { scores[opt]=0; firsts[opt]=0; seconds[opt]=0; }
+  for (const guest of Object.values(pVotes)) {
+    if (guest.first  && scores[guest.first]  !== undefined) { scores[guest.first]  += 2; firsts[guest.first]++; }
+    if (guest.second && scores[guest.second] !== undefined) { scores[guest.second] += 1; seconds[guest.second]++; }
+  }
+  let maxScore = -1, winner = null;
+  for (const opt of poll.options) { if (scores[opt] > maxScore) { maxScore=scores[opt]; winner=opt; } }
+  // Tie detection
+  const tied = poll.options.filter(o => scores[o]===maxScore && maxScore>0);
+  let isTied = tied.length > 1;
+  if (isTied) {
+    // Tie-break by first-choice count
+    const maxFirst = Math.max(...tied.map(o=>firsts[o]));
+    const stillTied = tied.filter(o=>firsts[o]===maxFirst);
+    if (stillTied.length===1) { winner=stillTied[0]; isTied=false; }
+    else { winner=tied[0]; } // first listed wins in display
+  }
+  if (maxScore <= 0) winner = null;
+  return { scores, firsts, seconds, winner, isTied, tied };
+}
+
+function castVote(pollId, optionId, rank) {
+  const name = ST.guestName;
+  if (!name) return;
+  if (!ST.votes[pollId]) ST.votes[pollId] = {};
+  if (!ST.votes[pollId][name]) ST.votes[pollId][name] = { first:null, second:null };
+  const g = ST.votes[pollId][name];
+  if (rank === 1) {
+    if (g.first === optionId) { g.first = null; }
+    else if (g.second === optionId) { const old=g.first; g.first=optionId; g.second=old; }
+    else { g.first = optionId; if (g.second===optionId) g.second=null; }
+  } else {
+    if (g.second === optionId) { g.second = null; }
+    else if (g.first === optionId) { const old=g.second; g.second=optionId; g.first=old; }
+    else { g.second = optionId; if (g.first===optionId) g.first=null; }
+  }
+  storageSet('wcd-votes', ST.votes);
+  // Update tallies in-place without rebuilding the calendar (preserves open panels)
+  updateTalliesInPlace(pollId);
+  renderShoppingList();
+}
+
+function getGuestVote(pollId) {
+  const name = ST.guestName;
+  if (!name || !ST.votes[pollId]) return {first:null,second:null};
+  return ST.votes[pollId][name] || {first:null,second:null};
+}
+
+/* ═══════════════════════════════════════════════════════════
+   AUTO-PLACEMENT ALGORITHM
+═══════════════════════════════════════════════════════════ */
+// Returns minutes from midnight (10am=600, noon=720, etc.) → minutes from 10AM for positioning
+function minFromMidnight(h,m=0){ return h*60+m; }
+function minFrom10(h,m=0){ return minFromMidnight(h,m)-600; }
+
+function getHourlyWeather(dayKey){
+  return hourlyWeather(dayKey); // array of {hour,temp,precip}
+}
+function weatherAt(dayKey,minutesFrom10){
+  const hw=getHourlyWeather(dayKey);
+  const absMin=minutesFrom10+600;
+  const h=Math.floor(absMin/60);
+  const entry=hw.find(x=>x.hour===h)||hw[hw.length-1];
+  return entry;
+}
+function avgWeatherOver(dayKey,startMin,durationMin){
+  const hw=getHourlyWeather(dayKey);
+  let temps=0,precips=0,count=0;
+  const startAbs=startMin+600;
+  const endAbs=startAbs+durationMin;
+  for(const w of hw){
+    const hAbs=w.hour*60;
+    if(hAbs>=startAbs-30&&hAbs<=endAbs+30){temps+=w.temp;precips+=w.precip;count++;}
+  }
+  if(!count)return{temp:75,precip:20};
+  return{temp:temps/count,precip:precips/count};
+}
+
+function scoreWindow(dayKey,actType,startMin,durationMin){
+  const{temp,precip}=avgWeatherOver(dayKey,startMin,durationMin);
+  if(actType==='hike')    return -(precip*2+Math.max(0,temp-82));
+  if(actType==='swim')    return temp-precip*1.5;
+  return -precip; // flexible
+}
+
+function bestStart(dayKey,actType,rangeStartH,rangeEndH,durationMin){
+  const rangeStart=minFrom10(rangeStartH);
+  const rangeEnd=minFrom10(rangeEndH);
+  let best=rangeStart,bestScore=-Infinity;
+  for(let s=rangeStart;s<=rangeEnd-durationMin;s+=15){
+    const score=scoreWindow(dayKey,actType,s,durationMin);
+    if(score>bestScore){bestScore=score;best=s;}
+  }
+  return best;
+}
+
+function autoPlaceDay(dayKey){
+  const schedule = {};
+  // Helper to check overlap and nudge
+  const placed = [];
+  function noOverlap(start,dur){
+    for(const p of placed){
+      if(start<p.end&&start+dur>p.start)return false;
+    }
+    return true;
+  }
+  function placeBlock(id,start,dur){
+    let s=start;
+    // Nudge if overlapping (up to 60 min shift)
+    for(let attempt=0;attempt<8;attempt++){
+      if(noOverlap(s,dur)){placed.push({id,start:s,end:s+dur});schedule[id]={start:s,duration:dur};return s;}
+      s+=15;
+    }
+    // fallback
+    placed.push({id,start,end:start+dur});
+    schedule[id]={start,duration:dur};
+    return start;
+  }
+
+  if(dayKey==='thu'){
+    // Arrival 2PM–4PM = minFrom10(14)=240
+    placeBlock('arrival',minFrom10(14),120);
+    // Dinner 6:30PM = minFrom10(18,30)=510
+    placeBlock('thu-dinner',minFrom10(20,0),90);
+    // Evening walk poll — 19:30–20:30 range
+    const walkWinner=tallyPoll('poll-thu-walk').winner||'thu-lighthouse';
+    const walkAct=ACTIVITIES[walkWinner];
+    const walkStart=bestStart(dayKey,walkAct.type,19,21,walkAct.durationMin);
+    placeBlock('thu-walk',walkStart,walkAct.durationMin);
+    // Fire-pit snack 9:45PM = minFrom10(21,45)=705
+    placeBlock('thu-snack',minFrom10(21,45),45);
+    // Wind-down 10:30PM
+    placeBlock('thu-winddown',minFrom10(22,30),60);
+  }
+
+  if(dayKey==='fri'){
+    // Breakfast 10AM
+    placeBlock('fri-breakfast',minFrom10(10),60);
+    // Physical activity
+    const physWinner=tallyPoll('poll-fri-physical').winner||'fri-kaaterskill';
+    const physAct=ACTIVITIES[physWinner];
+    const physStart=bestStart(dayKey,physAct.type,10,16,physAct.durationMin);
+    placeBlock('fri-physical',physStart,physAct.durationMin);
+    // Freshen up after physical
+    const physEnd=physStart+physAct.durationMin;
+    placeBlock('fri-freshen',physEnd,60);
+    // Lunch after freshen up, target 1-3PM range
+    const lunchMin=Math.max(physEnd+60,minFrom10(13));
+    placeBlock('fri-lunch',lunchMin,60);
+    // Leisure
+    const leisureWinner=tallyPoll('poll-fri-leisure').winner||'fri-brewery';
+    const leisureAct=ACTIVITIES[leisureWinner];
+    const leisureStart=Math.max(lunchMin+60,minFrom10(15));
+    placeBlock('fri-leisure',Math.min(leisureStart,minFrom10(18)),leisureAct.durationMin);
+    // Dinner 6:30PM
+    placeBlock('fri-dinner',minFrom10(18,30),90);
+    // Backgammon Tournament 8PM fixed
+    placeBlock('fri-backgammon',minFrom10(20),90);
+    // Snack 9:30PM
+    placeBlock('fri-snack',minFrom10(21,30),45);
+    // Wind-down 10:30PM
+    placeBlock('fri-winddown',minFrom10(22,30),60);
+  }
+
+  if(dayKey==='sat'){
+    // Breakfast 10AM
+    placeBlock('sat-breakfast',minFrom10(10),60);
+    // Physical activity
+    const physWinner=tallyPoll('poll-sat-physical').winner||'sat-arboretum';
+    const physAct=ACTIVITIES[physWinner];
+    const physStart=bestStart(dayKey,physAct.type,10,16,physAct.durationMin);
+    placeBlock('sat-physical',physStart,physAct.durationMin);
+    // Freshen up
+    const physEnd=physStart+physAct.durationMin;
+    placeBlock('sat-freshen',physEnd,60);
+    // Lunch
+    const lunchMin=Math.max(physEnd+60,minFrom10(13));
+    placeBlock('sat-lunch',lunchMin,60);
+    // Leisure
+    const leisureWinner=tallyPoll('poll-sat-leisure').winner||'sat-brewery';
+    const leisureAct=ACTIVITIES[leisureWinner];
+    const leisureStart=Math.max(lunchMin+60,minFrom10(15));
+    placeBlock('sat-leisure',Math.min(leisureStart,minFrom10(18)),leisureAct.durationMin);
+    // Dinner 6:30PM
+    placeBlock('sat-dinner',minFrom10(18,30),90);
+    // Snack 8:30PM
+    placeBlock('sat-snack',minFrom10(20,30),45);
+    // Wind-down 10PM
+    placeBlock('sat-winddown',minFrom10(22),60);
+  }
+
+  return schedule;
+}
+
+function getSchedule(dayKey){
+  const stored = ST.schedule[dayKey]||{};
+  const auto   = autoPlaceDay(dayKey);
+  const merged = {...auto};
+  for(const[id,val]of Object.entries(stored)){
+    if(val.manual) merged[id]={...merged[id],...val};
+  }
+  return merged;
+}
+/* ═══════════════════════════════════════════════════════════
+   RENDERING HELPERS
+═══════════════════════════════════════════════════════════ */
+const CAL_MINUTES = 840; // 10AM–12AM
+const HOURS_LIST  = [10,11,12,13,14,15,16,17,18,19,20,21,22,23,24];
+
+function fmtHour(h){ if(h===0||h===24)return'12 AM'; if(h<12)return h+' AM'; if(h===12)return'12 PM'; return(h-12)+' PM'; }
+function minToTime(m){ // m = minutes from 10AM
+  const abs=m+600; const h=Math.floor(abs/60)%24; const min=abs%60;
+  const hr=h===0?12:(h>12?h-12:h); const ampm=h<12||h===0?'AM':'PM';
+  return `${hr}:${min.toString().padStart(2,'0')} ${ampm}`;
+}
+function fmtRating(r, rev, name){
+  if(r===null && rev===null) return name==='diy-kale-caesar'?'house recipe':name==='hershey-smores'?'community classic':'chef\'s recipe';
+  if(r===null) return `${rev} ratings`;
+  const stars = r==='5'||r===5 ? '5★' : `${r}★`;
+  if(rev===null) return stars;
+  const k = rev>=1000 ? `~${(rev/1000).toFixed(rev>=10000?0:1)}k` : rev;
+  return `${stars} · ${k} ratings`;
+}
+
+function buildWeatherSVG(dayKey, totalH){
+  const hw = getHourlyWeather(dayKey);
+  const showPrecip = dayKey !== 'sat';
+
+  // Y: hour → percent of calendar height (10AM=0%, midnight=100%)
+  function hToY(h){ return ((h*60-600)/840)*100; }
+
+  // Temp curve: mapped to right 55%–95% of width so it doesn't clash with blocks
+  const tMin = Math.min(...hw.map(x=>x.temp))-3;
+  const tMax = Math.max(...hw.map(x=>x.temp))+3;
+  function tToX(t){ return 55+(t-tMin)/(tMax-tMin)*38; }
+
+  // Build smooth cubic bezier path for temp
+  const pts = hw.map(w=>({ x: tToX(w.temp), y: hToY(w.hour) }));
+  let tempPath = `M ${pts[0].x.toFixed(2)},${pts[0].y.toFixed(2)}`;
+  for(let i=1;i<pts.length;i++){
+    const cp1y = pts[i-1].y + (pts[i].y-pts[i-1].y)*0.4;
+    const cp2y = pts[i].y   - (pts[i].y-pts[i-1].y)*0.4;
+    tempPath += ` C ${pts[i-1].x.toFixed(2)},${cp1y.toFixed(2)} ${pts[i].x.toFixed(2)},${cp2y.toFixed(2)} ${pts[i].x.toFixed(2)},${pts[i].y.toFixed(2)}`;
+  }
+  // Area fill under temp curve (down to right edge)
+  const tempArea = tempPath
+    + ` L 95,${pts[pts.length-1].y.toFixed(2)} L 95,${pts[0].y.toFixed(2)} Z`;
+
+  // Precip bars: left-anchored horizontal bands, width = precip% * 0.28 of total width
+  let precipBars = '';
+  if(showPrecip){
+    for(let i=0;i<hw.length-1;i++){
+      const y1 = hToY(hw[i].hour);
+      const y2 = hToY(hw[i+1].hour);
+      const w  = (hw[i].precip/100)*28;
+      if(w>0.2){
+        precipBars += `<rect x="0" y="${y1.toFixed(2)}" width="${w.toFixed(2)}" height="${(y2-y1+0.1).toFixed(2)}" fill="rgba(60,107,120,0.18)"/>`;
+      }
+    }
+    // Precip stroke line on right edge of bars
+    const precipLinePts = hw.map(w=>`${((w.precip/100)*28).toFixed(2)},${hToY(w.hour).toFixed(2)}`).join(' ');
+    precipBars += `<polyline points="${precipLinePts}" fill="none" stroke="rgba(60,107,120,0.45)" stroke-width="0.5" vector-effect="non-scaling-stroke"/>`;
+  }
+
+  // Temp labels at peak and trough
+  const peakW = hw.reduce((a,b)=>a.temp>b.temp?a:b);
+  const troughW = hw.reduce((a,b)=>a.temp<b.temp?a:b);
+
+  return `<svg class="cal-weather-svg" viewBox="0 0 100 100" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="tempgrad-${dayKey}" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0%" stop-color="rgba(198,138,46,0)" />
+        <stop offset="100%" stop-color="rgba(198,138,46,0.12)" />
+      </linearGradient>
+    </defs>
+    ${precipBars}
+    <path d="${tempArea}" fill="url(#tempgrad-${dayKey})" stroke="none"/>
+    <path d="${tempPath}" fill="none" stroke="rgba(198,138,46,0.55)" stroke-width="0.7" vector-effect="non-scaling-stroke" stroke-linejoin="round"/>
+  </svg>`;
+}
+
+function buildOptionMeta(optId, pollType){
+  if(optId==='_eatout') return '<span style="font-style:italic;color:var(--ink2)">Eat out instead — see top picks →</span>';
+  if(optId==='_writein'){
+    const txt=ST.writein.text||'';
+    return `<span style="color:var(--ink1)">${txt?(txt.length>60?txt.slice(0,60)+'…':txt):'Cook\'s choice — type a dish'}</span>`;
+  }
+  const a=ACTIVITIES[optId];
+  if(a && a.type==='drink'){
+    return `<span class="opt-addr">${a.desc}</span>`;
+  }
+  if(a && a.type==='restaurant'){
+    const stars=a.rating?`${a.rating}★`:'';
+    const reviews=a.reviews?`/${a.reviews}`:'';
+    const ratingStr=stars?`${stars}${reviews} · `:'';
+    return `<span style="color:var(--ink2)">${a.price ? a.price+' · ':''} ${a.addr}${ratingStr||a.tip?` · ${ratingStr}${a.tip}`:''}</span>`;
+  }
+  if(pollType==='activity'){
+    if(!a)return optId;
+    const dur = a.durationMin ? `<span class="opt-duration">⏱ ${a.durationMin >= 60 ? (a.durationMin/60 % 1 === 0 ? a.durationMin/60 + ' hr' : (Math.floor(a.durationMin/60) + ' hr ' + (a.durationMin%60) + ' min')) : a.durationMin + ' min'}</span>` : '';
+    const addr = a.addr ? `<span class="opt-addr">${a.addr}</span>` : '';
+    const tip  = a.tip  ? `<span class="opt-tip">${a.tip}</span>`   : '';
+    return [dur, addr, tip].filter(Boolean).join('<span class="opt-sep"> · </span>');
+  }
+  const r=RECIPES[optId];
+  if(!r)return optId;
+  const ratingStr=fmtRating(r.rating,r.reviews,optId);
+  return `<span>${r.source} · ${ratingStr}</span>`;}
+
+function buildVotePanel(pollId){
+  const poll=POLLS[pollId];
+  const tally=tallyPoll(pollId);
+  const gVote=getGuestVote(pollId);
+  const hasName=!!ST.guestName;
+
+  // Determine whether this poll has both dine-in and dine-out options
+  const isDineOut = id => id==='_eatout' || ACTIVITIES[id]?.type==='restaurant';
+  const hasMix = poll.type==='meal' && poll.options.some(id=>!isDineOut(id)&&id!=='_writein') && poll.options.some(isDineOut);
+  let html='<div class="block-vote-panel" id="vp-'+pollId+'">';
+  let lastSection = null; // 'in' | 'out'
+  for(const optId of poll.options){
+    // Insert section headers for meal polls with mixed options
+    if(hasMix){
+      const section = isDineOut(optId) ? 'out' : 'in';
+      if(section !== lastSection){
+        lastSection = section;
+        const label = section==='in' ? 'Cook at Home' : 'Dine Out';
+        html += `<div class="vote-section-header">${label}</div>`;
+      }
+    }
+
+    const isWinner=tally.winner===optId&&tally.winner!==null;
+    const isTied=tally.isTied&&tally.tied&&tally.tied.includes(optId);
+    const score=tally.scores[optId]||0;
+    const f=tally.firsts[optId]||0;
+    const s=tally.seconds[optId]||0;
+    const pts=score;
+
+    let optName='';
+    if(optId==='_eatout')       optName='Eat Out Instead';
+    else if(optId==='_writein') optName=ST.writein.text||(ST.writein.text===''?'Write-In Option':'');
+    else if(poll.type==='activity') optName=ACTIVITIES[optId]?.name||optId;
+    else {
+      // Could be a recipe OR a restaurant eat-out option on a meal poll
+      optName=RECIPES[optId]?.name || ACTIVITIES[optId]?.name || optId;
+    }
+
+    const veg=(poll.type==='meal'&&optId!=='_eatout'&&optId!=='_writein'&&RECIPES[optId]?.veg)?'<span class="badge-veg">Vegetarian</span>':'';
+    const note=(poll.type==='meal'&&optId!=='_eatout'&&optId!=='_writein'&&RECIPES[optId]?.note)?`<div class="vote-option-tip">${RECIPES[optId].note}</div>`:'';
+    const sides=(poll.type==='meal'&&optId!=='_eatout'&&optId!=='_writein'&&RECIPES[optId]?.sides)?`<div class="vote-option-sides">Sides: ${RECIPES[optId].sides}</div>`:'';
+    const actTip=(poll.type==='activity'&&ACTIVITIES[optId]?.tip)?`<div class="vote-option-tip">${ACTIVITIES[optId].tip}</div>`:'';
+
+    let writeinField='';
+    if(optId==='_writein'){
+      writeinField=`<input class="writein-input" id="writein-input-${pollId}" type="text" maxlength="200" placeholder="Cook's choice — type a dish" value="${escHtml(ST.writein.text||'')}" oninput="onWriteinChange(this.value,'${pollId}')">
+      <div class="writein-saved" id="writein-saved-${pollId}">Saved ✓</div>`;
+    }
+
+    html+=`<div class="vote-option-row${isWinner?' is-winner':''}" id="vor-${pollId}-${optId.replace(/[^a-z0-9]/g,'_')}">
+      <div class="vote-option-content">
+        <div class="vote-option-name">
+          ${escHtml(optName)}
+          ${isWinner?'<span class="badge-plan">THE PLAN</span>':''}
+          ${isTied?'<span class="tied-label">TIED</span>':''}
+          ${veg}
+        </div>
+        <div class="vote-option-meta">${buildOptionMeta(optId,poll.type)}</div>
+        ${sides}${note}${actTip}${writeinField}
+        <div class="vote-tally" aria-live="polite">● ${f} &nbsp;○ ${s} &nbsp;· <span class="pts">${pts} pts</span></div>
+      </div>
+      <div class="vote-chips">
+        <button class="chip ${gVote.first===optId?'selected-1':''}" 
+          ${!hasName?'disabled title="Enter your name above to vote"':''}
+          onclick="castVote('${pollId}','${optId}',1)" 
+          aria-pressed="${gVote.first===optId}"
+          aria-label="Vote 1st choice for ${escHtml(optName)}">1st</button>
+        <button class="chip ${gVote.second===optId?'selected-2':''}" 
+          ${!hasName?'disabled title="Enter your name above to vote"':''}
+          onclick="castVote('${pollId}','${optId}',2)"
+          aria-pressed="${gVote.second===optId}"
+          aria-label="Vote 2nd choice for ${escHtml(optName)}">2nd</button>
+      </div>
+    </div>`;
+  }
+  html+='</div>';
+  return html;
+}
+
+function buildEatOutCard(mealType){
+  const list=RESTAURANTS[mealType]||RESTAURANTS.dinner;
+  let html='<div class="restaurant-list">';
+  for(const r of list){
+    html+=`<div class="restaurant-item">
+      <span class="restaurant-name">${escHtml(r.name)}</span> <span class="restaurant-price">${r.price}</span>
+      <div class="restaurant-addr">${escHtml(r.addr)}</div>
+      <div class="restaurant-why">${escHtml(r.why)}</div>
+    </div>`;
+  }
+  html+=`<div class="splurge-note">${escHtml(SPLURGE)}</div>`;
+  html+='</div>';
+  return html;
+}
+
+function escHtml(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+/* Block definitions per day */
+function dayBlocks(dayKey){
+  const s=getSchedule(dayKey);
+  const blocks=[];
+
+  const addBlock=(id,title,type,pollId,start,dur,sub,mealType,activityType)=>{
+    if(s[id]){start=s[id].start;dur=s[id].duration;}
+    const manual=ST.schedule[dayKey]&&ST.schedule[dayKey][id]&&ST.schedule[dayKey][id].manual;
+    blocks.push({id,title,type,pollId,start,dur,sub,mealType,activityType,manual});
+  };
+
+  if(dayKey==='thu'){
+    addBlock('arrival','Arrival & Unpack','fixed',null,minFrom10(14),120,'Get settled, claim rooms','','');
+    // Dinner
+    const dWin=tallyPoll('poll-thu-dinner').winner;
+    const dTitle=dWin&&dWin!=='_eatout'&&dWin!=='_writein'?RECIPES[dWin]?.name:dWin==='_eatout'?'Dinner':dWin==='_writein'?(ST.writein.text||'Cook\'s Choice'):'Dinner';
+    addBlock('thu-dinner',dTitle,'meal','poll-thu-dinner',minFrom10(20,0),90,'','dinner','');
+    // Walk
+    const wWin=tallyPoll('poll-thu-walk').winner;
+    const wAct=ACTIVITIES[wWin]||ACTIVITIES['thu-lighthouse'];
+    const wTitle=wWin?wAct.name:'Evening Walk';
+    addBlock('thu-walk',wTitle,'activity','poll-thu-walk',minFrom10(19,30),wAct.durationMin,wAct.addr,'','flexible');
+    const sWin=tallyPoll('poll-thu-snack').winner;
+    const sTitle=sWin?RECIPES[sWin]?.name:'Fire-Pit Snack';
+    addBlock('thu-snack',sTitle,'snack','poll-thu-snack',minFrom10(21,45),45,'Fire pit','','');
+    addBlock('thu-winddown','Evening Wind-Down','personal',null,minFrom10(22,30),60,'','','');
+  }
+  if(dayKey==='fri'){
+    const bWin=tallyPoll('poll-fri-breakfast').winner;
+    const bTitle=bWin&&bWin!=='_eatout'?RECIPES[bWin]?.name:bWin==='_eatout'?'Breakfast':'Breakfast';
+    addBlock('fri-breakfast',bTitle,'meal','poll-fri-breakfast',minFrom10(10),60,'','breakfast','');
+    const phWin=tallyPoll('poll-fri-physical').winner;
+    const phAct=ACTIVITIES[phWin]||ACTIVITIES['fri-kaaterskill'];
+    addBlock('fri-physical',phWin?phAct.name:'Friday Activity','activity','poll-fri-physical',minFrom10(10,30),phAct.durationMin,phAct.addr,'',phAct.type);
+    addBlock('fri-freshen','Drive Back + Freshen Up','personal',null,0,60,'','','');
+    const lWin=tallyPoll('poll-fri-lunch').winner;
+    const lTitle=lWin&&lWin!=='_eatout'?RECIPES[lWin]?.name:lWin==='_eatout'?'Lunch':'Lunch';
+    addBlock('fri-lunch',lTitle,'meal','poll-fri-lunch',minFrom10(13,30),60,'','lunch','');
+    const leWin=tallyPoll('poll-fri-leisure').winner;
+    const leAct=ACTIVITIES[leWin]||ACTIVITIES['fri-lasting-joy'];
+    addBlock('fri-leisure',leWin?leAct.name:'Leisure','activity','poll-fri-leisure',minFrom10(15),leAct.durationMin,leAct.addr,'','flexible');
+    const dWin=tallyPoll('poll-fri-dinner').winner;
+    const dTitle=dWin&&dWin!=='_eatout'?RECIPES[dWin]?.name:dWin==='_eatout'?'Dinner':'Dinner';
+    addBlock('fri-dinner',dTitle,'meal','poll-fri-dinner',minFrom10(18,30),90,'','dinner','');
+    addBlock('fri-backgammon','🎲 Backgammon Tournament','fixed',null,minFrom10(20),90,'Winner cooks nothing Saturday','','');
+    const sWin=tallyPoll('poll-fri-snack').winner;
+    const sTitle=sWin?RECIPES[sWin]?.name:'Fire-Pit Snack';
+    addBlock('fri-snack',sTitle,'snack','poll-fri-snack',minFrom10(21,30),45,'Fire pit','','');
+    addBlock('fri-winddown','Evening Wind-Down','personal',null,minFrom10(22,30),60,'','','');
+  }
+  if(dayKey==='sat'){
+    const bWin=tallyPoll('poll-sat-breakfast').winner;
+    const bTitle=bWin&&bWin!=='_eatout'?RECIPES[bWin]?.name:bWin==='_eatout'?'Breakfast':'Breakfast';
+    addBlock('sat-breakfast',bTitle,'meal','poll-sat-breakfast',minFrom10(10),60,'','breakfast','');
+    const phWin=tallyPoll('poll-sat-physical').winner;
+    const phAct=ACTIVITIES[phWin]||ACTIVITIES['sat-arboretum'];
+    addBlock('sat-physical',phWin?phAct.name:'Saturday Activity','activity','poll-sat-physical',minFrom10(10,30),phAct.durationMin,phAct.addr,'',phAct.type);
+    addBlock('sat-freshen','Drive Back + Freshen Up','personal',null,0,60,'','','');
+    const lWin=tallyPoll('poll-sat-lunch').winner;
+    const lTitle=lWin&&lWin!=='_eatout'?RECIPES[lWin]?.name:lWin==='_eatout'?'Lunch':'Lunch';
+    addBlock('sat-lunch',lTitle,'meal','poll-sat-lunch',minFrom10(13,30),60,'','lunch','');
+    const leWin=tallyPoll('poll-sat-leisure').winner;
+    const leAct=ACTIVITIES[leWin]||ACTIVITIES['sat-lasting-joy'];
+    addBlock('sat-leisure',leWin?leAct.name:'Leisure','activity','poll-sat-leisure',minFrom10(15),leAct.durationMin,leAct.addr,'','flexible');
+    const dWin=tallyPoll('poll-sat-dinner').winner;
+    const dTitle=dWin&&dWin!=='_eatout'?RECIPES[dWin]?.name:dWin==='_eatout'?'Dinner':'Dinner';
+    addBlock('sat-dinner',dTitle,'meal','poll-sat-dinner',minFrom10(18,30),90,'','dinner','');
+    const sWin=tallyPoll('poll-sat-snack').winner;
+    const sTitle=sWin?RECIPES[sWin]?.name:'Fire-Pit Snack';
+    addBlock('sat-snack',sTitle,'snack','poll-sat-snack',minFrom10(20,30),45,'Fire pit','','');
+    addBlock('sat-winddown','Evening Wind-Down','personal',null,minFrom10(22),60,'','','');
+  }
+  // Apply schedule overrides for fresh/physical blocks
+  for(const b of blocks){
+    if(ST.schedule[dayKey]&&ST.schedule[dayKey][b.id]&&ST.schedule[dayKey][b.id].manual){
+      b.start=ST.schedule[dayKey][b.id].start;
+      b.manual=true;
+    }
+  }
+  // Fix freshen-up to be after physical
+  for(const b of blocks){
+    if(b.id===dayKey+'-freshen'){
+      const phys=blocks.find(x=>x.id===dayKey+'-physical');
+      if(phys&&!b.manual) b.start=phys.start+phys.dur;
+    }
+  }
+  return blocks;
+}
+
+function buildCalendar(dayKey, containerEl){
+  const blocks=dayBlocks(dayKey);
+  const rowH=window.innerWidth<=768?48:56;
+  const totalH=CAL_MINUTES/60*rowH; // 14 hours
+  const CAL_PAD_TOP = 10; // matches padding-top on .cal-outer
+
+  // Axis + gridlines
+  let axisHtml='<div class="cal-axis">';
+  for(const h of HOURS_LIST){
+    const top=((h-10)/14)*totalH + CAL_PAD_TOP;
+    axisHtml+=`<div class="cal-axis-label" style="top:${top}px">${fmtHour(h)}</div>`;
+    axisHtml+=`<div class="cal-axis-tick" style="top:${top}px"></div>`;
+  }
+  axisHtml+='</div>';
+
+  let gridHtml='<div class="cal-grid">';
+  for(const h of HOURS_LIST){
+    const top=((h-10)/14)*totalH + CAL_PAD_TOP;
+    const isNoon = h===12;
+    gridHtml+=`<div class="cal-gridline${isNoon?' noon':''}" style="top:${top}px"></div>`;
+  }
+  gridHtml+='</div>';
+
+  const weatherSVG=buildWeatherSVG(dayKey,totalH);
+
+  // Weather summary
+  const hw=getHourlyWeather(dayKey);
+  const wd=WEATHER[dayKey];
+  document.getElementById('weather-'+dayKey).textContent=
+    `High ${wd.high}°F · ${wd.precip}% precip chance`;
+
+  // Detect overlaps
+  const sorted=[...blocks].sort((a,b)=>a.start-b.start);
+  const cols=[];
+  for(const b of sorted){
+    let placed=false;
+    for(let c=0;c<cols.length;c++){
+      const last=cols[c][cols[c].length-1];
+      if(last.start+last.dur<=b.start){cols[c].push(b);placed=true;break;}
+    }
+    if(!placed)cols.push([b]);
+  }
+  const blockCol={};
+  const totalCols=cols.length||1;
+  cols.forEach((col,ci)=>col.forEach(b=>blockCol[b.id]=ci));
+
+  let blocksHtml='<div class="cal-blocks" id="calblocks-'+dayKey+'" style="position:absolute;left:56px;right:8px;top:'+CAL_PAD_TOP+'px;bottom:0;">';
+  for(const b of blocks){
+    const top=(b.start/CAL_MINUTES)*totalH;
+    const height=Math.max(40,(b.dur/CAL_MINUTES)*totalH);
+    const ci=blockCol[b.id]||0;
+    const colW=100/totalCols;
+    const leftPct=ci*colW;
+    const w=`calc(${colW}% - 4px)`;
+    const weather=weatherAt(dayKey,b.start);
+    const chipTxt=`${weather.temp}° · ${weather.precip}% rain`;
+    const winnerBadge=(b.pollId&&tallyPoll(b.pollId).winner)?'🏆 ':'';
+
+    // Build inner content
+    let inner=`<div class="block-inner">
+      <div class="block-header">
+        <span class="block-title">${winnerBadge}${escHtml(b.title)}</span>
+        ${b.pollId?`<button class="block-vote-toggle" onclick="openVoteModal('${b.pollId}')" aria-haspopup="dialog"><span class="vt-icon-circle"><svg width="6" height="6" viewBox="0 0 8 8" fill="currentColor"><polygon points="4,5 1,2 7,2"/></svg></span>Vote</button>`:''}
+        ${b.type!=='fixed'?`<span class="block-weather-chip">${chipTxt}</span>`:''}
+      </div>
+      ${b.sub?`<div class="block-sub">${escHtml(b.sub)}</div>`:''}`;
+    inner+='</div>'; // block-inner
+
+    blocksHtml+=`<div class="cal-block type-${b.type}" 
+      id="cb-${dayKey}-${b.id}"
+      data-day="${dayKey}" data-block="${b.id}" data-start="${b.start}" data-dur="${b.dur}"
+      style="position:absolute;top:${top}px;height:${height}px;left:calc(${leftPct}% + 2px);width:${w};z-index:10;"
+      tabindex="0" role="button"
+      aria-label="${escHtml(b.title)}, ${minToTime(b.start)}–${minToTime(b.start+b.dur)}, arrow keys to move"
+      onkeydown="onBlockKeydown(event,'${dayKey}','${b.id}')">
+      ${inner}
+    </div>`;
+  }
+  blocksHtml+='</div>';
+
+  containerEl.style.height=(totalH + CAL_PAD_TOP)+'px';
+  containerEl.style.position='relative';
+  containerEl.innerHTML=axisHtml+gridHtml+weatherSVG+blocksHtml;
+
+  // Attach drag handlers
+  for(const b of blocks){
+    const el=document.getElementById(`cb-${dayKey}-${b.id}`);
+    if(el) attachDrag(el,dayKey,b.id);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   VOTE MODAL
+═══════════════════════════════════════════════════════════ */
+let _openPollId = null;
+
+function openVoteModal(pollId) {
+  const poll = POLLS[pollId];
+  if (!poll) return;
+  _openPollId = pollId;
+
+  const modal    = document.getElementById('vote-modal');
+  const titleEl  = document.getElementById('vmodal-title');
+  const bodyEl   = document.getElementById('vmodal-body');
+
+  titleEl.textContent = poll.label;
+
+  // Build body: name hint if needed, then vote rows
+  const hasName = !!ST.guestName;
+  let html = '';
+  if (!hasName) {
+    html += `<div class="vmodal-name-hint">Enter your name in the header to cast votes.</div>`;
+  }
+  html += buildVotePanel(pollId).replace(/<div class="block-vote-panel[^"]*"[^>]*>/,'').replace(/<\/div>\s*$/,'');
+
+  // If meal and winner is eat-out, append restaurant card
+  if (poll.type === 'meal') {
+    const winner = tallyPoll(pollId).winner;
+    if (winner === '_eatout') {
+      const mealType = pollId.includes('breakfast') ? 'breakfast' : pollId.includes('lunch') ? 'lunch' : 'dinner';
+      html += buildEatOutCard(mealType);
+    }
+  }
+
+  bodyEl.innerHTML = html;
+
+  modal.style.display = 'flex';
+  modal.classList.remove('exiting');
+  modal.classList.add('entering');
+  document.body.style.overflow = 'hidden';
+
+  // Focus the modal for keyboard users
+  setTimeout(() => modal.querySelector('.vmodal-close')?.focus(), 50);
+}
+
+function closeVoteModal() {
+  const modal = document.getElementById('vote-modal');
+  modal.classList.remove('entering');
+  modal.classList.add('exiting');
+  document.body.style.overflow = '';
+  setTimeout(() => {
+    modal.style.display = 'none';
+    modal.classList.remove('exiting');
+    _openPollId = null;
+  }, 160);
+}
+
+// Close on Escape
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && _openPollId) closeVoteModal();
+});
+
+function toggleVotePanel(pollId, btn) {
+  // Legacy — now opens the modal instead
+  openVoteModal(pollId);
+}
+
+function renderAllPolls(){
+  // Re-render vote panels that are currently open
+  document.querySelectorAll('.block-vote-panel.open').forEach(panel=>{
+    const pollId=panel.id.replace('vp-','');
+    if(!POLLS[pollId])return;
+    panel.outerHTML=buildVotePanel(pollId).replace('class="block-vote-panel"','class="block-vote-panel open"');
+    // Actually we need to re-render entire block; do it by day
+  });
+  // Simpler: re-render all calendars
+  ['thu','fri','sat'].forEach(d=>{
+    const container=document.getElementById('cal-'+d);
+    if(container&&container.children.length>0) buildCalendar(d,container);
+  });
+}
+
+function updateTalliesInPlace(pollId) {
+  const poll = POLLS[pollId];
+  if (!poll) return;
+  const tally = tallyPoll(pollId);
+  const gVote = getGuestVote(pollId);
+  const hasName = !!ST.guestName;
+
+  // Determine search scope — check open modal/wizard body first, then full doc
+  const scope = (_openPollId === pollId)
+    ? (document.getElementById('vmodal-body') || document.getElementById('wizard-body') || document)
+    : document;
+  if (!scope) return;
+
+  for (const optId of poll.options) {
+    const safeId = optId.replace(/[^a-z0-9]/g, '_');
+    const row = scope.querySelector(`#vor-${pollId}-${safeId}`) || document.getElementById(`vor-${pollId}-${safeId}`);
+    if (!row) continue;
+
+    row.classList.toggle('is-winner', tally.winner === optId && tally.winner !== null);
+
+    const tallyEl = row.querySelector('.vote-tally');
+    if (tallyEl) {
+      const f = tally.firsts[optId] || 0;
+      const s = tally.seconds[optId] || 0;
+      const pts = tally.scores[optId] || 0;
+      tallyEl.innerHTML = `● ${f} &nbsp;○ ${s} &nbsp;· <span class="pts">${pts} pts</span>`;
+    }
+
+    const chips = row.querySelectorAll('.chip');
+    if (chips[0]) {
+      chips[0].classList.toggle('selected-1', gVote.first === optId);
+      chips[0].setAttribute('aria-pressed', gVote.first === optId);
+      chips[0].disabled = !hasName;
+    }
+    if (chips[1]) {
+      chips[1].classList.toggle('selected-2', gVote.second === optId);
+      chips[1].setAttribute('aria-pressed', gVote.second === optId);
+      chips[1].disabled = !hasName;
+    }
+
+    const nameLine = row.querySelector('.vote-option-name');
+    if (nameLine) {
+      nameLine.querySelector('.badge-plan')?.remove();
+      nameLine.querySelector('.tied-label')?.remove();
+      if (tally.winner === optId && tally.winner !== null) {
+        const b = document.createElement('span');
+        b.className = 'badge-plan'; b.textContent = 'THE PLAN';
+        nameLine.appendChild(b);
+      } else if (tally.isTied && tally.tied?.includes(optId)) {
+        const t = document.createElement('span');
+        t.className = 'tied-label'; t.textContent = 'TIED';
+        nameLine.appendChild(t);
+      }
+    }
+  }
+
+  // Update block title on the calendar
+  document.querySelectorAll('.cal-block').forEach(blk => {
+    if (blk.innerHTML.includes(`openVoteModal('${pollId}'`) || blk.innerHTML.includes(`toggleVotePanel('${pollId}'`)) {
+      const titleEl = blk.querySelector('.block-title');
+      if (titleEl) {
+        const winner = tally.winner;
+        let newTitle = '';
+        if (!winner) newTitle = poll.label;
+        else if (winner === '_eatout') newTitle = poll.label.split(' ')[0];
+        else if (winner === '_writein') newTitle = ST.writein.text || "Cook's Choice";
+        else if (poll.type === 'activity') newTitle = '🏆 ' + (ACTIVITIES[winner]?.name || winner);
+        else newTitle = '🏆 ' + (RECIPES[winner]?.name || winner);
+        if (newTitle) titleEl.textContent = newTitle;
+      }
+    }
+  });
+}
+
+function updateCalendarWinners(){
+  ['thu','fri','sat'].forEach(d=>{
+    const container=document.getElementById('cal-'+d);
+    if(container&&container.children.length>0) buildCalendar(d,container);
+  });
+  renderShoppingList();
+}
+/* ═══════════════════════════════════════════════════════════
+   DRAG & DROP — Pointer Events, 15-min snap, touch-friendly
+═══════════════════════════════════════════════════════════ */
+let _dragState = null;
+const tooltip = ()=>document.getElementById('drag-tooltip');
+
+function attachDrag(el, dayKey, blockId){
+  el.addEventListener('pointerdown', e=>{
+    if(e.target.closest('.block-vote-toggle,.block-vote-panel,.writein-input,.chip,.restaurant-list,a'))return;
+    e.preventDefault();
+    el.setPointerCapture(e.pointerId);
+    const rect=el.getBoundingClientRect();
+    const calEl=document.getElementById('cal-'+dayKey);
+    const calRect=calEl.getBoundingClientRect();
+    const rowH=window.innerWidth<=768?48:56;
+    const totalH=CAL_MINUTES/60*rowH;
+    _dragState={
+      el, dayKey, blockId,
+      startY: e.clientY,
+      origTop: parseFloat(el.style.top)||0,
+      calTop: calRect.top,
+      calH: totalH,
+      dur: parseInt(el.dataset.dur),
+      startMin: parseInt(el.dataset.start),
+    };
+    el.classList.add('dragging');
+    el.style.zIndex=200;
+    tooltip().style.display='block';
+  });
+
+  el.addEventListener('pointermove', e=>{
+    if(!_dragState||_dragState.el!==el)return;
+    const dy=e.clientY-_dragState.startY;
+    const minsMoved=Math.round((dy/_dragState.calH)*CAL_MINUTES/15)*15;
+    let newStart=_dragState.startMin+minsMoved;
+    newStart=Math.max(0,Math.min(CAL_MINUTES-_dragState.dur,newStart));
+    // Snap to 15-min
+    newStart=Math.round(newStart/15)*15;
+    const newTop=(_dragState.origTop+dy/_dragState.calH*_dragState.calH);
+    const clampedTop=(newStart/CAL_MINUTES)*_dragState.calH;
+    el.style.top=clampedTop+'px';
+    _dragState.currentStart=newStart;
+    // Tooltip
+    const tt=tooltip();
+    tt.textContent=`${minToTime(newStart)} – ${minToTime(newStart+_dragState.dur)}`;
+    tt.style.left=(e.clientX+12)+'px';
+    tt.style.top=(e.clientY-8)+'px';
+  });
+
+  el.addEventListener('pointerup', e=>{
+    if(!_dragState||_dragState.el!==el)return;
+    el.classList.remove('dragging');
+    el.style.zIndex='';
+    tooltip().style.display='none';
+    const newStart=_dragState.currentStart??_dragState.startMin;
+    // Persist
+    if(!ST.schedule[_dragState.dayKey]) ST.schedule[_dragState.dayKey]={};
+    ST.schedule[_dragState.dayKey][_dragState.blockId]={start:newStart,duration:_dragState.dur,manual:true};
+    storageSet('wcd-schedule',ST.schedule);
+    el.dataset.start=newStart;
+    // Re-render this block's label in the DOM (settle animation)
+    el.style.transition='top 120ms ease';
+    setTimeout(()=>{ el.style.transition=''; },150);
+    _dragState=null;
+    // Rebuild calendar so manual pin and aria-label update
+    setTimeout(()=>buildCalendar(_dragState2?.dayKey||_dragState?.dayKey||el.dataset.day,document.getElementById('cal-'+el.dataset.day)),160);
+  });
+  // Keyboard movement
+}
+// keep reference to clean rebuild
+let _dragState2=null;
+
+function onBlockKeydown(e, dayKey, blockId){
+  if(e.key!=='ArrowUp'&&e.key!=='ArrowDown')return;
+  e.preventDefault();
+  const el=document.getElementById(`cb-${dayKey}-${blockId}`);
+  if(!el)return;
+  const rowH=window.innerWidth<=768?48:56;
+  const totalH=CAL_MINUTES/60*rowH;
+  let cur=parseInt(el.dataset.start);
+  const dur=parseInt(el.dataset.dur);
+  cur=e.key==='ArrowUp'?Math.max(0,cur-15):Math.min(CAL_MINUTES-dur,cur+15);
+  el.dataset.start=cur;
+  el.style.top=(cur/CAL_MINUTES)*totalH+'px';
+  el.setAttribute('aria-label',`${el.getAttribute('aria-label').split(',')[0]}, ${minToTime(cur)}–${minToTime(cur+dur)}, arrow keys to move`);
+  if(!ST.schedule[dayKey])ST.schedule[dayKey]={};
+  ST.schedule[dayKey][blockId]={start:cur,duration:dur,manual:true};
+  storageSet('wcd-schedule',ST.schedule);
+}
+
+function onWriteinChange(val, pollId){
+  ST.writein={text:val.trim(), updatedBy:ST.guestName||'anonymous'};
+  storageSet('wcd-writein',ST.writein);
+  const saved=document.getElementById('writein-saved-'+pollId);
+  if(saved){saved.classList.add('show');setTimeout(()=>saved.classList.remove('show'),1800);}
+  // Update vote rows that show the write-in name
+  document.querySelectorAll('[id^="vor-"][id$="_writein"],[id$="__writein"]').forEach(el=>{
+    const nameEl=el.querySelector('.vote-option-name');
+    if(nameEl){const badge=nameEl.querySelector('.badge-plan,.tied-label');nameEl.textContent=(val.trim()||"Write-In Option")+(badge?' ':'')+' ';if(badge)nameEl.appendChild(badge);}
+  });
+}
+/* ═══════════════════════════════════════════════════════════
+   SHOPPING LIST
+═══════════════════════════════════════════════════════════ */
+function shopItemId(prefix, label){
+  return prefix+'-'+label.replace(/[^a-z0-9]/gi,'_').toLowerCase().slice(0,40);
+}
+
+function renderShoppingList(){
+  const container=document.getElementById('shop-content');
+  if(!container)return;
+  let html='';
+  let totalItems=0,checkedItems=0;
+
+  const addItem=(id,label)=>{
+    totalItems++;
+    const checked=!!ST.shopping[id];
+    if(checked)checkedItems++;
+    html+=`<div class="shop-item-row${checked?' checked-item':''}" id="shoprow-${id}">
+      <div class="shop-cb${checked?' checked':''}" role="checkbox" aria-checked="${checked}" tabindex="0"
+        onclick="toggleShopItem('${id}',this.parentElement)" 
+        onkeydown="if(event.key===' '||event.key==='Enter'){event.preventDefault();toggleShopItem('${id}',this.parentElement)}"></div>
+      <div class="shop-item-label">${escHtml(label)}</div>
+    </div>`;
+  };
+
+  const days=[
+    {key:'thu',label:'Thursday July 9',meals:[{poll:'poll-thu-dinner',slot:'Dinner',mealType:'dinner'}]},
+    {key:'fri',label:'Friday July 10', meals:[
+      {poll:'poll-fri-breakfast',slot:'Breakfast',mealType:'breakfast'},
+      {poll:'poll-fri-lunch',slot:'Lunch',mealType:'lunch'},
+      {poll:'poll-fri-dinner',slot:'Dinner',mealType:'dinner'},
+    ]},
+    {key:'sat',label:'Saturday July 11',meals:[
+      {poll:'poll-sat-breakfast',slot:'Breakfast',mealType:'breakfast'},
+      {poll:'poll-sat-lunch',slot:'Lunch',mealType:'lunch'},
+      {poll:'poll-sat-dinner',slot:'Dinner',mealType:'dinner'},
+    ]},
+  ];
+
+  for(const day of days){
+    html+=`<div class="shop-section-title">${day.label}</div>`;
+    for(const meal of day.meals){
+      const tally=tallyPoll(meal.poll);
+      const winner=tally.winner;
+      html+=`<div class="shop-meal-title">${meal.slot}`;
+      if(winner){
+        if(winner==='_eatout') html+=` <span class="badge-plan" style="background:var(--moss)">EAT OUT</span>`;
+        else if(winner==='_writein') html+=` <span style="font-weight:400;font-size:12px">— ${escHtml(ST.writein.text||'Write-In')}</span>`;
+        else {
+          const r=RECIPES[winner];
+          const recipeLink=r?.url?`<a href="${r.url}" target="_blank" rel="noopener" style="font-size:11px;color:var(--buoy);text-decoration:none;margin-left:6px">View recipe →</a>`:'';
+          html+=` — <span style="font-weight:400">${escHtml(r?.name||winner)}</span>${recipeLink}`;
+        }
+      }
+      html+='</div>';
+
+      if(!winner||winner==='_eatout'){
+        html+=`<div class="shop-eating-out">${winner==='_eatout'?'Eating out — nothing to buy.':'No votes yet — check back after voting.'}</div>`;
+      } else {
+        const itemPrefix=`${day.key}-${meal.slot.toLowerCase()}-${winner}`;
+        if(winner==='_writein'){
+          html+=`<div class="shop-eating-out" style="font-style:normal;color:var(--ink1)">Write-in dish — add your own items.</div>`;
+        } else {
+          const list=SHOPPING_LISTS[winner]||[];
+          for(const item of list){ addItem(shopItemId(itemPrefix,item),item); }
+        }
+      }
+
+      // Other options toggle
+      const otherOpts=POLLS[meal.poll].options.filter(o=>o!==winner&&o!=='_eatout'&&o!=='_writein'&&SHOPPING_LISTS[o]);
+      if(otherOpts.length){
+        const togId=`shopother-${meal.poll}`;
+        html+=`<button class="shop-other-toggle" onclick="document.getElementById('${togId}').classList.toggle('open');this.textContent=document.getElementById('${togId}').classList.contains('open')?'▲ Hide other options':'▼ Other options'">▼ Other options</button>`;
+        html+=`<div class="shop-other-panel" id="${togId}">`;
+        for(const optId of otherOpts){
+          const r=RECIPES[optId];
+          if(!r)continue;
+          html+=`<div style="margin-left:16px;margin-top:8px">`;
+          html+=`<div style="font-size:12px;font-weight:600;color:var(--ink2);margin-bottom:4px">${escHtml(r.name)}</div>`;
+          const oPrefix=`${day.key}-other-${optId}`;
+          for(const item of (SHOPPING_LISTS[optId]||[])){ addItem(shopItemId(oPrefix,item),item); }
+          html+=`</div>`;
+        }
+        html+='</div>';
+      }
+    }
+  }
+
+  // Fire-pit snacks section
+  html+=`<div class="shop-section-title">Fire-Pit Snacks</div>`;
+  for(const sid of SNACK_IDS){
+    const r=RECIPES[sid];
+    html+=`<div class="shop-meal-title">${escHtml(r.name)}</div>`;
+    for(const item of (SHOPPING_LISTS[sid]||[])){ addItem(shopItemId('snack-'+sid,item),item); }
+  }
+
+  // Sides & staples
+  html+=`<div class="shop-section-title">Sides & Staples</div>`;
+  const staples=['Olive oil (good quality, 1 L+)','Kosher salt, black pepper','Unsalted butter (2 lb)','Coffee + filters','Breakfast fruit bowl (berries, melon)','Crusty baguettes × 4 (replenish as needed)'];
+  for(const s of staples){ addItem(shopItemId('staples',s),s); }
+
+  // Drinks
+  html+=`<div class="shop-section-title">Drinks</div>`;
+  html+=`<div class="shop-placeholder-row">Add your group's drinks here:</div>`;
+  const drinkPlaceholders=['Wine / beer / cider — your picks','Sparkling water (24-pack)','Juice, coffee creamer, etc.'];
+  for(const d of drinkPlaceholders){ addItem(shopItemId('drinks',d),d); }
+
+  container.innerHTML=html;
+  document.getElementById('shop-count').textContent=`${checkedItems}/${totalItems} packed`;
+}
+
+function toggleShopItem(id, rowEl){
+  if(ST.shopping[id]){ delete ST.shopping[id]; }
+  else { ST.shopping[id]=true; }
+  storageSet('wcd-shopping',ST.shopping);
+  const checked=!!ST.shopping[id];
+  rowEl.classList.toggle('checked-item',checked);
+  const cb=rowEl.querySelector('.shop-cb');
+  if(cb){ cb.classList.toggle('checked',checked); cb.setAttribute('aria-checked',checked); }
+  // Update count
+  const total=document.querySelectorAll('.shop-cb').length;
+  const chk=document.querySelectorAll('.shop-cb.checked').length;
+  const cnt=document.getElementById('shop-count');
+  if(cnt)cnt.textContent=`${chk}/${total} packed`;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SUNDAY TAB
+═══════════════════════════════════════════════════════════ */
+function renderSundayTab(){
+  const container=document.getElementById('sun-content');
+  if(!container)return;
+
+  const checkoutItems=[
+    'Strip beds and gather all linens per house rules',
+    'Pack coolers with leftover food',
+    'Take out all trash and recycling',
+    'Sweep / wipe fridge and toss anything that won\'t travel',
+    'Final walkthrough — windows, doors, lights, AC/heat off',
+    'Load cars and do a phone/charger sweep',
+  ];
+
+  let html=`<div class="sunday-card">
+    <div class="sunday-card-title">Checkout & Travel</div>
+    <ul class="checkout-list">
+      ${checkoutItems.map(i=>`<li>${escHtml(i)}</li>`).join('')}
+    </ul>
+  </div>`;
+
+  html+=`<div class="sunday-card">
+    <div class="sunday-card-title">Food on the Road</div>
+    <p style="font-size:14px;color:var(--ink1);line-height:1.6;margin-bottom:12px">
+      No cooking today. Grab breakfast or lunch on the way out — 
+      <strong>Abby's Restaurant &amp; Bar</strong> (2762 NY-32, Saugerties, opens 7 AM) is right on the route.
+    </p>
+    <div style="font-weight:600;font-size:13px;margin:12px 0 4px">Breakfast options nearby:</div>
+    <div class="restaurant-list">`;
+  for(const r of RESTAURANTS.breakfast){
+    html+=`<div class="restaurant-item">
+      <span class="restaurant-name">${escHtml(r.name)}</span> <span class="restaurant-price">${r.price}</span>
+      <div class="restaurant-addr">${escHtml(r.addr)}</div>
+      <div class="restaurant-why">${escHtml(r.why)}</div>
+    </div>`;
+  }
+  html+=`</div>
+    <div style="font-weight:600;font-size:13px;margin:12px 0 4px">Lunch options nearby:</div>
+    <div class="restaurant-list">`;
+  for(const r of RESTAURANTS.lunch){
+    html+=`<div class="restaurant-item">
+      <span class="restaurant-name">${escHtml(r.name)}</span> <span class="restaurant-price">${r.price}</span>
+      <div class="restaurant-addr">${escHtml(r.addr)}</div>
+      <div class="restaurant-why">${escHtml(r.why)}</div>
+    </div>`;
+  }
+  html+=`</div><div class="splurge-note">${escHtml(SPLURGE)}</div>`;
+  html+=`</div>`;
+
+  html+=`<div class="sunday-card">
+    <div class="sunday-card-title">Weather</div>
+    <p style="font-size:14px;color:var(--ink1);line-height:1.6">
+      Sunday is beyond the reliable forecast window — check a live forecast before the drive home.
+    </p>
+  </div>`;
+
+  container.innerHTML=html;
+}
+/* ═══════════════════════════════════════════════════════════
+   INIT & TABS
+═══════════════════════════════════════════════════════════ */
+let _activeTab = 'thu';
+
+async function switchTab(tabKey){
+  _activeTab = tabKey;
+  document.querySelectorAll('.tab-btn').forEach(b=>{
+    const active=b.dataset.tab===tabKey;
+    b.classList.toggle('active',active);
+    b.setAttribute('aria-selected',active);
+  });
+  document.querySelectorAll('.tab-panel').forEach(p=>{
+    p.classList.toggle('active',p.id==='tab-'+tabKey);
+  });
+  // Re-fetch shared state on tab switch
+  await loadAllShared();
+  if(tabKey==='thu'||tabKey==='fri'||tabKey==='sat'){
+    buildCalendar(tabKey, document.getElementById('cal-'+tabKey));
+  } else if(tabKey==='sun'){
+    renderSundayTab();
+  } else if(tabKey==='shop'){
+    renderShoppingList();
+  }
+}
+
+async function doRefresh(){
+  const btn=document.getElementById('btn-refresh');
+  btn.classList.add('spinning');
+  await loadAllShared();
+  btn.classList.remove('spinning');
+  // Re-render active content
+  await switchTab(_activeTab);
+}
+
+async function init(){
+  // Show skeletons
+  ['thu','fri','sat'].forEach(d=>{
+    const el=document.getElementById('cal-'+d);
+    if(el) el.innerHTML='<div style="padding:12px"><div class="skeleton-bar" style="height:48px;margin-bottom:6px"></div><div class="skeleton-bar" style="height:80px;margin-bottom:6px"></div><div class="skeleton-bar" style="height:56px"></div></div>';
+  });
+
+  // Load shared state
+  await loadAllShared();
+
+  // Name input — replaced by modal; wire up change-name button
+  const changeName=document.getElementById('btn-change-name');
+  if(changeName) changeName.addEventListener('click', openNameModal);
+
+  // Show name modal on load if no name set
+  if(!ST.guestName) {
+    openNameModal();
+  } else {
+    updateNameButton();
+  }
+
+  // Wire up name-select enable/disable confirm
+  const nameSelect = document.getElementById('name-select');
+  if(nameSelect){
+    nameSelect.addEventListener('change', ()=>{
+      document.getElementById('nmodal-confirm').disabled = !nameSelect.value;
+    });
+    // Pre-select if name already known
+    if(ST.guestName) nameSelect.value = ST.guestName;
+  }
+
+  // Tab buttons
+  document.querySelectorAll('.tab-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>switchTab(btn.dataset.tab));
+  });
+
+  // Refresh button
+  document.getElementById('btn-refresh').addEventListener('click',doRefresh);
+
+  // Build initial active tab
+  buildCalendar('thu', document.getElementById('cal-thu'));
+  renderSundayTab();
+}
+
+function openNameModal(){
+  const modal = document.getElementById('name-modal');
+  modal.style.display = 'flex';
+  // Pre-select current name if set
+  const sel = document.getElementById('name-select');
+  if(sel && ST.guestName) { sel.value = ST.guestName; document.getElementById('nmodal-confirm').disabled = false; }
+  setTimeout(()=> document.getElementById('name-select')?.focus(), 80);
+}
+
+function confirmName(){
+  const sel = document.getElementById('name-select');
+  const chosen = sel?.value?.trim();
+  if(!chosen) return;
+  ST.guestName = chosen;
+  document.getElementById('name-modal').style.display = 'none';
+  updateNameButton();
+  // Launch voting wizard
+  openVotingWizard();
+}
+
+function updateNameButton(){
+  const btn = document.getElementById('btn-change-name');
+  if(btn) btn.textContent = ST.guestName ? `Voting as ${ST.guestName}` : 'Choose name';
+}
+
+/* ═══════════════════════════════════════════════════════════
+   VOTING WIZARD
+═══════════════════════════════════════════════════════════ */
+const WIZARD_POLLS = [
+  { id:'poll-drinks',       day:'The Trip'           },
+  { id:'poll-thu-dinner',   day:'Thursday · July 9'  },
+  { id:'poll-thu-walk',     day:'Thursday · July 9'   },
+  { id:'poll-thu-snack',    day:'Thursday · July 9'   },
+  { id:'poll-fri-breakfast',day:'Friday · July 10'    },
+  { id:'poll-fri-lunch',    day:'Friday · July 10'    },
+  { id:'poll-fri-dinner',   day:'Friday · July 10'    },
+  { id:'poll-fri-physical', day:'Friday · July 10'    },
+  { id:'poll-fri-leisure',  day:'Friday · July 10'    },
+  { id:'poll-fri-snack',    day:'Friday · July 10'    },
+  { id:'poll-sat-breakfast',day:'Saturday · July 11'  },
+  { id:'poll-sat-lunch',    day:'Saturday · July 11'  },
+  { id:'poll-sat-dinner',   day:'Saturday · July 11'  },
+  { id:'poll-sat-physical', day:'Saturday · July 11'  },
+  { id:'poll-sat-leisure',  day:'Saturday · July 11'  },
+  { id:'poll-sat-snack',    day:'Saturday · July 11'  },
+];
+let _wizardStep = 0;
+
+function openVotingWizard(){
+  _wizardStep = 0;
+  document.getElementById('wizard-modal').style.display = 'flex';
+  renderWizardStep();
+}
+
+function renderWizardStep(){
+  const total = WIZARD_POLLS.length;
+  const { id: pollId, day } = WIZARD_POLLS[_wizardStep];
+  const poll = POLLS[pollId];
+  _openPollId = pollId;
+
+  // Header
+  document.getElementById('wizard-eyebrow').textContent = day;
+  document.getElementById('wizard-title').textContent = poll.label;
+  document.getElementById('wizard-step-label').textContent = `${_wizardStep + 1} of ${total}`;
+  document.getElementById('wizard-progress').style.width = `${((_wizardStep + 1) / total) * 100}%`;
+
+  // Next button label
+  const nextBtn = document.getElementById('wizard-next');
+  nextBtn.innerHTML = (_wizardStep === total - 1)
+    ? `See the plan <span class="wizard-next-arrow">→</span>`
+    : `Next <span class="wizard-next-arrow">→</span>`;
+
+  // Back button visibility
+  const backBtn = document.getElementById('wizard-back');
+  if(backBtn) backBtn.disabled = (_wizardStep === 0);
+
+  // Body — reuse buildVotePanel, strip outer wrapper div
+  const hasName = !!ST.guestName;
+  let html = '';
+  if(!hasName) html += `<div class="vmodal-name-hint">Enter your name in the header to cast votes.</div>`;
+  html += buildVotePanel(pollId).replace(/<div class="block-vote-panel[^"]*"[^>]*>/,'').replace(/<\/div>\s*$/,'');
+  document.getElementById('wizard-body').innerHTML = html;
+}
+
+function wizardBack(){
+  if(_wizardStep <= 0) return;
+  _wizardStep--;
+  renderWizardStep();
+  document.getElementById('wizard-body').scrollTop = 0;
+}
+
+function wizardNext(){
+  const total = WIZARD_POLLS.length;
+  if(_wizardStep >= total - 1){
+    closeWizard();
+  } else {
+    _wizardStep++;
+    renderWizardStep();
+    document.getElementById('wizard-body').scrollTop = 0;
+  }
+}
+
+function wizardSkip(){
+  wizardNext();
+}
+
+function closeWizard(){
+  _openPollId = null;
+  document.getElementById('wizard-modal').style.display = 'none';
+  // Rebuild all visible calendars now that votes are in
+  ['thu','fri','sat'].forEach(d=>{
+    const el = document.getElementById('cal-'+d);
+    if(el) buildCalendar(d, el);
+  });
+  renderShoppingList();
+}
+
+window.addEventListener('DOMContentLoaded', init);
+
+// Scroll reveal via IntersectionObserver
+(function(){
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');io.unobserve(e.target);}});
+  },{threshold:0.08});
+  function attachReveals(){
+    document.querySelectorAll('.day-header,.cal-outer,.poll-section').forEach(el=>{
+      if(!el.classList.contains('reveal')){el.classList.add('reveal');io.observe(el);}
+    });
+  }
+  window.addEventListener('DOMContentLoaded',()=>setTimeout(attachReveals,120));
+  // Re-run after tab switches (calendar renders async)
+  const _orig = window.switchTab;
+  if(typeof switchTab!=='undefined'){
+    const _wrap=switchTab;
+    window.switchTab=async function(k){await _wrap(k);setTimeout(attachReveals,160);};
+  }
+})();
+</script>
+</body></html>
