@@ -72,16 +72,7 @@ async function vertexRequest(contents, systemInstruction, tools, modelId) {
     systemInstruction: { parts: [{ text: systemInstruction }] },
     tools: [
       { functionDeclarations: tools },
-      { googleSearch: {} },
-      { googleMaps: { groundingTypes: { places: {}, routing: {} } } },
     ],
-    // Anchor Maps lookups to the Catskills / Saugerties area.
-    toolConfig: {
-      retrievalConfig: {
-        latLng:       TRIP_LAT_LNG,
-        languageCode: "en_US",
-      },
-    },
     generationConfig: { maxOutputTokens: 4096, temperature: 0.7 },
   };
 
