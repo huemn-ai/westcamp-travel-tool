@@ -1928,6 +1928,11 @@ function closeLunaChat() {
   // Panel and backdrop fade out immediately
   if (panel)    panel.classList.remove('open');
   if (backdrop) backdrop.classList.remove('open');
+  // Reset keyboard-lift transforms so closed state is always clean
+  const saberWrap2 = document.getElementById('luna-saber-wrap');
+  const panel2     = document.getElementById('luna-panel');
+  if (saberWrap2) saberWrap2.style.transform = 'translateX(-50%) translateY(0px)';
+  if (panel2)     panel2.style.transform = '';
   // Saber retracts after a brief delay (so panel fades while blade retracts)
   setTimeout(() => {
     if (saberBar) saberBar.classList.remove('open');
@@ -2056,20 +2061,32 @@ function setupLunaListeners() {
       if (e.changedTouches[0].clientY - touchStartY > 60) closeLunaChat();
     }, { passive: true });
   }
-  // Track iOS virtual keyboard so saber bar stays above it
+  // Track iOS virtual keyboard — lift elements using transform (GPU) not bottom (layout)
   if (window.visualViewport) {
-    const onViewportChange = () => {
+    let _kbH = 0;
+    const onViewport = () => {
       const saberWrap = document.getElementById('luna-saber-wrap');
       const panel     = document.getElementById('luna-panel');
-      if (!saberWrap || !panel) return;
-      const keyboardH = Math.max(0, window.innerHeight - window.visualViewport.height - window.visualViewport.offsetTop);
-      const saberBottom = Math.max(20, keyboardH + 8) + 'px';
-      const panelBottom = (Math.max(20, keyboardH + 8) + 78) + 'px';
-      saberWrap.style.bottom = saberBottom;
-      panel.style.bottom     = panelBottom;
+      if (!saberWrap) return;
+
+      const newKbH = Math.max(0,
+        window.innerHeight - window.visualViewport.height - window.visualViewport.offsetTop
+      );
+      if (Math.abs(newKbH - _kbH) < 2) return; // ignore tiny sub-pixel jitter
+      _kbH = newKbH;
+
+      // Lift saber bar — keep its existing translateX(-50%) centering
+      saberWrap.style.transform = `translateX(-50%) translateY(-${newKbH}px)`;
+
+      // Lift panel — only when open, so closed state isn't affected
+      if (panel && panel.classList.contains('open')) {
+        panel.style.transform = newKbH > 0
+          ? `translateY(-${newKbH}px)`
+          : '';
+      }
     };
-    window.visualViewport.addEventListener('resize', onViewportChange);
-    window.visualViewport.addEventListener('scroll', onViewportChange);
+    window.visualViewport.addEventListener('resize', onViewport, { passive: true });
+    window.visualViewport.addEventListener('scroll', onViewport, { passive: true });
   }
 }
 if (document.readyState === 'loading') {
