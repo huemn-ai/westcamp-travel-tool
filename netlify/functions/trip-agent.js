@@ -328,6 +328,24 @@ const GEMINI_TOOLS = [
       required: ["info_type"],
     },
   },
+  {
+    name: "add_poll_option",
+    description: "Add a new votable option (restaurant, activity, etc.) to a poll. Use this when a guest or you want to add a new choice that isn't in the existing list. After adding, guests can vote for it. Returns the new option's id.",
+    parameters: {
+      type: "object",
+      properties: {
+        poll_id:      { type: "string", description: "Poll to add to, e.g. 'poll-fri-dinner' or 'poll-fri-leisure'." },
+        id:           { type: "string", description: "Unique snake_case ID for this option, e.g. 'fri-bread-alone'. Must be unique. Use day prefix when relevant." },
+        label:        { type: "string", description: "Display name, e.g. 'Bread Alone Bakery'." },
+        address:      { type: "string", description: "Street address (optional)." },
+        tip:          { type: "string", description: "Short helpful tip about this option (optional)." },
+        type:         { type: "string", enum: ["meal","restaurant","activity","flexible","snack","hike","swim"], description: "Option type." },
+        duration_min: { type: "number", description: "Estimated duration in minutes (optional)." },
+        added_by:     { type: "string", description: "Who is adding this — guest name or 'luna'." },
+      },
+      required: ["poll_id", "id", "label", "type", "added_by"],
+    },
+  },
 ];
 
 // ─── Tool implementations ─────────────────────────────────────────────────────
@@ -462,6 +480,34 @@ function getTripInfo({ info_type }) {
   return { success: true, data: info };
 }
 
+async function addPollOption({ poll_id, id, label, address, tip, type, duration_min, added_by }) {
+  const { data: existing } = await supabase
+    .from("poll_options")
+    .select("id")
+    .eq("id", id)
+    .maybeSingle();
+  if (existing) {
+    return { error: `Option id "${id}" already exists. Choose a different id.` };
+  }
+  const { error } = await supabase.from("poll_options").insert({
+    id, poll_id, label,
+    address: address || null,
+    tip: tip || null,
+    type,
+    duration_min: duration_min || null,
+    added_by,
+    updated_at: new Date().toISOString(),
+  });
+  if (error) return { error: error.message };
+  return {
+    success: true,
+    message: `Added "${label}" to ${poll_id}. Guests can now vote for it.`,
+    option_id: id,
+    poll_id,
+    options_refreshed: true,
+  };
+}
+
 // ─── Web search (Google Custom Search JSON API) ───────────────────────────────
 async function webSearch({ query }) {
   if (!SEARCH_API_KEY) {
@@ -516,6 +562,7 @@ async function executeTool(name, input) {
     case "get_preferences":     return await getPreferences(input);
     case "update_preferences":  return await updatePreferences(input);
     case "get_trip_info":       return getTripInfo(input);
+    case "add_poll_option":     return await addPollOption(input);
     default:                    return { error: `Unknown tool: ${name}` };
   }
 }
@@ -540,6 +587,7 @@ Days:
 - **Move blocks** to new times with move_block — always call get_full_schedule first so you have the block IDs
 - **Reset blocks** to their default times with reset_block
 - **Read and update voting preferences** for all polls
+- **Add new poll options** with add_poll_option — restaurants, activities, or other ideas guests want to vote on
 
 ## Behavior
 - Be concise and friendly. Your name is Luna.

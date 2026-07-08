@@ -233,6 +233,7 @@ const ST = {
   schedule: {},   // { [dayId]: { [blockId]: { start, duration, manual } } }
   writein:  { text:'', updatedBy:'' },
   shopping: {},   // { [itemId]: true }
+  pollOptions: {}, // { [optionId]: { label, address, tip, type, duration_min, added_by, poll_id } }
   guestName: '',
   storageOk: true,
 };
@@ -299,6 +300,14 @@ async function storageGet(key) {
         shopping[row.item_id] = true;
       }
       return Object.keys(shopping).length > 0 ? shopping : null;
+    }
+    
+    if (key === 'wcd-poll-options') {
+      const { data, error } = await _db.from('poll_options').select('*');
+      if (error || !data) return null;
+      const map = {};
+      data.forEach(r => { map[r.id] = r; });
+      return map;
     }
     
     return null;
@@ -384,16 +393,18 @@ async function loadAllShared() {
   const TIMEOUT_MS = 5000;
   const withTimeout = (p) => Promise.race([p, new Promise(res => setTimeout(() => res(null), TIMEOUT_MS))]);
   try {
-    const [votes, schedule, writein, shopping] = await Promise.all([
+    const [votes, schedule, writein, shopping, pollOpts] = await Promise.all([
       withTimeout(storageGet('wcd-votes')),
       withTimeout(storageGet('wcd-schedule')),
       withTimeout(storageGet('wcd-writein')),
       withTimeout(storageGet('wcd-shopping')),
+      withTimeout(storageGet('wcd-poll-options')),
     ]);
     if (votes)    ST.votes    = votes;
     if (schedule) ST.schedule = schedule;
     if (writein)  ST.writein  = writein;
     if (shopping) ST.shopping = shopping;
+    if (pollOpts) ST.pollOptions = pollOpts;
   } catch(e) {
     console.warn('loadAllShared error', e);
     ST.storageOk = false;
@@ -455,6 +466,39 @@ function subscribeToChanges() {
       renderShoppingList();
     })
     .subscribe();
+
+  // Subscribe to poll_options inserts — re-render active vote panel so new options appear immediately
+  _db
+    .channel('poll-options-changes')
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'poll_options' }, async (payload) => {
+      console.log('Poll option added:', payload);
+      const newRow = payload.new;
+      if (newRow && newRow.id) {
+        ST.pollOptions[newRow.id] = newRow;
+      } else {
+        // Full reload if row missing
+        const fresh = await storageGet('wcd-poll-options');
+        if (fresh) ST.pollOptions = fresh;
+      }
+      // Re-render the active vote modal or wizard body if it targets this poll
+      const affectedPollId = newRow?.poll_id;
+      if (affectedPollId && _openPollId === affectedPollId) {
+        const bodyEl = document.getElementById('vmodal-body') || document.getElementById('wizard-body');
+        if (bodyEl) {
+          const hasName = !!ST.guestName;
+          let html = '';
+          if (!hasName) html += `<div class="vmodal-name-hint">Enter your name in the header to cast votes.</div>`;
+          html += buildVotePanel(affectedPollId).replace(/<div class="block-vote-panel[^"]*"[^>]*>/, '').replace(/<\/div>\s*$/, '');
+          bodyEl.innerHTML = html;
+        }
+      }
+      // Rebuild calendars so the block title and tally reflect the update
+      ['thu','fri','sat'].forEach(d => {
+        const el = document.getElementById('cal-' + d);
+        if (el && el.children.length > 0) buildCalendar(d, el);
+      });
+    })
+    .subscribe();
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -465,18 +509,25 @@ function getVotes(pollId) { return ST.votes[pollId] || {}; }
 function tallyPoll(pollId) {
   const poll = POLLS[pollId];
   const pVotes = getVotes(pollId);
+  // Combine hardcoded option IDs with any DB-added options for this poll
+  const hardcodedIds = poll.options;
+  const dbOnlyIds = Object.values(ST.pollOptions || {})
+    .filter(o => o.poll_id === pollId && !hardcodedIds.includes(o.id))
+    .map(o => o.id);
+  const allOptionIds = [...hardcodedIds, ...dbOnlyIds];
+
   const scores = {};
   const firsts = {};
   const seconds = {};
-  for (const opt of poll.options) { scores[opt]=0; firsts[opt]=0; seconds[opt]=0; }
+  for (const opt of allOptionIds) { scores[opt]=0; firsts[opt]=0; seconds[opt]=0; }
   for (const guest of Object.values(pVotes)) {
     if (guest.first  && scores[guest.first]  !== undefined) { scores[guest.first]  += 2; firsts[guest.first]++; }
     if (guest.second && scores[guest.second] !== undefined) { scores[guest.second] += 1; seconds[guest.second]++; }
   }
   let maxScore = -1, winner = null;
-  for (const opt of poll.options) { if (scores[opt] > maxScore) { maxScore=scores[opt]; winner=opt; } }
+  for (const opt of allOptionIds) { if (scores[opt] > maxScore) { maxScore=scores[opt]; winner=opt; } }
   // Tie detection
-  const tied = poll.options.filter(o => scores[o]===maxScore && maxScore>0);
+  const tied = allOptionIds.filter(o => scores[o]===maxScore && maxScore>0);
   let isTied = tied.length > 1;
   if (isTied) {
     // Tie-break by first-choice count
@@ -758,6 +809,7 @@ function buildOptionMeta(optId, pollType){
     return `<span style="color:var(--ink1)">${txt?(txt.length>60?txt.slice(0,60)+'…':txt):'Cook\'s choice — type a dish'}</span>`;
   }
   const a=ACTIVITIES[optId];
+  const dbOpt=ST.pollOptions[optId];
   if(a && a.type==='drink'){
     return `<span class="opt-addr">${a.desc}</span>`;
   }
@@ -767,15 +819,30 @@ function buildOptionMeta(optId, pollType){
     const ratingStr=stars?`${stars}${reviews} · `:'';
     return `<span style="color:var(--ink2)">${a.price ? a.price+' · ':''} ${a.addr}${ratingStr||a.tip?` · ${ratingStr}${a.tip}`:''}</span>`;
   }
+  // DB-added restaurant option
+  if(dbOpt && dbOpt.type==='restaurant'){
+    const parts=[];
+    if(dbOpt.address) parts.push(`<span class="opt-addr">${escHtml(dbOpt.address)}</span>`);
+    if(dbOpt.tip)     parts.push(`<span class="opt-tip">${escHtml(dbOpt.tip)}</span>`);
+    return parts.join('<span class="opt-sep"> · </span>');
+  }
   if(pollType==='activity'){
-    if(!a)return optId;
-    const dur = a.durationMin ? `<span class="opt-duration">⏱ ${a.durationMin >= 60 ? (a.durationMin/60 % 1 === 0 ? a.durationMin/60 + ' hr' : (Math.floor(a.durationMin/60) + ' hr ' + (a.durationMin%60) + ' min')) : a.durationMin + ' min'}</span>` : '';
-    const addr = a.addr ? `<span class="opt-addr">${a.addr}</span>` : '';
-    const tip  = a.tip  ? `<span class="opt-tip">${a.tip}</span>`   : '';
-    return [dur, addr, tip].filter(Boolean).join('<span class="opt-sep"> · </span>');
+    const act=a||dbOpt;
+    if(!act)return optId;
+    const durMin=act.durationMin||act.duration_min;
+    const addr=act.addr||act.address;
+    const tip=act.tip;
+    const dur = durMin ? `<span class="opt-duration">⏱ ${durMin >= 60 ? (durMin/60 % 1 === 0 ? durMin/60 + ' hr' : (Math.floor(durMin/60) + ' hr ' + (durMin%60) + ' min')) : durMin + ' min'}</span>` : '';
+    const addrHtml = addr ? `<span class="opt-addr">${escHtml(addr)}</span>` : '';
+    const tipHtml  = tip  ? `<span class="opt-tip">${escHtml(tip)}</span>`   : '';
+    return [dur, addrHtml, tipHtml].filter(Boolean).join('<span class="opt-sep"> · </span>');
   }
   const r=RECIPES[optId];
-  if(!r)return optId;
+  if(!r){
+    // DB-added non-restaurant option — show tip if available
+    if(dbOpt && dbOpt.tip) return `<span style="color:var(--ink2)">${escHtml(dbOpt.tip)}</span>`;
+    return optId;
+  }
   const ratingStr=fmtRating(r.rating,r.reviews,optId);
   return `<span>${r.source} · ${ratingStr}</span>`;}
 
@@ -786,11 +853,18 @@ function buildVotePanel(pollId){
   const hasName=!!ST.guestName;
 
   // Determine whether this poll has both dine-in and dine-out options
-  const isDineOut = id => id==='_eatout' || ACTIVITIES[id]?.type==='restaurant';
+  const isDineOut = id => id==='_eatout' || ACTIVITIES[id]?.type==='restaurant' || ST.pollOptions[id]?.type==='restaurant';
   const hasMix = poll.type==='meal' && poll.options.some(id=>!isDineOut(id)&&id!=='_writein') && poll.options.some(isDineOut);
+
+  // Combine hardcoded options with any DB-only additions for this poll
+  const hardcodedIds = poll.options;
+  const dbOnlyOptions = Object.values(ST.pollOptions || {})
+    .filter(o => o.poll_id === pollId && !hardcodedIds.includes(o.id));
+  const allOptions = [...hardcodedIds, ...dbOnlyOptions.map(o => o.id)];
+
   let html='<div class="block-vote-panel" id="vp-'+pollId+'">';
   let lastSection = null; // 'in' | 'out'
-  for(const optId of poll.options){
+  for(const optId of allOptions){
     // Insert section headers for meal polls with mixed options
     if(hasMix){
       const section = isDineOut(optId) ? 'out' : 'in';
@@ -808,19 +882,25 @@ function buildVotePanel(pollId){
     const s=tally.seconds[optId]||0;
     const pts=score;
 
+    // Look up metadata: hardcoded sources first, then DB pollOptions
+    const dbOpt = ST.pollOptions[optId];
+
     let optName='';
     if(optId==='_eatout')       optName='Eat Out Instead';
     else if(optId==='_writein') optName=ST.writein.text||(ST.writein.text===''?'Write-In Option':'');
-    else if(poll.type==='activity') optName=ACTIVITIES[optId]?.name||optId;
+    else if(poll.type==='activity') optName=ACTIVITIES[optId]?.name||dbOpt?.label||optId;
     else {
-      // Could be a recipe OR a restaurant eat-out option on a meal poll
-      optName=RECIPES[optId]?.name || ACTIVITIES[optId]?.name || optId;
+      // Could be a recipe OR a restaurant eat-out option on a meal poll, or a DB-added option
+      optName=RECIPES[optId]?.name || ACTIVITIES[optId]?.name || dbOpt?.label || optId;
     }
 
     const veg=(poll.type==='meal'&&optId!=='_eatout'&&optId!=='_writein'&&RECIPES[optId]?.veg)?'<span class="badge-veg">Vegetarian</span>':'';
     const note=(poll.type==='meal'&&optId!=='_eatout'&&optId!=='_writein'&&RECIPES[optId]?.note)?`<div class="vote-option-tip">${RECIPES[optId].note}</div>`:'';
     const sides=(poll.type==='meal'&&optId!=='_eatout'&&optId!=='_writein'&&RECIPES[optId]?.sides)?`<div class="vote-option-sides">Sides: ${RECIPES[optId].sides}</div>`:'';
-    const actTip=(poll.type==='activity'&&ACTIVITIES[optId]?.tip)?`<div class="vote-option-tip">${ACTIVITIES[optId].tip}</div>`:'';
+    const actTip=(poll.type==='activity'&&(ACTIVITIES[optId]?.tip||dbOpt?.tip))?`<div class="vote-option-tip">${ACTIVITIES[optId]?.tip||dbOpt?.tip}</div>`:'';
+
+    // DB-added badge so guests can see what Luna added
+    const lunaAdded=(dbOpt&&dbOpt.added_by&&dbOpt.added_by!=='system')?`<span class="badge-veg" style="background:var(--rain)">+ Added by ${escHtml(dbOpt.added_by)}</span>`:'';
 
     let writeinField='';
     if(optId==='_writein'){
@@ -834,7 +914,7 @@ function buildVotePanel(pollId){
           ${escHtml(optName)}
           ${isWinner?'<span class="badge-plan">THE PLAN</span>':''}
           ${isTied?'<span class="tied-label">TIED</span>':''}
-          ${veg}
+          ${veg}${lunaAdded}
         </div>
         <div class="vote-option-meta">${buildOptionMeta(optId,poll.type)}</div>
         ${sides}${note}${actTip}${writeinField}
@@ -1145,7 +1225,14 @@ function updateTalliesInPlace(pollId) {
     : document;
   if (!scope) return;
 
-  for (const optId of poll.options) {
+  // Include DB-added options in the in-place update
+  const hardcodedIds = poll.options;
+  const dbOnlyIds = Object.values(ST.pollOptions || {})
+    .filter(o => o.poll_id === pollId && !hardcodedIds.includes(o.id))
+    .map(o => o.id);
+  const allOptionIds = [...hardcodedIds, ...dbOnlyIds];
+
+  for (const optId of allOptionIds) {
     const safeId = optId.replace(/[^a-z0-9]/g, '_');
     const row = scope.querySelector(`#vor-${pollId}-${safeId}`) || document.getElementById(`vor-${pollId}-${safeId}`);
     if (!row) continue;
@@ -1198,8 +1285,8 @@ function updateTalliesInPlace(pollId) {
         if (!winner) newTitle = poll.label;
         else if (winner === '_eatout') newTitle = poll.label.split(' ')[0];
         else if (winner === '_writein') newTitle = ST.writein.text || "Cook's Choice";
-        else if (poll.type === 'activity') newTitle = '🏆 ' + (ACTIVITIES[winner]?.name || winner);
-        else newTitle = '🏆 ' + (RECIPES[winner]?.name || winner);
+        else if (poll.type === 'activity') newTitle = '🏆 ' + (ACTIVITIES[winner]?.name || ST.pollOptions[winner]?.label || winner);
+        else newTitle = '🏆 ' + (RECIPES[winner]?.name || ST.pollOptions[winner]?.label || winner);
         if (newTitle) titleEl.textContent = newTitle;
       }
     }
@@ -1849,6 +1936,11 @@ async function sendAgentMessage() {
           const el = document.getElementById('cal-' + d);
           if (el) buildCalendar(d, el);
         });
+      }
+      // If Luna added a poll option, reload poll options and refresh any open vote panel
+      if (data.message && data.message.includes('options_refreshed')) {
+        const fresh = await storageGet('wcd-poll-options');
+        if (fresh) ST.pollOptions = fresh;
       }
     } else {
       addAgentMessage('Sorry, something went wrong: ' + (data.error || 'Unknown error'), 'assistant');
