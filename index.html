@@ -3922,5 +3922,23 @@ document.addEventListener('DOMContentLoaded', () => {
     }, { passive: true });
   }
 });
+
+/* expose functions used in inline event handlers to window for all browser environments */
+window.openLunaChat   = openLunaChat;
+window.closeLunaChat  = closeLunaChat;
+window.setAgentModel  = setAgentModel;
+window.sendAgentMessage = sendAgentMessage;
+window.openVoteModal  = openVoteModal;
+window.closeVoteModal = closeVoteModal;
+window.castVote       = castVote;
+window.onWriteinChange = onWriteinChange;
+window.toggleShopItem = toggleShopItem;
+window.openNameModal  = openNameModal;
+window.confirmName    = confirmName;
+window.closeWizard    = closeWizard;
+window.wizardNext     = wizardNext;
+window.wizardBack     = wizardBack;
+window.wizardSkip     = wizardSkip;
+window.doRefresh      = doRefresh;
 </script>
 </body></html>
