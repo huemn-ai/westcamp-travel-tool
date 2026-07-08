@@ -1,5 +1,22 @@
 /* expose hoisted function declarations to window immediately — safe because
    function declarations are hoisted before any code runs */
+/* Capture originals before the wrapper assignments below overwrite window.X */
+var _fnOpenLunaChat    = openLunaChat;
+var _fnCloseLunaChat   = closeLunaChat;
+var _fnSetAgentModel   = setAgentModel;
+var _fnSendAgentMsg    = sendAgentMessage;
+var _fnOpenVoteModal   = openVoteModal;
+var _fnCloseVoteModal  = closeVoteModal;
+var _fnCastVote        = castVote;
+var _fnWriteinChange   = onWriteinChange;
+var _fnToggleShopItem  = toggleShopItem;
+var _fnOpenNameModal   = openNameModal;
+var _fnConfirmName     = confirmName;
+var _fnCloseWizard     = closeWizard;
+var _fnWizardNext      = wizardNext;
+var _fnWizardBack      = wizardBack;
+var _fnWizardSkip      = wizardSkip;
+var _fnDoRefresh       = doRefresh;
 window.openLunaChat    = function(){ openLunaChat(); };
 window.closeLunaChat   = function(){ closeLunaChat(); };
 window.setAgentModel   = function(m){ setAgentModel(m); };
@@ -16,47 +33,24 @@ window.wizardNext      = function(){ wizardNext(); };
 window.wizardBack      = function(){ wizardBack(); };
 window.wizardSkip      = function(){ wizardSkip(); };
 window.doRefresh       = function(){ doRefresh(); };
-
-/* Fix: the wrappers above capture `window.X` references which would recurse
-   into themselves. Re-point them to the hoisted function declarations directly
-   using a late-binding shim so inline onclick handlers resolve correctly. */
-(function patchWindowBindings(){
-  /* All functions are hoisted at this point. We capture them here and then
-     reassign window.X so the wrappers defined above now correctly delegate
-     to the real implementations without infinite recursion. */
-  var _open    = openLunaChat;
-  var _close   = closeLunaChat;
-  var _setMod  = setAgentModel;
-  var _send    = sendAgentMessage;
-  var _openVote= openVoteModal;
-  var _closeVote=closeVoteModal;
-  var _cast    = castVote;
-  var _writein = onWriteinChange;
-  var _togShop = toggleShopItem;
-  var _openName= openNameModal;
-  var _confirm = confirmName;
-  var _closeWiz= closeWizard;
-  var _wNext   = wizardNext;
-  var _wBack   = wizardBack;
-  var _wSkip   = wizardSkip;
-  var _refresh = doRefresh;
-  window.openLunaChat    = function(){ _open(); };
-  window.closeLunaChat   = function(){ _close(); };
-  window.setAgentModel   = function(m){ _setMod(m); };
-  window.sendAgentMessage= function(){ _send(); };
-  window.openVoteModal   = function(p){ _openVote(p); };
-  window.closeVoteModal  = function(){ _closeVote(); };
-  window.castVote        = function(p,r,v){ _cast(p,r,v); };
-  window.onWriteinChange = function(e){ _writein(e); };
-  window.toggleShopItem  = function(id){ _togShop(id); };
-  window.openNameModal   = function(){ _openName(); };
-  window.confirmName     = function(){ _confirm(); };
-  window.closeWizard     = function(){ _closeWiz(); };
-  window.wizardNext      = function(){ _wNext(); };
-  window.wizardBack      = function(){ _wBack(); };
-  window.wizardSkip      = function(){ _wSkip(); };
-  window.doRefresh       = function(){ _refresh(); };
-}());
+/* Re-point window.X to the captured originals so inline onclick handlers
+   call real implementations without infinite recursion. */
+window.openLunaChat    = function(){ _fnOpenLunaChat(); };
+window.closeLunaChat   = function(){ _fnCloseLunaChat(); };
+window.setAgentModel   = function(m){ _fnSetAgentModel(m); };
+window.sendAgentMessage= function(){ _fnSendAgentMsg(); };
+window.openVoteModal   = function(p){ _fnOpenVoteModal(p); };
+window.closeVoteModal  = function(){ _fnCloseVoteModal(); };
+window.castVote        = function(p,r,v){ _fnCastVote(p,r,v); };
+window.onWriteinChange = function(e){ _fnWriteinChange(e); };
+window.toggleShopItem  = function(id){ _fnToggleShopItem(id); };
+window.openNameModal   = function(){ _fnOpenNameModal(); };
+window.confirmName     = function(){ _fnConfirmName(); };
+window.closeWizard     = function(){ _fnCloseWizard(); };
+window.wizardNext      = function(){ _fnWizardNext(); };
+window.wizardBack      = function(){ _fnWizardBack(); };
+window.wizardSkip      = function(){ _fnWizardSkip(); };
+window.doRefresh       = function(){ _fnDoRefresh(); };
 
 /* ═══════════════════════════════════════════════════════════
    SUPABASE INITIALIZATION
